@@ -1,9 +1,6 @@
 name: Manual release evals
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/release-evals.yml
   workflow_dispatch:
     inputs:
       agent:
@@ -47,13 +44,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  register:
-    name: Register manual release workflow
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Workflow registrado. Nenhuma chamada de agente foi autorizada."
-
   plan:
     name: Confirm paid call budget
     if: github.event_name == 'workflow_dispatch'
