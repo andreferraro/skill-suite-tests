@@ -11,7 +11,7 @@ Skill para orientar Codex e Cursor na criação de testes automatizados guiados 
 
 ## Estado da v0.3.0
 
-A implementação está disponível no [PR #8](https://github.com/andreferraro/skill-suite-tests/pull/8). A tag `v0.3.0` será criada depois que Codex e Cursor passarem os gates definidos para a release.
+A implementação foi integrada em `develop` pelo [PR #8](https://github.com/andreferraro/skill-suite-tests/pull/8). A release candidate está no [PR #9](https://github.com/andreferraro/skill-suite-tests/pull/9). A tag `v0.3.0` será criada depois que Codex e Cursor passarem os gates definidos para a release.
 
 | Evidência | Estado atual |
 | --- | --- |
@@ -23,7 +23,7 @@ A implementação está disponível no [PR #8](https://github.com/andreferraro/s
 | Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635717298) |
 | Eval pareado Cursor | Configurado e pendente do gate de release |
 | Ganho mediano sobre baseline | 0 ponto na última execução |
-| Release `v0.3.0` | Pendente de uma execução manual e aprovada dos evals pareados |
+| Release `v0.3.0` | [PR #9](https://github.com/andreferraro/skill-suite-tests/pull/9) em draft, pendente de certificação manual |
 
 A [execução 31635717298](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635717298) comprovou o helper de sensibilidade, mas ainda reprovou o gate. Eventos manteve 100. API ficou em 91,25 porque duas chamadas concorrentes não detectaram a serialização enfraquecida. Web ficou em 83,75 porque cobriu a resposta obsoleta e deixou o estado loading sem cenário sensível. A skill passou a exigir contenção real e prova por mecanismo protetivo de alto impacto; o detector também passou a sinalizar estados assíncronos pendentes.
 
