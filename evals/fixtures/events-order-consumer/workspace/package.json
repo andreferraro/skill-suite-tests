@@ -1,0 +1,23 @@
+{
+  "name": "skill-eval-events-order-consumer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "test:infra": "cross-env RUN_INFRA_TESTS=1 vitest run"
+  },
+  "dependencies": {
+    "amqplib": "2.0.1",
+    "pg": "8.23.0"
+  },
+  "devDependencies": {
+    "@types/amqplib": "0.10.8",
+    "@types/node": "26.2.0",
+    "@types/pg": "8.21.0",
+    "cross-env": "10.1.0",
+    "testcontainers": "12.1.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "case": "web-password-reset",
+      "passed": true,
+      "stage": "complete",
+      "reference_exit_code": 0,
+      "extended_check": "not_run",
+      "mutations": [
+        {
+          "id": "loading-not-disabled",
+          "killed": true,
+          "exit_code": 1
+        },
+        {
+          "id": "error-not-announced",
+          "killed": true,
+          "exit_code": 1
+        },
+        {
+          "id": "input-without-accessible-name",
+          "killed": true,
+          "exit_code": 1
+        },
+        {
+          "id": "stale-response-wins",
+          "killed": true,
+          "exit_code": 1
+        }
+      ]
+    },
+    {
+      "case": "api-payment",
+      "passed": true,
+      "stage": "complete",
+      "reference_exit_code": 0,
+      "extended_check": "not_run",
+      "mutations": [
+        {
+          "id": "unstable-idempotent-response",
+          "killed": true,
+          "exit_code": 1
+        },
+        {
+          "id": "deferred-concurrent-transaction",
+          "killed": true,
+          "exit_code": 1
+        },
+        {
+          "id": "zero-amount-accepted",
+          "killed": true,
+          "exit_code": 1
+        },
+        {
+          "id": "failed-insert-committed",
+          "killed": true,
+          "exit_code": 1
+        }
+      ]
+    },
+    {
+      "case": "events-order-consumer",
+      "passed": true,
+      "stage": "complete",
+      "reference_exit_code": 0,
+      "extended_check": "passed",
+      "mutations": [
+        {
+          "id": "deduplication-disabled",
+          "killed": true,
+          "exit_code": 1
+        },
+        {
+          "id": "retry-attempt-not-incremented",
+          "killed": true,
+          "exit_code": 1
+        },
+        {
+          "id": "dlq-one-attempt-late",
+          "killed": true,
+          "exit_code": 1
+        },
+        {
+          "id": "correlation-id-lost",
+          "killed": true,
+          "exit_code": 1
+        }
+      ]
+    }
+  ]
+}
