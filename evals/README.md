@@ -128,6 +128,8 @@ Use `--dry-run` para conferir comandos e isolamento sem consumir APIs.
 - `agent-evals.yml`: Codex em todo pull request, uma repetição por caso.
 - `release-evals.yml`: Codex e Cursor, três repetições por caso, em pull requests para `main` e por execução manual.
 
+As proteções de `develop` exigem o gate agregado de PR. As proteções de `main` exigem os gates agregados de PR e release. Ambos também dependem dos cinco checks de qualidade.
+
 ### Configuração do repositório
 
 Configure em **Settings > Secrets and variables > Actions**:

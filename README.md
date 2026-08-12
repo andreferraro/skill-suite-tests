@@ -261,6 +261,12 @@ O repositório usa Gitflow:
 
 Commits seguem Conventional Commits. Uma release exige qualidade estrutural, fixtures verdes, eval de PR com Codex e eval de release com Codex e Cursor.
 
+As branches estão protegidas no GitHub:
+
+- `develop` exige pull request atualizado, checks de qualidade, `Aggregate PR gate` e conversas resolvidas;
+- `main` exige os mesmos controles e também `Aggregate release gate`;
+- as regras também valem para administradores e bloqueiam force push e exclusão das branches.
+
 ### O que falta para publicar a v0.3.0
 
 Configuração atual em **Settings > Secrets and variables > Actions**:
