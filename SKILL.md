@@ -40,7 +40,7 @@ Tratar outros ecossistemas como **adaptáveis**. Reutilizar a stack encontrada e
 6. **Escolher ferramentas.** Reutilizar runner, harness, fixtures e infraestrutura existentes. Ler [guia-de-ecossistemas.md](references/guia-de-ecossistemas.md) somente quando a escolha estiver aberta.
 7. **Projetar o conjunto mínimo.** Para cada cenário, definir risco, precondições, estímulo, dados, oráculo, isolamento, cleanup e evidência esperada. Rastrear guards, validações, locks, transações, deduplicação, ordering, retry e mecanismos equivalentes encontrados no alvo para um cenário sensível ou justificar por que estão fora do recorte.
 8. **Implementar.** Seguir convenções locais e manter a mudança pequena. Adicionar dependência somente diante de lacuna comprovada.
-9. **Provar sensibilidade.** Partir de uma execução verde. Para cada mecanismo protetivo de alto impacto usado no desenho, preferir uma mutação local temporária: executar o teste, exigir falha, restaurar o arquivo e executar verde novamente. Quando a mutação não for segura, registrar o motivo e usar um controle negativo executado. Uma descrição de que o teste falharia não é evidência. Quando ajudar, usar `python <skill-root>/scripts/prove_test_sensitivity.py --root <projeto> --file <arquivo> --search <texto-exato> --replace <mutação> -- <comando-do-teste>`; o helper aceita uma ocorrência, não usa shell e restaura o arquivo mesmo após erro.
+9. **Provar sensibilidade.** Partir de uma execução verde. Para cada mecanismo protetivo de alto impacto usado no desenho, preferir uma mutação local temporária: executar o teste, exigir falha, restaurar o arquivo e executar verde novamente. Tratar a mutação restaurada byte a byte antes da entrega como prova transitória, sem incorporá-la à mudança de produção. Quando a mutação não for segura ou o usuário proibir qualquer alteração transitória, registrar o motivo e usar um controle negativo executado. Uma descrição de que o teste falharia não é evidência. Quando ajudar, usar `python <skill-root>/scripts/prove_test_sensitivity.py --root <projeto> --file <arquivo> --search <texto-exato> --replace <mutação> -- <comando-do-teste>`; o helper aceita uma ocorrência, não usa shell e restaura o arquivo mesmo após erro.
 10. **Executar em camadas.** Rodar o teste criado, o comando canônico que inclui a suíte alterada, a suíte mais ampla configurada e os checks estáticos aplicáveis. Não substituir um comando obrigatório por outro mais estreito. Tratar falha, timeout, hook pendente e `no tests found` como resultado incompleto a diagnosticar e corrigir. Executar cenários intensivos, destrutivos ou externos somente com autorização adequada.
 11. **Relatar evidências.** Informar classificação, base, arquivos, cenários, comandos, resultados, limitações e pendências.
 
@@ -54,7 +54,7 @@ Consultar [bases-tecnicas.md](references/bases-tecnicas.md) quando protocolo, ac
 - Preferir componente para lógica local e browser real para jornada, layout e comportamento nativo.
 - Quando o projeto já incluir uma suíte de browser no comando canônico e o risco atravessar essa fronteira, criar e executar o teste de browser necessário para manter a suíte completa válida.
 - Para ações assíncronas com estado pending/loading, manter a operação pendente por uma Promise controlada e verificar feedback, bloqueio do controle, supressão de duplicidade e recuperação após sucesso e erro.
-- Em corridas assíncronas, aguardar a liquidação e a estabilização observável do DOM com a primitiva do runner. Um único `Promise.resolve()` não comprova que uma resposta tardia deixou de atualizar a interface.
+- Em corridas assíncronas, controlar cada operação separadamente. Resolver a operação mais nova, confirmar seu resultado, resolver a antiga por último, aguardar sua liquidação e afirmar que o resultado novo permaneceu. Uma asserção de ausência feita logo após resolver uma Promise pode passar antes da atualização defeituosa e não comprova proteção contra resposta obsoleta.
 - Manter asserções funcionais junto de screenshots, vídeos ou traces.
 - Exigir baseline aprovada e tolerância explícita para regressão visual.
 
@@ -93,6 +93,7 @@ Concluir somente quando os gates aplicáveis passarem:
 - Separar defeito do produto, falha do teste, problema de ambiente e dado inválido.
 - Evitar snapshots amplos, sleeps fixos, ordem compartilhada, dados globais, selectors frágeis e mocks permissivos.
 - Preservar mensagens de erro, traces, seeds e contraexemplos úteis ao diagnóstico.
+- Nomear cada propriedade comprovada com precisão no relatório. Trocar rótulos amplos por mecanismos observáveis, como nome acessível, operação por teclado, anúncio de erro, rollback, deduplicação ou correlação, quando realmente testados.
 - Usar `<definir>` em vez de inventar thresholds, carga ou regra de negócio.
 
 ## Segurança operacional
