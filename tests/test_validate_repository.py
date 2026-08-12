@@ -13,6 +13,17 @@ from validate_repository import scan_secrets, validate_local_links  # noqa: E402
 
 
 class RepositoryValidationTests(unittest.TestCase):
+    def test_paid_agent_jobs_enforce_the_case_gate(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "agent-evals.yml").read_text(
+            encoding="utf-8"
+        )
+        paired_commands = workflow.split("name: Run paired eval within the approved ceiling")[1:]
+
+        self.assertEqual(2, len(paired_commands))
+        for command in paired_commands:
+            paired_command = command.split("- name: Save new comparable baseline", 1)[0]
+            self.assertIn("--enforce-gate", paired_command)
+
     def test_local_link_validator_detects_missing_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
