@@ -6,8 +6,6 @@ Você explica o fluxo, o comportamento esperado e o impacto da falha. A skill an
 
 [Ver apresentação completa](https://docs.google.com/presentation/d/10icBAwszr-oIcf-SeNOB2QKGF9NQE1qs7TGqt0nVeQY/edit?usp=sharing)
 
-> Estado atual: documentação inicial. A instalação fica operacional quando o `SKILL.md` for publicado na raiz deste repositório.
-
 ## O que pode ser testado
 
 - Frontend: componentes, telas, navegação, estados de UI, acessibilidade e responsividade.
@@ -17,6 +15,15 @@ Você explica o fluxo, o comportamento esperado e o impacto da falha. A skill an
 - Dados: persistência, transições de estado, consistência e concorrência.
 - Jornadas completas: interface, serviços, dados e efeitos do início ao fim.
 - Atributos de qualidade: segurança, performance, resiliência, observabilidade e experiência.
+
+## Conteúdo do repositório
+
+- [`SKILL.md`](SKILL.md): fluxo operacional, gates de qualidade e contrato de saída.
+- [`agents/openai.yaml`](agents/openai.yaml): nome, descrição e prompt exibidos no Codex.
+- [`references/tipos-de-teste.md`](references/tipos-de-teste.md): taxonomia e seleção por risco.
+- [`references/oraculos-e-qualidade.md`](references/oraculos-e-qualidade.md): oráculos, isolamento, sensibilidade e critérios de conclusão.
+- [`references/guia-de-ecossistemas.md`](references/guia-de-ecossistemas.md): ferramentas para frontend, backend, mobile, dados e integrações.
+- [`references/bases-tecnicas.md`](references/bases-tecnicas.md): normas e referências oficiais.
 
 ## Como a estratégia é definida
 
@@ -37,7 +44,6 @@ O tipo de teste nasce do risco, da arquitetura e da evidência necessária.
 
 - Git instalado.
 - Codex ou Cursor com suporte a Agent Skills.
-- `SKILL.md` na raiz do repositório, com `name: skill-suite-tests`.
 
 Codex e Cursor carregam skills globais de `~/.agents/skills`. Um único clone atende as duas ferramentas.
 

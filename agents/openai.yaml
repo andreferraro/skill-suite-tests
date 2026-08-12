@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill Suite Tests"
+  short_description: "Cria testes de sistemas guiados por risco"
+  default_prompt: "Use $skill-suite-tests para analisar o risco e criar testes executáveis para este fluxo."
