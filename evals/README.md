@@ -2,6 +2,17 @@
 
 O benchmark mede se a skill melhora testes gerados por Codex e Cursor. Baseline e tratamento recebem o mesmo pedido curto, o mesmo projeto e o mesmo contrato de evidência. Os riscos esperados, graders e mutantes ficam fora do workspace entregue ao agente. Assim, o benchmark mede descoberta e tratamento de riscos, sem entregar a resposta no prompt.
 
+## Certificação publicada
+
+A `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andreferraro/skill-suite-tests/commit/7da3f5c243c80b259c330335fe29adab9e80da0f), com três repetições para Codex e Cursor em cada caso. O [relatório consolidado](results/v0.3.0-certification.json) passou o gate com mediana da skill de 100/100 e ganho mediano de 16,875 pontos.
+
+| Agente | API | Eventos | Web | Aprovações críticas com a skill |
+| --- | ---: | ---: | ---: | --- |
+| Codex | 100 | 100 | 96,25 | 3/3, 2/3 e 2/3 |
+| Cursor | 100 | 100 | 96,25 | 3/3, 3/3 e 3/3 |
+
+As notas são medianas. O relatório contém os baselines, ganhos e links para todos os runs. Resultados individuais reprovados permanecem registrados e contam na consolidação.
+
 ## Casos
 
 | Caso | Stack | Riscos obrigatórios |
@@ -137,16 +148,20 @@ python evals/aggregate_reports.py \
 
 Use `--dry-run` para conferir comandos e isolamento sem consumir APIs.
 
+Use `--repetition-start 2` ou `--repetition-start 3` para continuar uma certificação interrompida sem repetir amostras anteriores. O número é gravado nos resultados e validado na consolidação final.
+
 Uma execução real exige `--max-agent-calls`. O runner calcula o total antes de iniciar qualquer agente e encerra se ultrapassar o teto. Sem cache, cada par baseline e skill usa duas chamadas por agente, caso e repetição.
 
 Use `--baseline-cache evals/baseline-cache` para reaproveitar o baseline quando agente, modelo, fixture, prompt, contrato, grader, mutantes, harness e imagem das CLIs continuarem equivalentes. A impressão digital invalida o cache quando qualquer um desses elementos muda. Alterações exclusivas na skill preservam o baseline e reduzem o próximo par a uma chamada de tratamento.
+
+No GitHub Actions, cada repetição usa uma chave de cache própria. Isso permite continuar as amostras 2 e 3 sem misturar resultados e sem recalcular um baseline já salvo para a mesma impressão digital.
 
 Sem `--agent-container-image`, o runner usa as CLIs instaladas no host. Esse modo serve para diagnóstico local e exige `codex` ou `cursor-agent` no `PATH`.
 
 ## GitHub Actions
 
 - `quality.yml`: estrutura, scripts, schema, links, segredos, fixtures e mutantes.
-- `agent-evals.yml`: execução manual e seletiva do Codex, com um caso ou os três.
+- `agent-evals.yml`: execução manual e seletiva de Codex ou Cursor, com um caso ou os três.
 - `release-evals.yml`: execução manual de Codex, Cursor ou ambos, com uma ou três repetições.
 
 Pushes, pull requests, merges e tags executam somente `quality.yml`. As proteções de `develop` e `main` dependem dos cinco checks gratuitos de qualidade. Os evals pagos são um gate manual de publicação, separado do CI cotidiano.
@@ -161,7 +176,9 @@ Pushes, pull requests, merges e tags executam somente `quality.yml`. As proteç�
 | Um agente, três casos, três repetições | até 18 | 9 |
 | Dois agentes, três casos, três repetições | até 36 | 18 |
 
-O formulário do workflow mostra e valida o teto antes de liberar os jobs. O runner aplica uma segunda trava. Esses números representam chamadas, não dólares. O custo varia conforme modelo e tokens.
+O formulário do workflow mostra e valida o teto antes de liberar os jobs. Deixe a autorização desmarcada para executar somente a prévia gratuita. O runner aplica uma segunda trava. Esses números representam chamadas, não dólares. O custo varia conforme modelo e tokens.
+
+Cada job de caso exige execução válida e gate técnico aprovado. A comparação de ganho fica no job agregado, porque um caso pode ter baseline perfeito e ganho zero sem representar regressão da skill.
 
 ### Configuração do repositório
 
