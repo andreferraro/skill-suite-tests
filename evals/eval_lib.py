@@ -23,6 +23,18 @@ GENERATED_PATH_PARTS = {
 GENERATED_FILE_SUFFIXES = {".pyc", ".pyo"}
 
 
+def is_test_artifact(relative: Path) -> bool:
+    lowered_parts = tuple(part.lower() for part in relative.parts)
+    name = relative.name.lower()
+    return (
+        any(part in {"test", "tests", "__tests__", "spec", "specs"} for part in lowered_parts[:-1])
+        or name.startswith(("test_", "spec_"))
+        or any(marker in name for marker in (".test.", ".spec."))
+        or name.endswith("_test.go")
+        or relative.name.endswith(("Test.java", "Tests.java", "Test.kt", "Tests.kt", "Test.cs", "Tests.cs"))
+    )
+
+
 @dataclass(frozen=True)
 class CommandResult:
     command: list[str]
@@ -39,6 +51,20 @@ def load_cases() -> list[dict[str, Any]]:
     document = json.loads((EVAL_ROOT / "cases.json").read_text(encoding="utf-8"))
     if document.get("schema_version") != "1.0" or not isinstance(document.get("cases"), list):
         raise ValueError("evals/cases.json has an unsupported schema")
+    for case in document["cases"]:
+        required_risks = case.get("required_risks")
+        signal_groups = case.get("risk_signal_groups")
+        if not isinstance(required_risks, list) or not isinstance(signal_groups, dict):
+            raise ValueError(f"eval case {case.get('id', '<unknown>')} has invalid risk signals")
+        if set(required_risks) != set(signal_groups):
+            raise ValueError(f"eval case {case.get('id', '<unknown>')} risk signals do not match required risks")
+        if any(
+            not isinstance(groups, list)
+            or not groups
+            or any(not isinstance(group, list) or not group for group in groups)
+            for groups in signal_groups.values()
+        ):
+            raise ValueError(f"eval case {case.get('id', '<unknown>')} has an empty risk signal group")
     return document["cases"]
 
 
@@ -137,7 +163,12 @@ def restore_mutation(workspace: Path, mutation: dict[str, str], original: str) -
     (workspace / mutation["file"]).write_text(original, encoding="utf-8")
 
 
-def hash_paths(workspace: Path, prefixes: list[str]) -> dict[str, str]:
+def hash_paths(
+    workspace: Path,
+    prefixes: list[str],
+    *,
+    ignore_test_artifacts: bool = False,
+) -> dict[str, str]:
     hashes: dict[str, str] = {}
     for prefix in prefixes:
         base = workspace / prefix
@@ -150,7 +181,9 @@ def hash_paths(workspace: Path, prefixes: list[str]) -> dict[str, str]:
                 any(part in GENERATED_PATH_PARTS for part in relative_parts)
                 or path.suffix.lower() in GENERATED_FILE_SUFFIXES
             )
-            if path.is_file() and not generated:
+            if path.is_file() and not generated and not (
+                ignore_test_artifacts and is_test_artifact(path.relative_to(workspace))
+            ):
                 relative = path.relative_to(workspace).as_posix()
                 hashes[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
     return hashes
@@ -170,6 +203,18 @@ def copy_artifact_paths(workspace: Path, artifacts: Path, prefixes: list[str]) -
             relative = path.relative_to(workspace)
             if any(part in GENERATED_PATH_PARTS or part == "node_modules" for part in relative.parts):
                 continue
+            destination = destination_root / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, destination)
+
+    for path in workspace.rglob("*"):
+        relative = path.relative_to(workspace)
+        generated = (
+            any(part in GENERATED_PATH_PARTS for part in relative.parts)
+            or path.suffix.lower() in GENERATED_FILE_SUFFIXES
+            or "node_modules" in relative.parts
+        )
+        if path.is_file() and is_test_artifact(relative) and not generated:
             destination = destination_root / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, destination)

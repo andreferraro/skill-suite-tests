@@ -19,7 +19,15 @@ from eval_lib import (  # noqa: E402
     run_command,
     sanitized_environment,
 )
-from run_eval import aggregate, build_agent_command, build_container_command, evaluation_exit_code  # noqa: E402
+from run_eval import (  # noqa: E402
+    aggregate,
+    build_agent_command,
+    build_container_command,
+    build_eval_prompt,
+    build_test_environment,
+    covered_risk_ids,
+    evaluation_exit_code,
+)
 
 
 def result(
@@ -80,6 +88,38 @@ class ArtifactTests(unittest.TestCase):
             source.write_text("enabled = False\n", encoding="utf-8")
             self.assertNotEqual(before, hash_paths(workspace, ["app/"]))
 
+    def test_production_hash_allows_colocated_tests_only(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = workspace / "src" / "PasswordReset.tsx"
+            source.parent.mkdir()
+            source.write_text("export const value = true;\n", encoding="utf-8")
+            before = hash_paths(workspace, ["src/"], ignore_test_artifacts=True)
+
+            colocated = workspace / "src" / "PasswordReset.test.tsx"
+            colocated.write_text("test('feature', () => {});\n", encoding="utf-8")
+            self.assertEqual(
+                before,
+                hash_paths(workspace, ["src/"], ignore_test_artifacts=True),
+            )
+
+            source.write_text("export const value = false;\n", encoding="utf-8")
+            self.assertNotEqual(
+                before,
+                hash_paths(workspace, ["src/"], ignore_test_artifacts=True),
+            )
+
+    def test_production_hash_does_not_treat_contest_class_as_a_test(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = workspace / "src" / "Contest.java"
+            source.parent.mkdir()
+            source.write_text("class Contest {}\n", encoding="utf-8")
+
+            hashes = hash_paths(workspace, ["src/"], ignore_test_artifacts=True)
+
+            self.assertIn("src/Contest.java", hashes)
+
     def test_copies_only_requested_workspace_outputs(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -87,6 +127,8 @@ class ArtifactTests(unittest.TestCase):
             artifacts = root / "artifacts"
             (workspace / "tests").mkdir(parents=True)
             (workspace / "tests" / "feature.test.ts").write_text("test()\n", encoding="utf-8")
+            (workspace / "src").mkdir()
+            (workspace / "src" / "feature.spec.ts").write_text("test()\n", encoding="utf-8")
             (workspace / "tests" / "__pycache__").mkdir()
             (workspace / "tests" / "__pycache__" / "test.pyc").write_bytes(b"generated")
             (workspace / "test-evidence.json").write_text("{}\n", encoding="utf-8")
@@ -95,8 +137,51 @@ class ArtifactTests(unittest.TestCase):
 
             output = artifacts / "workspace-output"
             self.assertTrue((output / "tests" / "feature.test.ts").is_file())
+            self.assertTrue((output / "src" / "feature.spec.ts").is_file())
             self.assertTrue((output / "test-evidence.json").is_file())
             self.assertFalse((output / "tests" / "__pycache__" / "test.pyc").exists())
+
+
+class RiskCoverageTests(unittest.TestCase):
+    def test_matches_hidden_compound_risk_without_exposing_id(self) -> None:
+        case = {
+            "required_risks": ["ordering-correlation"],
+            "risk_signal_groups": {
+                "ordering-correlation": [
+                    ["ordering", "sequencia"],
+                    ["correlation", "correlacao"],
+                ]
+            },
+        }
+
+        covered = covered_risk_ids(
+            case,
+            "Evita sobrescrever uma sequência nova e preserva a correlação da mensagem.",
+        )
+
+        self.assertEqual(["ordering-correlation"], covered)
+
+    def test_rejects_partial_compound_risk(self) -> None:
+        case = {
+            "required_risks": ["ordering-correlation"],
+            "risk_signal_groups": {
+                "ordering-correlation": [["ordering", "ordem"], ["correlation", "correlacao"]]
+            },
+        }
+
+        self.assertEqual([], covered_risk_ids(case, "Valida apenas a ordem dos eventos."))
+
+    def test_baseline_and_treatment_receive_same_request_without_hidden_risk_ids(self) -> None:
+        case = {
+            "prompt": "Crie testes guiados por risco para o pagamento.",
+            "required_risks": ["idempotency", "concurrency", "rollback"],
+        }
+
+        baseline = build_eval_prompt(case, "codex", "baseline")
+        treatment = build_eval_prompt(case, "codex", "skill")
+
+        self.assertEqual("Use $skill-suite-tests. " + baseline, treatment)
+        self.assertTrue(all(risk not in baseline for risk in case["required_risks"]))
 
 
 class CommandTests(unittest.TestCase):
@@ -127,6 +212,20 @@ class CommandTests(unittest.TestCase):
         self.assertEqual(environment["PATH"], "runtime-path")
         self.assertEqual(environment["OPENAI_API_KEY"], "agent-key")
         self.assertNotIn("DATABASE_URL", environment)
+
+    def test_grader_keeps_browser_path_without_agent_credentials(self) -> None:
+        environment = {
+            "PATH": "runtime-path",
+            "PLAYWRIGHT_BROWSERS_PATH": "/tmp/browsers",
+            "OPENAI_API_KEY": "openai-secret",
+            "CURSOR_API_KEY": "cursor-secret",
+        }
+
+        test_environment = build_test_environment(environment)
+
+        self.assertEqual("/tmp/browsers", test_environment["PLAYWRIGHT_BROWSERS_PATH"])
+        self.assertNotIn("OPENAI_API_KEY", test_environment)
+        self.assertNotIn("CURSOR_API_KEY", test_environment)
 
     def test_codex_home_exists_before_cli_execution(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

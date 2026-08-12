@@ -1,6 +1,6 @@
 # Evals da Skill Suite Tests
 
-O benchmark mede se a skill melhora testes gerados por Codex e Cursor. Os graders e mutantes ficam fora do workspace entregue ao agente.
+O benchmark mede se a skill melhora testes gerados por Codex e Cursor. Baseline e tratamento recebem o mesmo pedido curto, o mesmo projeto e o mesmo contrato de evidência. Os riscos esperados, graders e mutantes ficam fora do workspace entregue ao agente. Assim, o benchmark mede descoberta e tratamento de riscos, sem entregar a resposta no prompt.
 
 ## Casos
 

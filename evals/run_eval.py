@@ -10,6 +10,7 @@ import shutil
 import statistics
 import tempfile
 import time
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -34,6 +35,40 @@ import sys
 
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from validate_test_evidence import validate as validate_evidence  # noqa: E402
+
+
+def build_test_environment(environment: dict[str, str]) -> dict[str, str]:
+    """Keep deterministic test runtime settings without exposing agent credentials."""
+    result = environment.copy()
+    result.pop("OPENAI_API_KEY", None)
+    result.pop("CURSOR_API_KEY", None)
+    return result
+
+
+def normalize_evidence_text(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value.lower())
+    return "".join(character for character in normalized if not unicodedata.combining(character))
+
+
+def covered_risk_ids(case: dict[str, Any], evidence_text: str) -> list[str]:
+    """Match hidden risk concepts through deterministic groups of accepted signals."""
+    normalized = normalize_evidence_text(evidence_text)
+    covered: list[str] = []
+    for risk in case["required_risks"]:
+        groups = case["risk_signal_groups"][risk]
+        if all(any(normalize_evidence_text(signal) in normalized for signal in group) for group in groups):
+            covered.append(risk)
+    return covered
+
+
+def build_eval_prompt(case: dict[str, Any], agent: str, mode: str) -> str:
+    invocation = "Use $skill-suite-tests. " if agent == "codex" else "/skill-suite-tests "
+    return (
+        (invocation if mode == "skill" else "")
+        + case["prompt"]
+        + " Siga .eval-contract/test-evidence.v1.json e valide o relatório com .eval-contract/validate_test_evidence.py."
+        + " Trabalhe apenas neste workspace e limite conclusões ao que executar."
+    )
 
 
 def build_agent_command(
@@ -205,14 +240,24 @@ def grade_workspace(
     production_before: dict[str, str],
     manifests_before: dict[str, str],
     artifacts: Path,
+    test_environment: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    production_unchanged = production_before == hash_paths(workspace, case["production_paths"])
+    production_unchanged = production_before == hash_paths(
+        workspace,
+        case["production_paths"],
+        ignore_test_artifacts=True,
+    )
     manifests_unchanged = manifests_before == manifest_hashes(workspace)
 
-    correct = run_command(case["test_command"], workspace, timeout=600)
+    correct = run_command(case["test_command"], workspace, env=test_environment, timeout=600)
     write_command_log(artifacts / "correct-tests.json", correct)
     if correct.passed and case.get("extended_test_command"):
-        extended = run_command(case["extended_test_command"], workspace, timeout=900)
+        extended = run_command(
+            case["extended_test_command"],
+            workspace,
+            env=test_environment,
+            timeout=900,
+        )
         write_command_log(artifacts / "extended-tests.json", extended)
         if not extended.passed:
             correct = extended
@@ -222,7 +267,12 @@ def grade_workspace(
         for mutation in case["mutations"]:
             original = apply_mutation(workspace, mutation)
             try:
-                result = run_command(case["test_command"], workspace, timeout=600)
+                result = run_command(
+                    case["test_command"],
+                    workspace,
+                    env=test_environment,
+                    timeout=600,
+                )
             finally:
                 restore_mutation(workspace, mutation, original)
             write_command_log(artifacts / f"mutation-{mutation['id']}.json", result)
@@ -231,7 +281,11 @@ def grade_workspace(
         mutation_results = [{"id": mutation["id"], "killed": False} for mutation in case["mutations"]]
 
     mutation_score = sum(item["killed"] for item in mutation_results) / len(mutation_results)
-    production_unchanged = production_unchanged and production_before == hash_paths(workspace, case["production_paths"])
+    production_unchanged = production_unchanged and production_before == hash_paths(
+        workspace,
+        case["production_paths"],
+        ignore_test_artifacts=True,
+    )
     manifests_unchanged = manifests_unchanged and manifests_before == manifest_hashes(workspace)
     evidence_path = workspace / "test-evidence.json"
     if evidence_path.is_file():
@@ -247,7 +301,7 @@ def grade_workspace(
         evidence_errors = ["test-evidence.json was not created"]
         evidence_text = ""
 
-    covered_risks = [risk for risk in case["required_risks"] if risk.lower() in evidence_text]
+    covered_risks = covered_risk_ids(case, evidence_text)
     coverage_ratio = len(covered_risks) / len(case["required_risks"])
 
     score = round(
@@ -304,15 +358,7 @@ def run_once(
         if mode == "skill":
             install_skill(workspace / ".agents" / "skills" / "skill-suite-tests")
 
-        risk_ids = ", ".join(case["required_risks"])
-        invocation = "Use $skill-suite-tests. " if agent == "codex" else "/skill-suite-tests "
-        prompt = (
-            (invocation if mode == "skill" else "")
-            + case["prompt"]
-            + f" Use exatamente estes IDs em risks[].id: {risk_ids}."
-            + " Siga .eval-contract/test-evidence.v1.json e valide o relatório com .eval-contract/validate_test_evidence.py."
-            + " Trabalhe apenas neste workspace e limite conclusões ao que executar."
-        )
+        prompt = build_eval_prompt(case, agent, mode)
         command, environment = build_agent_command(
             agent,
             prompt,
@@ -407,7 +453,11 @@ def run_once(
                 environment,
             )
 
-        production_before = hash_paths(workspace, case["production_paths"])
+        production_before = hash_paths(
+            workspace,
+            case["production_paths"],
+            ignore_test_artifacts=True,
+        )
         manifests_before = manifest_hashes(workspace)
         started = time.monotonic()
         agent_result = run_command(
@@ -419,7 +469,15 @@ def run_once(
         duration_seconds = round(time.monotonic() - started, 2)
         write_command_log(artifacts / "agent.json", agent_result)
 
-        grade = grade_workspace(case, workspace, production_before, manifests_before, artifacts)
+        test_environment = build_test_environment(environment)
+        grade = grade_workspace(
+            case,
+            workspace,
+            production_before,
+            manifests_before,
+            artifacts,
+            test_environment,
+        )
         grade["critical_pass"] = grade["critical_pass"] and agent_result.passed
         copy_artifact_paths(
             workspace,

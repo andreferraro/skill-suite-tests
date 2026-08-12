@@ -5,7 +5,7 @@
       "id": "web-password-reset",
       "workspace": "fixtures/web-password-reset/workspace",
       "reference_tests": "graders/web-password-reset/reference",
-      "prompt": "Crie e execute o conjunto mínimo de testes automatizados para o componente de recuperação de senha. Prove loading, tratamento e anúncio de erro, operação por teclado com nome acessível e proteção contra resposta assíncrona obsoleta. Não altere código de produção. Gere test-evidence.json na raiz do projeto.",
+      "prompt": "Crie e execute testes automatizados guiados por risco para o componente de recuperação de senha. Não altere código de produção. Gere test-evidence.json na raiz do projeto.",
       "setup_commands": [
         ["npm", "ci"],
         ["npx", "playwright", "install", "--with-deps", "chromium"]
@@ -14,6 +14,12 @@
       "production_paths": ["src/"],
       "artifact_paths": ["tests/", "test-evidence.json"],
       "required_risks": ["loading", "error-announcement", "keyboard-accessibility", "stale-response"],
+      "risk_signal_groups": {
+        "loading": [["loading", "carregamento", "pendente", "pending"]],
+        "error-announcement": [["error-announcement", "role alert", "anuncio de erro", "alerta acessivel"]],
+        "keyboard-accessibility": [["keyboard-accessibility", "teclado", "keyboard", "nome acessivel", "accessible name"]],
+        "stale-response": [["stale-response", "resposta obsoleta", "resposta antiga", "stale response", "fora de ordem"]]
+      },
       "mutations": [
         {
           "id": "loading-not-disabled",
@@ -45,7 +51,7 @@
       "id": "api-payment",
       "workspace": "fixtures/api-payment/workspace",
       "reference_tests": "graders/api-payment/reference",
-      "prompt": "Crie e execute testes automatizados para criação de pagamentos. Prove idempotência, segurança sob chamadas concorrentes, rejeição de valor zero e rollback quando ocorre falha depois do insert. Não altere código de produção. Gere test-evidence.json na raiz do projeto.",
+      "prompt": "Crie e execute testes automatizados guiados por risco para a criação de pagamentos. Não altere código de produção. Gere test-evidence.json na raiz do projeto.",
       "setup_commands": [
         ["python", "-m", "pip", "install", "--require-hashes", "-r", "requirements.lock"]
       ],
@@ -53,6 +59,12 @@
       "production_paths": ["app/"],
       "artifact_paths": ["tests/", "test-evidence.json"],
       "required_risks": ["idempotency", "concurrency", "validation", "rollback"],
+      "risk_signal_groups": {
+        "idempotency": [["idempot"]],
+        "concurrency": [["concorr", "concurr", "condicao de corrida", "race condition"]],
+        "validation": [["valor zero", "zero amount", "amount <= 0", "validacao de valor", "valor positivo"]],
+        "rollback": [["rollback", "reversao", "transacao desfeita"]]
+      },
       "mutations": [
         {
           "id": "unstable-idempotent-response",
@@ -84,7 +96,7 @@
       "id": "events-order-consumer",
       "workspace": "fixtures/events-order-consumer/workspace",
       "reference_tests": "graders/events-order-consumer/reference",
-      "prompt": "Crie e execute testes automatizados para o consumidor de pedidos. Prove deduplicação, incremento do retry, envio à DLQ no limite, ordering e preservação do correlation ID. Reuse o harness de RabbitMQ e PostgreSQL quando a fronteira exigir. Não altere código de produção. Gere test-evidence.json na raiz do projeto.",
+      "prompt": "Crie e execute testes automatizados guiados por risco para o consumidor de pedidos. Não altere código de produção. Gere test-evidence.json na raiz do projeto.",
       "setup_commands": [
         ["npm", "ci"]
       ],
@@ -93,6 +105,15 @@
       "production_paths": ["src/"],
       "artifact_paths": ["tests/", "test-evidence.json"],
       "required_risks": ["deduplication", "retry", "dlq", "ordering-correlation"],
+      "risk_signal_groups": {
+        "deduplication": [["dedup", "duplic"]],
+        "retry": [["retry", "nova tentativa", "retentativa"]],
+        "dlq": [["dlq", "dead letter"]],
+        "ordering-correlation": [
+          ["ordering", "ordem", "sequencia", "sequence"],
+          ["correlation", "correlacao"]
+        ]
+      },
       "mutations": [
         {
           "id": "deduplication-disabled",

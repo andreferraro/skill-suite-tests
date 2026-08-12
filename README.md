@@ -18,15 +18,15 @@ A implementação está disponível no [PR #8](https://github.com/andreferraro/s
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
-| Validação local dos scripts | 36 testes unitários aprovados |
+| Validação local dos scripts | 42 testes unitários aprovados |
 | CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml) |
 | Configuração do GitHub | Os dois secrets e as duas variáveis estão cadastrados |
-| Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31631643026) |
+| Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31633274525) |
 | Eval pareado Cursor | Configurado e pendente do gate de release |
 | Ganho sobre baseline | 0 ponto na última execução |
 | Release `v0.3.0` | Bloqueada até a execução e aprovação dos evals pareados |
 
-A [execução 31631643026](https://github.com/andreferraro/skill-suite-tests/actions/runs/31631643026) concluiu baseline e tratamento nos três casos. API marcou 90 pontos nos dois modos. Web e eventos marcaram 35 pontos nos dois modos. O ganho ficou em zero e bloqueou a release. Os artefatos revelaram falso positivo na preservação de produção, suíte Web incompleta e teardown instável no teste com infraestrutura. As correções seguem pelo mesmo gate, sem alterar a pontuação mínima.
+A [execução 31633274525](https://github.com/andreferraro/skill-suite-tests/actions/runs/31633274525) concluiu baseline e tratamento nos três casos. API e eventos marcaram 100 pontos nos dois modos. Web marcou 35 no baseline e 25 com a skill porque o grader perdeu o caminho do Chromium instalado. O resultado também mostrou que o prompt entregava ao baseline todos os riscos e IDs esperados, eliminando a parte de descoberta que a skill deveria acrescentar. O harness e o desenho pareado foram corrigidos sem alterar a pontuação mínima.
 
 ## O que esta skill é
 
