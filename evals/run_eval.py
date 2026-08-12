@@ -41,6 +41,8 @@ def build_agent_command(
     workspace: Path,
     runtime_home: Path,
     model: str | None,
+    *,
+    containerized: bool = False,
 ) -> tuple[list[str], dict[str, str]]:
     isolated_home = runtime_home / "home"
     isolated_home.mkdir(parents=True, exist_ok=True)
@@ -60,8 +62,8 @@ def build_agent_command(
             Path(value).mkdir(parents=True, exist_ok=True)
 
     if agent == "codex":
-        executable = shutil.which("codex")
-        if not executable:
+        executable = "codex" if containerized else shutil.which("codex")
+        if executable is None:
             raise RuntimeError("codex CLI is not available")
         codex_home = runtime_home / "codex-home"
         codex_home.mkdir(parents=True, exist_ok=True)
@@ -73,7 +75,7 @@ def build_agent_command(
             "--ignore-rules",
             "--skip-git-repo-check",
             "--sandbox",
-            "workspace-write",
+            "danger-full-access" if containerized else "workspace-write",
             "--json",
         ]
         if model:
@@ -85,8 +87,8 @@ def build_agent_command(
         environment.pop("CURSOR_API_KEY", None)
         return command, environment
 
-    executable = shutil.which("cursor-agent") or shutil.which("agent")
-    if not executable:
+    executable = "cursor-agent" if containerized else (shutil.which("cursor-agent") or shutil.which("agent"))
+    if executable is None:
         raise RuntimeError("cursor-agent CLI is not available")
     command = [
         executable,
@@ -94,18 +96,103 @@ def build_agent_command(
         "--force",
         "--output-format",
         "stream-json",
-        "--sandbox",
-        "enabled",
         "--trust",
-        "--workspace",
-        str(workspace),
     ]
+    if not containerized:
+        command.extend(["--sandbox", "enabled", "--workspace", str(workspace)])
     if model:
         command.extend(["--model", model])
     command.append(prompt)
     environment = sanitized_environment(isolated_paths)
     environment.pop("OPENAI_API_KEY", None)
     return command, environment
+
+
+def build_container_command(
+    image: str,
+    inner_command: list[str],
+    workspace: Path,
+    runtime_home: Path,
+    environment: dict[str, str],
+) -> tuple[list[str], dict[str, str]]:
+    """Wrap an agent command in a container that can only see its fixture and home."""
+    docker = shutil.which("docker")
+    if docker is None:
+        raise RuntimeError("docker is required for isolated agent evals")
+
+    workspace = workspace.resolve()
+    runtime_home = runtime_home.resolve()
+    container_home = runtime_home / "container-home"
+    container_home.mkdir(parents=True, exist_ok=True)
+    uid = os.getuid() if hasattr(os, "getuid") else None
+    gid = os.getgid() if hasattr(os, "getgid") else None
+
+    command = [
+        docker,
+        "run",
+        "--rm",
+        "--interactive",
+        "--read-only",
+        "--cap-drop=ALL",
+        "--security-opt=no-new-privileges",
+        "--pids-limit=512",
+        "--tmpfs",
+        "/tmp:rw,nosuid,nodev,size=1g",
+        "--mount",
+        f"type=bind,source={workspace},target=/workspace",
+        "--mount",
+        f"type=bind,source={container_home},target=/home/eval",
+        "--workdir",
+        "/workspace",
+        "--env",
+        "HOME=/home/eval",
+        "--env",
+        "CODEX_HOME=/home/eval/.codex",
+        "--env",
+        "PLAYWRIGHT_BROWSERS_PATH=/ms-playwright",
+        "--env",
+        "PYTHONPATH=/workspace/.agent-site",
+    ]
+    if uid is not None and gid is not None:
+        command.extend(["--user", f"{uid}:{gid}"])
+    for name in ("CI", "CURSOR_API_KEY", "LANG", "LC_ALL", "OPENAI_API_KEY"):
+        if environment.get(name):
+            command.extend(["--env", name])
+    command.extend([image, *inner_command])
+    return command, environment
+
+
+def prepare_container_workspace(
+    image: str,
+    workspace: Path,
+    runtime_home: Path,
+    environment: dict[str, str],
+) -> None:
+    requirements = workspace / "requirements.lock"
+    if not requirements.is_file():
+        return
+    command, container_environment = build_container_command(
+        image,
+        [
+            "python",
+            "-m",
+            "pip",
+            "install",
+            "--disable-pip-version-check",
+            "--no-deps",
+            "--require-hashes",
+            "--target",
+            "/workspace/.agent-site",
+            "-r",
+            "/workspace/requirements.lock",
+        ],
+        workspace,
+        runtime_home,
+        environment,
+    )
+    preparation = run_command(command, workspace, env=container_environment, timeout=900)
+    if not preparation.passed:
+        raise RuntimeError(f"unable to prepare isolated Python workspace: {preparation.stderr}")
 
 
 def grade_workspace(
@@ -197,6 +284,7 @@ def run_once(
     model: str | None,
     artifact_root: Path,
     dry_run: bool,
+    agent_container_image: str | None,
 ) -> dict[str, Any]:
     run_id = f"{agent}-{case['id']}-{mode}-{repetition}"
     artifacts = artifact_root / run_id
@@ -221,11 +309,43 @@ def run_once(
             + " Siga .eval-contract/test-evidence.v1.json e valide o relatório com .eval-contract/validate_test_evidence.py."
             + " Trabalhe apenas neste workspace e limite conclusões ao que executar."
         )
-        command, environment = build_agent_command(agent, prompt, workspace, runtime_home, model)
-        version_result = run_command([command[0], "--version"], workspace, env=environment, timeout=30)
+        command, environment = build_agent_command(
+            agent,
+            prompt,
+            workspace,
+            runtime_home,
+            model,
+            containerized=bool(agent_container_image),
+        )
+        if agent_container_image:
+            version_command, version_environment = build_container_command(
+                agent_container_image,
+                [command[0], "--version"],
+                workspace,
+                runtime_home,
+                environment,
+            )
+        else:
+            version_command, version_environment = [command[0], "--version"], environment
+        version_result = run_command(
+            version_command,
+            workspace,
+            env=version_environment,
+            timeout=30,
+        )
         agent_version = (version_result.stdout or version_result.stderr).strip() or "unknown"
         if not dry_run and not version_result.passed:
             raise RuntimeError(f"unable to execute {agent} CLI: {agent_version}")
+        agent_command = command
+        agent_environment = environment
+        if agent_container_image:
+            agent_command, agent_environment = build_container_command(
+                agent_container_image,
+                command,
+                workspace,
+                runtime_home,
+                environment,
+            )
         if dry_run:
             result = {
                 "run_id": run_id,
@@ -236,7 +356,7 @@ def run_once(
                 "model": model or "agent-default",
                 "agent_version": agent_version,
                 "dry_run": True,
-                "command": command,
+                "command": agent_command,
             }
             (artifacts / "result.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
             return result
@@ -246,10 +366,20 @@ def run_once(
             raise RuntimeError(f"{required_secret} is required for {agent} evals")
 
         if agent == "codex":
+            authentication_command = [command[0], "login", "--with-api-key"]
+            authentication_environment = environment
+            if agent_container_image:
+                authentication_command, authentication_environment = build_container_command(
+                    agent_container_image,
+                    authentication_command,
+                    workspace,
+                    runtime_home,
+                    environment,
+                )
             authentication = run_command(
-                [command[0], "login", "--with-api-key"],
+                authentication_command,
                 workspace,
-                env=environment,
+                env=authentication_environment,
                 input_text=environment[required_secret] + "\n",
                 timeout=30,
             )
@@ -265,10 +395,23 @@ def run_once(
             if not setup.passed:
                 raise RuntimeError(f"setup failed for {run_id}; see {setup_log}")
 
+        if agent_container_image:
+            prepare_container_workspace(
+                agent_container_image,
+                workspace,
+                runtime_home,
+                environment,
+            )
+
         production_before = hash_paths(workspace, case["production_paths"])
         manifests_before = manifest_hashes(workspace)
         started = time.monotonic()
-        agent_result = run_command(command, workspace, env=environment, timeout=1800)
+        agent_result = run_command(
+            agent_command,
+            workspace,
+            env=agent_environment,
+            timeout=1800,
+        )
         duration_seconds = round(time.monotonic() - started, 2)
         write_command_log(artifacts / "agent.json", agent_result)
 
@@ -426,6 +569,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--case", action="append", dest="cases")
     parser.add_argument("--repetitions", type=int, default=1)
     parser.add_argument("--model")
+    parser.add_argument(
+        "--agent-container-image",
+        help="Run the agent in this prebuilt container image with only the fixture mounted",
+    )
     parser.add_argument("--artifacts", type=Path, default=EVAL_ROOT / "artifacts")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--enforce-gate", action="store_true")
@@ -455,6 +602,7 @@ def main() -> int:
                             args.model,
                             args.artifacts,
                             args.dry_run,
+                            args.agent_container_image,
                         )
                     )
     report = aggregate(

@@ -75,12 +75,21 @@ python evals/validate_fixtures.py \
 
 Pré-requisitos:
 
-- `codex` para Codex;
-- `cursor-agent` para Cursor;
 - `OPENAI_API_KEY` ou `CURSOR_API_KEY` no ambiente;
 - projeto de API com acesso e créditos disponíveis para as chamadas executadas;
-- Node.js, Python e Docker.
+- Node.js, Python e Docker;
 - nome exato do modelo passado por `--model`.
+
+Construa a imagem isolada usada pela CI:
+
+```bash
+docker build \
+  --file evals/agent.Dockerfile \
+  --tag skill-suite-tests-eval-agent:local \
+  .
+```
+
+A imagem fixa as versões do Codex CLI e do Cursor Agent CLI. O pacote do Cursor também é verificado por SHA-256. O agente recebe dois mounts graváveis: a fixture e um diretório home descartável. O repositório, os graders e os mutantes ficam fora do contêiner.
 
 Codex em um caso:
 
@@ -90,6 +99,7 @@ python evals/run_eval.py \
   --case web-password-reset \
   --repetitions 1 \
   --model <modelo-codex> \
+  --agent-container-image skill-suite-tests-eval-agent:local \
   --enforce-gate
 ```
 
@@ -100,12 +110,14 @@ python evals/run_eval.py \
   --agent codex \
   --repetitions 3 \
   --model <modelo-codex> \
+  --agent-container-image skill-suite-tests-eval-agent:local \
   --artifacts evals/artifacts/codex
 
 python evals/run_eval.py \
   --agent cursor \
   --repetitions 3 \
   --model <modelo-cursor> \
+  --agent-container-image skill-suite-tests-eval-agent:local \
   --artifacts evals/artifacts/cursor
 
 python evals/aggregate_reports.py \
@@ -121,6 +133,8 @@ python evals/aggregate_reports.py \
 ```
 
 Use `--dry-run` para conferir comandos e isolamento sem consumir APIs.
+
+Sem `--agent-container-image`, o runner usa as CLIs instaladas no host. Esse modo serve para diagnóstico local e exige `codex` ou `cursor-agent` no `PATH`.
 
 ## GitHub Actions
 
@@ -141,7 +155,9 @@ Essa configuração é exclusiva da manutenção do benchmark no GitHub Actions.
 
 Os modelos devem usar os nomes exatos aceitos pelas respectivas CLIs. Os workflows entregam cada chave somente ao job do agente correspondente e publicam logs, resultados individuais e o resumo consolidado como artefatos.
 
-Cada execução do Codex cria um `CODEX_HOME` descartável e autentica a CLI com `codex login --with-api-key`. A chave entra pela entrada padrão e fica fora do comando e dos artefatos. Ausência de crédito, autenticação inválida ou falha da CLI são registradas como falhas de execução e bloqueiam o gate.
+Cada execução cria um home descartável dentro do contêiner. O Codex autentica com `codex login --with-api-key`; a chave entra pela entrada padrão e fica fora do comando e dos artefatos. O Cursor recebe somente `CURSOR_API_KEY`. Ausência de crédito, autenticação inválida ou falha da CLI são registradas como falhas de execução e bloqueiam o gate.
+
+O Codex usa `danger-full-access` somente dentro desse contêiner controlado, conforme a orientação oficial para automação isolada. O contêiner usa raiz somente leitura, capacidades removidas, `no-new-privileges` e mounts explícitos. O grader continua no host e avalia a fixture depois que o agente termina.
 
 Também é possível cadastrar pela GitHub CLI. Os comandos de secret solicitam o valor de forma interativa:
 

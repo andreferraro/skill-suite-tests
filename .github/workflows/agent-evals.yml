@@ -34,8 +34,8 @@ jobs:
         run: |
           test -n "$OPENAI_API_KEY"
           test -n "$CODEX_EVAL_MODEL"
-      - name: Install Codex CLI
-        run: npm install --global @openai/codex@0.147.0
+      - name: Build isolated agent image
+        run: docker build --file evals/agent.Dockerfile --tag skill-suite-tests-eval-agent:local .
       - name: Run paired eval
         shell: bash
         run: |
@@ -44,7 +44,8 @@ jobs:
             --case "${{ matrix.case }}" \
             --repetitions 1 \
             --artifacts evals/artifacts \
-            --model "$CODEX_EVAL_MODEL"
+            --model "$CODEX_EVAL_MODEL" \
+            --agent-container-image skill-suite-tests-eval-agent:local
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

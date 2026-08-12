@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "evals"))
 
 from eval_lib import apply_mutation, install_skill, restore_mutation, run_command, sanitized_environment  # noqa: E402
-from run_eval import aggregate, build_agent_command, evaluation_exit_code  # noqa: E402
+from run_eval import aggregate, build_agent_command, build_container_command, evaluation_exit_code  # noqa: E402
 
 
 def result(
@@ -111,6 +111,50 @@ class CommandTests(unittest.TestCase):
             self.assertIn("--ignore-user-config", command)
             self.assertIn("--skip-git-repo-check", command)
             self.assertNotIn("CURSOR_API_KEY", environment)
+
+    def test_containerized_codex_uses_controlled_full_access(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            command, _ = build_agent_command(
+                "codex",
+                "Create tests",
+                workspace,
+                root / "runtime",
+                "test-model",
+                containerized=True,
+            )
+
+        sandbox_index = command.index("--sandbox")
+        self.assertEqual("danger-full-access", command[sandbox_index + 1])
+
+    def test_container_mounts_only_fixture_and_agent_home(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            runtime = root / "runtime"
+            with (
+                mock.patch("run_eval.shutil.which", return_value="/usr/bin/docker"),
+                mock.patch("run_eval.os.getuid", return_value=1001, create=True),
+                mock.patch("run_eval.os.getgid", return_value=1001, create=True),
+            ):
+                command, environment = build_container_command(
+                    "eval-agent:test",
+                    ["codex", "--version"],
+                    workspace,
+                    runtime,
+                    {"PATH": "runtime-path", "OPENAI_API_KEY": "secret-value"},
+                )
+
+        rendered = " ".join(command)
+        self.assertIn(f"source={workspace.resolve()},target=/workspace", rendered)
+        self.assertIn("target=/home/eval", rendered)
+        self.assertNotIn("secret-value", rendered)
+        self.assertEqual("secret-value", environment["OPENAI_API_KEY"])
+        self.assertIn("--read-only", command)
+        self.assertIn("--cap-drop=ALL", command)
 
 
 class AggregateTests(unittest.TestCase):

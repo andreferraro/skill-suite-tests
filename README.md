@@ -244,8 +244,8 @@ python evals/validate_fixtures.py
 
 - Credenciais dos benchmarks entram somente por variáveis de ambiente ou GitHub Actions secrets.
 - O runner remove tokens e credenciais alheias antes de iniciar agentes.
-- Cada execução usa workspace temporário e recebe somente o projeto do caso.
-- Graders, mutantes e credenciais de produção ficam fora do workspace do agente.
+- Cada execução usa um contêiner descartável com raiz somente leitura.
+- O agente recebe somente a fixture e um home temporário. Graders, mutantes, repositório e credenciais de produção ficam fora do contêiner.
 - Carga, estresse, fuzz externo e injeção de falhas exigem ambiente autorizado.
 - Cleanup fica restrito aos recursos criados pelo teste.
 
@@ -267,27 +267,26 @@ As branches estão protegidas no GitHub:
 - `main` exige os mesmos controles e também `Aggregate release gate`;
 - as regras também valem para administradores e bloqueiam force push e exclusão das branches.
 
-### O que falta para publicar a v0.3.0
+### Publicação da v0.3.0
 
 Configuração atual em **Settings > Secrets and variables > Actions**:
 
 | Tipo | Nome | Estado |
 | --- | --- | --- |
-| Secret | `OPENAI_API_KEY` | Cadastrado e autenticado pelo Codex CLI |
+| Secret | `OPENAI_API_KEY` | Cadastrado, autenticado e com saldo disponível |
 | Secret | `CURSOR_API_KEY` | Cadastrado, validação pendente do eval de release |
 | Variable | `CODEX_EVAL_MODEL` | Cadastrada |
 | Variable | `CURSOR_EVAL_MODEL` | Cadastrada |
 
 As chaves devem ser cadastradas diretamente no GitHub. Evite colocá-las em arquivos, comandos com valor literal, commits ou mensagens do PR.
 
-Próximas etapas:
+Fluxo de publicação:
 
-1. Disponibilize créditos no projeto da OpenAI associado à chave usada pelo workflow.
-2. Reexecute o workflow **Agent evals** no PR #8.
-3. Confirme o gate do Codex nos três casos e faça o merge em `develop`.
-4. Crie `release/0.3.0` a partir de `develop` e abra um PR para `main`.
-5. Confirme o workflow **Release evals** com três repetições por caso para Codex e Cursor.
-6. Faça o merge em `main`, crie a tag `v0.3.0` e sincronize `main` com `develop`.
+1. Execute **Agent evals** no PR da feature para `develop`.
+2. Confirme o gate do Codex nos três casos e faça o merge em `develop`.
+3. Crie `release/0.3.0` a partir de `develop` e abra um PR para `main`.
+4. Confirme **Release evals** com três repetições por caso para Codex e Cursor.
+5. Faça o merge em `main`, crie a tag `v0.3.0` e sincronize `main` com `develop`.
 
 A release permanece pendente se o tratamento não superar o baseline ou se qualquer gate obrigatório falhar. Os critérios completos estão em [`evals/README.md`](evals/README.md).
 
