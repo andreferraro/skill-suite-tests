@@ -141,6 +141,35 @@ class DetectTestContextTests(unittest.TestCase):
 
             self.assertIn("sqlite", result["databases"])
 
+    def test_reports_confirmable_risk_signals_from_production_only(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "src").mkdir()
+            (root / "src" / "payment.py").write_text(
+                """
+def create(idempotency_key, amount, connection):
+    if amount <= 0:
+        raise ValueError()
+    connection.execute('BEGIN IMMEDIATE')
+    try:
+        return idempotency_key
+    except Exception:
+        connection.rollback()
+""",
+                encoding="utf-8",
+            )
+            (root / "tests").mkdir()
+            (root / "tests" / "test_noise.py").write_text("retry = 'DLQ'\n", encoding="utf-8")
+
+            result = detect(root)
+
+            signals = result["risk_signals"]
+            self.assertEqual(["src/payment.py"], signals["concurrency-control"])
+            self.assertEqual(["src/payment.py"], signals["idempotency-control"])
+            self.assertEqual(["src/payment.py"], signals["non-positive-validation"])
+            self.assertEqual(["src/payment.py"], signals["transaction-rollback"])
+            self.assertNotIn("retry-control", signals)
+
 
 if __name__ == "__main__":
     unittest.main()

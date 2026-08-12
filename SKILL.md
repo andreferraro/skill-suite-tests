@@ -32,13 +32,13 @@ Tratar outros ecossistemas como **adaptáveis**. Reutilizar a stack encontrada e
 
 ## Fluxo obrigatório
 
-1. **Descobrir o sistema.** Examinar implementação, contratos, testes, fixtures, CI e infraestrutura. Inventariar os comandos canônicos de teste e checks definidos em manifests e CI, separando suítes obrigatórias de suítes opt-in. Se Python estiver disponível, resolver o diretório desta skill a partir do `SKILL.md` carregado e executar `python <skill-root>/scripts/detect_test_context.py --root <projeto> --json` como inventário inicial. Confirmar o resultado no código.
+1. **Descobrir o sistema.** Examinar implementação, contratos, testes, fixtures, CI e infraestrutura. Inventariar os comandos canônicos de teste e checks definidos em manifests e CI, separando suítes obrigatórias de suítes opt-in. Se Python estiver disponível, resolver o diretório desta skill a partir do `SKILL.md` carregado e executar `python <skill-root>/scripts/detect_test_context.py --root <projeto> --json` como inventário inicial. Tratar `risk_signals` como candidatos e confirmar cada ocorrência no código.
 2. **Fixar a base.** Registrar requisito, critério de aceite, contrato, bug, risco ou comportamento aceito que sustenta cada cenário. Marcar lacunas como `<definir>`.
 3. **Classificar o pedido.** Escolher propósito, nível, atributo e técnica. Ler [tipos-de-teste.md](references/tipos-de-teste.md) quando houver dúvida real entre abordagens.
 4. **Delimitar a fronteira.** Declarar navegador, processo, serviço, banco, broker e dependências reais, containerizados, virtualizados ou simulados. Preservar real a fronteira que precisa ser provada.
 5. **Definir oráculos.** Cobrir interface, resposta, estado, eventos, efeitos, ausência de efeitos, tempo, recursos e observabilidade conforme o risco. Ler [oraculos-e-qualidade.md](references/oraculos-e-qualidade.md).
 6. **Escolher ferramentas.** Reutilizar runner, harness, fixtures e infraestrutura existentes. Ler [guia-de-ecossistemas.md](references/guia-de-ecossistemas.md) somente quando a escolha estiver aberta.
-7. **Projetar o conjunto mínimo.** Para cada cenário, definir risco, precondições, estímulo, dados, oráculo, isolamento, cleanup e evidência esperada.
+7. **Projetar o conjunto mínimo.** Para cada cenário, definir risco, precondições, estímulo, dados, oráculo, isolamento, cleanup e evidência esperada. Rastrear guards, validações, locks, transações, deduplicação, ordering, retry e mecanismos equivalentes encontrados no alvo para um cenário sensível ou justificar por que estão fora do recorte.
 8. **Implementar.** Seguir convenções locais e manter a mudança pequena. Adicionar dependência somente diante de lacuna comprovada.
 9. **Provar sensibilidade.** Confirmar que o teste detecta a quebra declarada por reprodução anterior, controle negativo, fixture dirigida ou mutação local temporária e reversível.
 10. **Executar em camadas.** Rodar o teste criado, o comando canônico que inclui a suíte alterada, a suíte mais ampla configurada e os checks estáticos aplicáveis. Não substituir um comando obrigatório por outro mais estreito. Tratar falha, timeout, hook pendente e `no tests found` como resultado incompleto a diagnosticar e corrigir. Executar cenários intensivos, destrutivos ou externos somente com autorização adequada.
@@ -61,6 +61,8 @@ Consultar [bases-tecnicas.md](references/bases-tecnicas.md) quando protocolo, ac
 - Cobrir regras, validações, erros, persistência, transações, cache e efeitos externos.
 - Validar contratos, protocolo e expectativas de consumidores quando aplicáveis.
 - Verificar commit, rollback, idempotência, concorrência, ordering e convergência conforme o risco.
+- Testar uma validação na camada que a implementa. Uma rejeição feita por UI, schema ou controller não comprova o guard equivalente no serviço ou domínio.
+- Tratar lock, transação serializada, constraint única e chave de idempotência como sinais de concorrência. Exercitar chamadas realmente simultâneas contra o mesmo armazenamento e verificar identidade, quantidade de criações e estado final.
 
 ### Eventos e processos assíncronos
 
@@ -68,6 +70,7 @@ Consultar [bases-tecnicas.md](references/bases-tecnicas.md) quando protocolo, ac
 - Aguardar condição observável com timeout e diagnóstico do último estado.
 - Verificar schema, ordering, retry, deduplicação, replay, DLQ e recuperação conforme o contrato.
 - Preservar o gate opt-in das suítes com containers ou serviços. O comando unitário não deve iniciar infraestrutura por efeito colateral.
+- Em falhas dirigidas de integração, substituir somente a operação que deve falhar e manter reais as fronteiras que precisam ser observadas. Não derrubar tabelas, filas ou serviços quando isso puder quebrar uma leitura anterior ao ponto de injeção.
 - Encerrar consumers, clientes, canais, conexões e containers sequencialmente, em ordem de dependência, com cleanup idempotente e tempo limitado. Não fechar recursos dependentes em paralelo. Confirmar que o processo de teste termina sem hooks pendentes.
 
 ## Gates de qualidade

@@ -18,15 +18,15 @@ A implementação está disponível no [PR #8](https://github.com/andreferraro/s
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
-| Validação local dos scripts | 42 testes unitários aprovados |
+| Validação local dos scripts | 43 testes unitários aprovados |
 | CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml) |
 | Configuração do GitHub | Os dois secrets e as duas variáveis estão cadastrados |
-| Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31633274525) |
+| Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31634174537) |
 | Eval pareado Cursor | Configurado e pendente do gate de release |
-| Ganho sobre baseline | 0 ponto na última execução |
+| Ganho mediano sobre baseline | -8,75 pontos na última execução |
 | Release `v0.3.0` | Bloqueada até a execução e aprovação dos evals pareados |
 
-A [execução 31633274525](https://github.com/andreferraro/skill-suite-tests/actions/runs/31633274525) concluiu baseline e tratamento nos três casos. API e eventos marcaram 100 pontos nos dois modos. Web marcou 35 no baseline e 25 com a skill porque o grader perdeu o caminho do Chromium instalado. O resultado também mostrou que o prompt entregava ao baseline todos os riscos e IDs esperados, eliminando a parte de descoberta que a skill deveria acrescentar. O harness e o desenho pareado foram corrigidos sem alterar a pontuação mínima.
+A [execução 31634174537](https://github.com/andreferraro/skill-suite-tests/actions/runs/31634174537) usou pedidos curtos e riscos ocultos. Web subiu de 27,5 para 96,25. API caiu de 87,5 para 78,75 porque a skill não transformou os controles de concorrência e validação do serviço em cenários sensíveis. Eventos caiu de 100 para 35 porque o teste de infraestrutura injetou a falha removendo uma tabela e quebrou uma leitura anterior ao ponto pretendido. O detector e o contrato foram ajustados a partir dessas evidências, mantendo os mesmos mutantes e gates.
 
 ## O que esta skill é
 
@@ -233,7 +233,7 @@ python evals/validate_fixtures.py
 ## Estrutura
 
 - [`SKILL.md`](SKILL.md): contrato e fluxo do agente.
-- [`scripts/detect_test_context.py`](scripts/detect_test_context.py): inventário determinístico da stack de testes.
+- [`scripts/detect_test_context.py`](scripts/detect_test_context.py): inventário determinístico da stack e de sinais de risco confirmáveis no código.
 - [`scripts/validate_test_evidence.py`](scripts/validate_test_evidence.py): validação semântica do relatório.
 - [`schemas/test-evidence.v1.json`](schemas/test-evidence.v1.json): contrato JSON Schema.
 - [`references/`](references): taxonomia, oráculos, ecossistemas e bases técnicas.

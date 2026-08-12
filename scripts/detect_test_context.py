@@ -58,6 +58,48 @@ TEST_PATTERNS = (
     re.compile(r"_test\.go$", re.IGNORECASE),
 )
 
+RISK_SIGNAL_PATTERNS = {
+    "accessibility-semantics": (
+        re.compile(r"\baria-[a-z-]+\b", re.IGNORECASE),
+        re.compile(r"\brole\s*=", re.IGNORECASE),
+        re.compile(r"\bhtmlfor\s*=", re.IGNORECASE),
+    ),
+    "concurrency-control": (
+        re.compile(r"\bbegin\s+immediate\b", re.IGNORECASE),
+        re.compile(r"\bfor\s+update\b", re.IGNORECASE),
+        re.compile(r"\b(mutex|semaphore|lock)\b", re.IGNORECASE),
+    ),
+    "dead-letter-control": (
+        re.compile(r"\bdlq\b", re.IGNORECASE),
+        re.compile(r"dead[-_ ]?letter", re.IGNORECASE),
+    ),
+    "deduplication-control": (
+        re.compile(r"\bdedup", re.IGNORECASE),
+        re.compile(r"hasprocessed", re.IGNORECASE),
+        re.compile(r"\bduplicate\b", re.IGNORECASE),
+    ),
+    "idempotency-control": (re.compile(r"\bidempoten", re.IGNORECASE),),
+    "non-positive-validation": (
+        re.compile(r"\b(amount|value|quantity|total)\s*<=\s*0\b", re.IGNORECASE),
+        re.compile(r"\bgt\s*=\s*0\b", re.IGNORECASE),
+    ),
+    "ordering-correlation-control": (
+        re.compile(r"\b(sequence|ordering)\b", re.IGNORECASE),
+        re.compile(r"\bcorrelation(id|_id)?\b", re.IGNORECASE),
+    ),
+    "retry-control": (
+        re.compile(r"\bretry\b", re.IGNORECASE),
+        re.compile(r"\battempt\s*\+\s*1\b", re.IGNORECASE),
+        re.compile(r"maxattempt", re.IGNORECASE),
+    ),
+    "stale-async-guard": (
+        re.compile(r"latestrequest", re.IGNORECASE),
+        re.compile(r"requestid\s*!==?", re.IGNORECASE),
+        re.compile(r"abortcontroller", re.IGNORECASE),
+    ),
+    "transaction-rollback": (re.compile(r"\brollback\b", re.IGNORECASE),),
+}
+
 
 def iter_project_files(root: Path) -> Iterable[Path]:
     for path in root.rglob("*"):
@@ -80,6 +122,33 @@ def read_text(path: Path) -> str:
         return path.read_text(encoding="utf-8", errors="ignore")
     except OSError:
         return ""
+
+
+def detect_risk_signals(relative_files: dict[str, Path]) -> dict[str, list[str]]:
+    source_files = {
+        name: path
+        for name, path in relative_files.items()
+        if name.endswith((".cs", ".go", ".java", ".js", ".jsx", ".kt", ".py", ".rb", ".ts", ".tsx"))
+        and not any(pattern.search(name) for pattern in TEST_PATTERNS)
+    }
+    source_contents = {name: read_text(path) for name, path in source_files.items()}
+    signals: dict[str, list[str]] = {}
+    for signal, patterns in RISK_SIGNAL_PATTERNS.items():
+        if signal == "ordering-correlation-control":
+            matching_files = sorted(
+                name
+                for name, content in source_contents.items()
+                if all(pattern.search(content) for pattern in patterns)
+            )
+        else:
+            matching_files = sorted(
+                name
+                for name, content in source_contents.items()
+                if any(pattern.search(content) for pattern in patterns)
+            )
+        if matching_files:
+            signals[signal] = matching_files
+    return signals
 
 
 def package_dependencies(package_files: list[Path]) -> set[str]:
@@ -238,8 +307,9 @@ def detect(root: Path) -> dict[str, object]:
         "brokers": brokers,
         "browser_automation": [tool for tool in test_tools if tool in {"playwright", "cypress"}],
         "infrastructure_files": infrastructure_files,
+        "risk_signals": detect_risk_signals(relative_files),
         "notes": [
-            "Detection reports project evidence only; it does not recommend or install tools.",
+            "Detection reports project evidence and candidate risk signals only; it does not recommend or install tools.",
             "Confirm signals against source code before making test-design decisions.",
         ],
     }
