@@ -19,6 +19,7 @@ def main() -> int:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--repetitions", type=int, required=True)
+    parser.add_argument("--repetition-start", type=int, default=1)
     parser.add_argument("--agent", action="append", dest="agents", required=True)
     parser.add_argument("--case", action="append", dest="cases", required=True)
     parser.add_argument("--enforce-gate", action="store_true")
@@ -35,6 +36,7 @@ def main() -> int:
     report = aggregate(
         results,
         repetitions=args.repetitions,
+        repetition_start=args.repetition_start,
         expected_agents=args.agents,
         expected_cases=args.cases,
     )

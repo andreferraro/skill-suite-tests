@@ -46,9 +46,13 @@ concurrency:
 jobs:
   plan:
     name: Confirm paid call budget
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    outputs:
+      authorized: ${{ steps.plan.outputs.authorized }}
     steps:
-      - name: Validate explicit authorization
+      - id: plan
+        name: Validate explicit authorization
         shell: bash
         env:
           SELECTED_AGENT: ${{ inputs.agent }}
@@ -67,9 +71,10 @@ jobs:
             echo "Teto: $expected chamadas de agente"
             echo "Baselines válidos em cache podem reduzir esse total."
           } >> "$GITHUB_STEP_SUMMARY"
+          echo "authorized=$CONFIRM_PAID" >> "$GITHUB_OUTPUT"
           if [ "$CONFIRM_PAID" != "true" ]; then
-            echo "Execução paga não autorizada. Marque confirm_paid para continuar." >&2
-            exit 1
+            echo "Prévia concluída. Nenhuma chamada paga foi autorizada."
+            exit 0
           fi
           if [ "$MAX_PAID_CALLS" -ne "$expected" ]; then
             echo "Teto inválido: a combinação selecionada exige confirmação de $expected chamadas." >&2
@@ -79,7 +84,7 @@ jobs:
   codex:
     name: Codex (${{ matrix.case }})
     needs: plan
-    if: inputs.agent == 'codex' || inputs.agent == 'both'
+    if: needs.plan.outputs.authorized == 'true' && (inputs.agent == 'codex' || inputs.agent == 'both')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -151,7 +156,7 @@ jobs:
   cursor:
     name: Cursor (${{ matrix.case }})
     needs: plan
-    if: inputs.agent == 'cursor' || inputs.agent == 'both'
+    if: needs.plan.outputs.authorized == 'true' && (inputs.agent == 'cursor' || inputs.agent == 'both')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -224,7 +229,7 @@ jobs:
     name: Aggregate manual release gate
     runs-on: ubuntu-latest
     needs: [plan, codex, cursor]
-    if: always() && needs.plan.result == 'success'
+    if: always() && needs.plan.result == 'success' && needs.plan.outputs.authorized == 'true'
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
