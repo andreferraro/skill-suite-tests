@@ -147,6 +147,7 @@ class CommandTests(unittest.TestCase):
                     runtime,
                     {"PATH": "runtime-path", "OPENAI_API_KEY": "secret-value"},
                 )
+                codex_home_created = (runtime / "container-home" / ".codex").is_dir()
 
         rendered = " ".join(command)
         self.assertIn(f"source={workspace.resolve()},target=/workspace", rendered)
@@ -155,6 +156,7 @@ class CommandTests(unittest.TestCase):
         self.assertEqual("secret-value", environment["OPENAI_API_KEY"])
         self.assertIn("--read-only", command)
         self.assertIn("--cap-drop=ALL", command)
+        self.assertTrue(codex_home_created)
 
 
 class AggregateTests(unittest.TestCase):

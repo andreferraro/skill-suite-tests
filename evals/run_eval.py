@@ -124,6 +124,8 @@ def build_container_command(
     runtime_home = runtime_home.resolve()
     container_home = runtime_home / "container-home"
     container_home.mkdir(parents=True, exist_ok=True)
+    (container_home / ".codex").mkdir(exist_ok=True)
+    (container_home / ".cache").mkdir(exist_ok=True)
     uid = os.getuid() if hasattr(os, "getuid") else None
     gid = os.getgid() if hasattr(os, "getgid") else None
 
