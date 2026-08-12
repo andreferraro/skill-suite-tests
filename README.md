@@ -18,14 +18,15 @@ A implementação está disponível no [PR #8](https://github.com/andreferraro/s
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
-| Validação local dos scripts | 23 testes unitários aprovados |
-| CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/runs/31607954210) |
-| Eval pareado Codex | Aguardando `OPENAI_API_KEY` e `CODEX_EVAL_MODEL` no GitHub Actions |
-| Eval pareado Cursor | Aguardando `CURSOR_API_KEY` e `CURSOR_EVAL_MODEL` no GitHub Actions |
+| Validação local dos scripts | 26 testes unitários aprovados |
+| CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/runs/31626774650) |
+| Configuração do GitHub | Os dois secrets e as duas variáveis estão cadastrados |
+| Eval pareado Codex | [Autenticação aprovada, execução bloqueada por ausência de créditos na API](https://github.com/andreferraro/skill-suite-tests/actions/runs/31626774775) |
+| Eval pareado Cursor | Configurado e pendente do gate de release |
 | Ganho sobre baseline | Sem resultado publicado |
-| Release `v0.3.0` | Aguardando configuração e aprovação dos evals pareados |
+| Release `v0.3.0` | Bloqueada até a execução e aprovação dos evals pareados |
 
-As tentativas atuais dos evals encerram no preflight porque o repositório ainda não possui as chaves e os modelos. Nenhuma chamada de agente foi executada e nenhum resultado de benchmark foi produzido. O histórico verificável fica nos artefatos e resumos dos workflows [Agent evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml) e [Release evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/release-evals.yml).
+O Codex CLI aceitou a chave em um `CODEX_HOME` descartável e tentou iniciar os seis agentes. A API encerrou as chamadas por ausência de créditos antes da execução dos pedidos. Por isso, ainda não existe resultado válido de baseline, tratamento ou ganho. O histórico verificável fica nos artefatos e resumos dos workflows [Agent evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml) e [Release evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/release-evals.yml).
 
 ## O que esta skill é
 
@@ -237,24 +238,25 @@ Commits seguem Conventional Commits. Uma release exige qualidade estrutural, fix
 
 ### O que falta para publicar a v0.3.0
 
-Configure em **Settings > Secrets and variables > Actions**:
+Configuração atual em **Settings > Secrets and variables > Actions**:
 
-| Tipo | Nome | Uso |
+| Tipo | Nome | Estado |
 | --- | --- | --- |
-| Secret | `OPENAI_API_KEY` | Eval pareado com Codex |
-| Secret | `CURSOR_API_KEY` | Eval pareado com Cursor |
-| Variable | `CODEX_EVAL_MODEL` | Nome exato do modelo usado pelo Codex |
-| Variable | `CURSOR_EVAL_MODEL` | Nome exato do modelo usado pelo Cursor |
+| Secret | `OPENAI_API_KEY` | Cadastrado e autenticado pelo Codex CLI |
+| Secret | `CURSOR_API_KEY` | Cadastrado, validação pendente do eval de release |
+| Variable | `CODEX_EVAL_MODEL` | Cadastrada |
+| Variable | `CURSOR_EVAL_MODEL` | Cadastrada |
 
 As chaves devem ser cadastradas diretamente no GitHub. Evite colocá-las em arquivos, comandos com valor literal, commits ou mensagens do PR.
 
-Depois da configuração:
+Próximas etapas:
 
-1. Reexecute o workflow **Agent evals** no PR #8.
-2. Confirme o gate do Codex nos três casos e faça o merge em `develop`.
-3. Crie `release/0.3.0` a partir de `develop` e abra um PR para `main`.
-4. Confirme o workflow **Release evals** com três repetições por caso para Codex e Cursor.
-5. Faça o merge em `main`, crie a tag `v0.3.0` e sincronize `main` com `develop`.
+1. Disponibilize créditos no projeto da OpenAI associado à chave usada pelo workflow.
+2. Reexecute o workflow **Agent evals** no PR #8.
+3. Confirme o gate do Codex nos três casos e faça o merge em `develop`.
+4. Crie `release/0.3.0` a partir de `develop` e abra um PR para `main`.
+5. Confirme o workflow **Release evals** com três repetições por caso para Codex e Cursor.
+6. Faça o merge em `main`, crie a tag `v0.3.0` e sincronize `main` com `develop`.
 
 A release permanece pendente se o tratamento não superar o baseline ou se qualquer gate obrigatório falhar. Os critérios completos estão em [`evals/README.md`](evals/README.md).
 

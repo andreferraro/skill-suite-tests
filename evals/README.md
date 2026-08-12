@@ -77,6 +77,7 @@ Pré-requisitos:
 - `codex` para Codex;
 - `cursor-agent` para Cursor;
 - `OPENAI_API_KEY` ou `CURSOR_API_KEY` no ambiente;
+- projeto de API com acesso e créditos disponíveis para as chamadas executadas;
 - Node.js, Python e Docker.
 - nome exato do modelo passado por `--model`.
 
@@ -129,6 +130,8 @@ Configure em **Settings > Secrets and variables > Actions**:
 - variables: `CODEX_EVAL_MODEL` e `CURSOR_EVAL_MODEL`.
 
 Os modelos devem usar os nomes exatos aceitos pelas respectivas CLIs. Os workflows entregam cada chave somente ao job do agente correspondente e publicam logs, resultados individuais e o resumo consolidado como artefatos.
+
+Cada execução do Codex cria um `CODEX_HOME` descartável e autentica a CLI com `codex login --with-api-key`. A chave entra pela entrada padrão e fica fora do comando e dos artefatos. Ausência de crédito, autenticação inválida ou falha da CLI são registradas como falhas de execução e bloqueiam o gate.
 
 Também é possível cadastrar pela GitHub CLI. Os comandos de secret solicitam o valor de forma interativa:
 
