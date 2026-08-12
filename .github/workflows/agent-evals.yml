@@ -39,6 +39,7 @@ jobs:
     name: Confirm paid call budget
     runs-on: ubuntu-latest
     outputs:
+      authorized: ${{ steps.plan.outputs.authorized }}
       cases: ${{ steps.plan.outputs.cases }}
     steps:
       - id: plan
@@ -63,10 +64,11 @@ jobs:
             echo "Teto: $expected chamadas de agente"
             echo "Baselines válidos em cache podem reduzir esse total."
           } >> "$GITHUB_STEP_SUMMARY"
+          echo "authorized=$CONFIRM_PAID" >> "$GITHUB_OUTPUT"
           echo "cases=$cases" >> "$GITHUB_OUTPUT"
           if [ "$CONFIRM_PAID" != "true" ]; then
-            echo "Execução paga não autorizada. Marque confirm_paid para continuar." >&2
-            exit 1
+            echo "Prévia concluída. Nenhuma chamada paga foi autorizada."
+            exit 0
           fi
           if [ "$MAX_PAID_CALLS" -ne "$expected" ]; then
             echo "Teto inválido: o caso selecionado exige confirmação de $expected chamadas." >&2
@@ -76,6 +78,7 @@ jobs:
   codex:
     name: Codex (${{ matrix.case }})
     needs: plan
+    if: needs.plan.outputs.authorized == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -152,7 +155,7 @@ jobs:
     name: Aggregate manual gate
     runs-on: ubuntu-latest
     needs: [plan, codex]
-    if: always() && needs.plan.result == 'success'
+    if: always() && needs.plan.result == 'success' && needs.plan.outputs.authorized == 'true'
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6

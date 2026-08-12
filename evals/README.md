@@ -161,7 +161,7 @@ Pushes, pull requests, merges e tags executam somente `quality.yml`. As proteç�
 | Um agente, três casos, três repetições | até 18 | 9 |
 | Dois agentes, três casos, três repetições | até 36 | 18 |
 
-O formulário do workflow mostra e valida o teto antes de liberar os jobs. O runner aplica uma segunda trava. Esses números representam chamadas, não dólares. O custo varia conforme modelo e tokens.
+O formulário do workflow mostra e valida o teto antes de liberar os jobs. Deixe a autorização desmarcada para executar somente a prévia gratuita. O runner aplica uma segunda trava. Esses números representam chamadas, não dólares. O custo varia conforme modelo e tokens.
 
 ### Configuração do repositório
 

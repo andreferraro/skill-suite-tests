@@ -217,7 +217,7 @@ O uso comum acontece dentro do Codex ou do Cursor instalado pelo usuário e segu
 
 Os secrets `OPENAI_API_KEY` e `CURSOR_API_KEY` aparecem apenas nos benchmarks de manutenção. Quem instala a skill para testar um sistema não precisa cadastrar esses secrets.
 
-Os benchmarks pagos nunca são acionados por push, pull request, merge ou release. A execução exige abertura manual do workflow, escolha do escopo, confirmação do teto de chamadas e autorização explícita. O runner também rejeita a execução sem `--max-agent-calls`.
+Os benchmarks pagos nunca são acionados por push, pull request, merge ou release. A execução exige abertura manual do workflow, escolha do escopo, confirmação do teto de chamadas e autorização explícita. Com a autorização desmarcada, o workflow mostra o plano e encerra sem chamar agentes. O runner também rejeita a execução sem `--max-agent-calls`.
 
 | Execução manual | Teto sem cache | Com todos os baselines válidos em cache |
 | --- | ---: | ---: |
