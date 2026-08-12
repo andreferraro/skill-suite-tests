@@ -1,7 +1,6 @@
 # Skill Suite Tests
 
 [![Quality](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml/badge.svg)](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml)
-[![Agent evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml/badge.svg)](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Skill para orientar Codex e Cursor na criação de testes automatizados guiados por risco. Você informa a parte do sistema e o risco relevante. O agente inspeciona a stack, escolhe a menor fronteira capaz de provar o comportamento, implementa os testes, executa a suíte e relata evidências.
@@ -18,15 +17,17 @@ A implementação está disponível no [PR #8](https://github.com/andreferraro/s
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
-| Validação local dos scripts | 46 testes unitários aprovados |
+| Validação local dos scripts | 51 testes unitários aprovados |
 | CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml) |
-| Configuração do GitHub | Os dois secrets e as duas variáveis estão cadastrados |
+| Configuração do GitHub | Os dois secrets e as duas variáveis estão cadastrados; saldo não é inferido dessa configuração |
 | Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635717298) |
 | Eval pareado Cursor | Configurado e pendente do gate de release |
 | Ganho mediano sobre baseline | 0 ponto na última execução |
-| Release `v0.3.0` | Bloqueada até a execução e aprovação dos evals pareados |
+| Release `v0.3.0` | Pendente de uma execução manual e aprovada dos evals pareados |
 
 A [execução 31635717298](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635717298) comprovou o helper de sensibilidade, mas ainda reprovou o gate. Eventos manteve 100. API ficou em 91,25 porque duas chamadas concorrentes não detectaram a serialização enfraquecida. Web ficou em 83,75 porque cobriu a resposta obsoleta e deixou o estado loading sem cenário sensível. A skill passou a exigir contenção real e prova por mecanismo protetivo de alto impacto; o detector também passou a sinalizar estados assíncronos pendentes.
+
+A tentativa seguinte falhou por falta de créditos antes de produzir uma medição válida. Esse incidente revelou o acionamento automático indevido dos benchmarks. Os workflows pagos agora são exclusivamente manuais e limitados.
 
 ## O que esta skill é
 
@@ -214,7 +215,18 @@ python scripts/validate_test_evidence.py test-evidence.json
 
 O uso comum acontece dentro do Codex ou do Cursor instalado pelo usuário e segue o plano ou provedor configurado nessa ferramenta.
 
-Os secrets `OPENAI_API_KEY` e `CURSOR_API_KEY` aparecem apenas nos workflows de manutenção. Eles executam o benchmark pareado no GitHub Actions para medir se a skill supera o mesmo agente sem a skill. Quem instala a skill para testar um sistema não precisa cadastrar esses secrets.
+Os secrets `OPENAI_API_KEY` e `CURSOR_API_KEY` aparecem apenas nos benchmarks de manutenção. Quem instala a skill para testar um sistema não precisa cadastrar esses secrets.
+
+Os benchmarks pagos nunca são acionados por push, pull request, merge ou release. A execução exige abertura manual do workflow, escolha do escopo, confirmação do teto de chamadas e autorização explícita. O runner também rejeita a execução sem `--max-agent-calls`.
+
+| Execução manual | Teto sem cache | Com todos os baselines válidos em cache |
+| --- | ---: | ---: |
+| Codex, um caso, uma repetição | 2 chamadas | 1 chamada |
+| Codex, três casos, uma repetição | 6 chamadas | 3 chamadas |
+| Codex e Cursor, três casos, uma repetição | 12 chamadas | 6 chamadas |
+| Codex e Cursor, três casos, três repetições | 36 chamadas | 18 chamadas |
+
+Uma chamada não tem preço fixo. O valor depende do modelo e dos tokens processados. O teto controla a quantidade de chamadas e evita execuções acidentais; o consumo em moeda deve ser acompanhado nos provedores.
 
 ## Evals
 
@@ -229,6 +241,8 @@ python -m unittest discover -s tests -v
 python scripts/validate_repository.py
 python evals/validate_fixtures.py
 ```
+
+Essa validação não usa agentes nem consome créditos de API.
 
 ## Estrutura
 
@@ -260,13 +274,15 @@ O repositório usa Gitflow:
 - `release/*`: preparação da versão.
 - `hotfix/*`: correções originadas de `main`.
 
-Commits seguem Conventional Commits. Uma release exige qualidade estrutural, fixtures verdes, eval de PR com Codex e eval de release com Codex e Cursor.
+Commits seguem Conventional Commits. Uma release exige qualidade estrutural, fixtures verdes e aprovação manual do benchmark de release com Codex e Cursor.
 
 As branches estão protegidas no GitHub:
 
-- `develop` exige pull request atualizado, checks de qualidade, `Aggregate PR gate` e conversas resolvidas;
-- `main` exige os mesmos controles e também `Aggregate release gate`;
+- `develop` exige pull request atualizado, checks de qualidade e conversas resolvidas;
+- `main` exige os mesmos controles de qualidade;
 - as regras também valem para administradores e bloqueiam force push e exclusão das branches.
+
+Os evals pagos ficaram fora dos checks automáticos obrigatórios. O gate de eficácia continua sendo critério de publicação da versão, executado uma única vez quando a release estiver pronta.
 
 ### Publicação da v0.3.0
 
@@ -274,7 +290,7 @@ Configuração atual em **Settings > Secrets and variables > Actions**:
 
 | Tipo | Nome | Estado |
 | --- | --- | --- |
-| Secret | `OPENAI_API_KEY` | Cadastrado, autenticado e com saldo disponível |
+| Secret | `OPENAI_API_KEY` | Cadastrado; crédito disponível precisa ser conferido no provedor antes de uma execução autorizada |
 | Secret | `CURSOR_API_KEY` | Cadastrado, validação pendente do eval de release |
 | Variable | `CODEX_EVAL_MODEL` | Cadastrada |
 | Variable | `CURSOR_EVAL_MODEL` | Cadastrada |
@@ -283,13 +299,14 @@ As chaves devem ser cadastradas diretamente no GitHub. Evite colocá-las em arqu
 
 Fluxo de publicação:
 
-1. Execute **Agent evals** no PR da feature para `develop`.
-2. Confirme o gate do Codex nos três casos e faça o merge em `develop`.
-3. Crie `release/0.3.0` a partir de `develop` e abra um PR para `main`.
-4. Confirme **Release evals** com três repetições por caso para Codex e Cursor.
-5. Faça o merge em `main`, crie a tag `v0.3.0` e sincronize `main` com `develop`.
+1. Faça o merge da feature em `develop` depois dos checks gratuitos de qualidade.
+2. Crie `release/0.3.0` a partir de `develop` e abra um PR para `main`.
+3. Execute **Manual release evals** com uma repetição para diagnóstico somente quando o código estiver pronto.
+4. Corrija localmente e repita apenas o agente ou caso necessário em **Manual agent evals**.
+5. Execute a certificação final com três repetições por caso para Codex e Cursor uma única vez.
+6. Depois do gate aprovado, faça o merge em `main`, crie a tag `v0.3.0` e sincronize `main` com `develop`.
 
-A release permanece pendente se o tratamento não superar o baseline ou se qualquer gate obrigatório falhar. Os critérios completos estão em [`evals/README.md`](evals/README.md).
+A release permanece pendente se o tratamento não superar o baseline. Os critérios e os tetos de chamadas estão em [`evals/README.md`](evals/README.md).
 
 ## Referências
 

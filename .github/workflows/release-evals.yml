@@ -1,20 +1,85 @@
-name: Release evals
+name: Manual release evals
 
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      agent:
+        description: Agente avaliado.
+        required: true
+        default: both
+        type: choice
+        options:
+          - codex
+          - cursor
+          - both
+      repetitions:
+        description: Uma repetição para diagnóstico; três somente para certificação final.
+        required: true
+        default: "1"
+        type: choice
+        options:
+          - "1"
+          - "3"
+      max_paid_calls:
+        description: Confirme o teto total calculado para a combinação escolhida.
+        required: true
+        default: "12"
+        type: choice
+        options:
+          - "6"
+          - "12"
+          - "18"
+          - "36"
+      confirm_paid:
+        description: Autorizo esta execução paga dentro do teto informado.
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-evals-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: manual-release-evals-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  plan:
+    name: Confirm paid call budget
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate explicit authorization
+        shell: bash
+        env:
+          SELECTED_AGENT: ${{ inputs.agent }}
+          REPETITIONS: ${{ inputs.repetitions }}
+          MAX_PAID_CALLS: ${{ inputs.max_paid_calls }}
+          CONFIRM_PAID: ${{ inputs.confirm_paid }}
+        run: |
+          agent_count=1
+          if [ "$SELECTED_AGENT" = "both" ]; then agent_count=2; fi
+          expected=$((agent_count * 3 * REPETITIONS * 2))
+          {
+            echo "## Plano de chamadas pagas"
+            echo
+            echo "Agente: $SELECTED_AGENT"
+            echo "Repetições: $REPETITIONS"
+            echo "Teto: $expected chamadas de agente"
+            echo "Baselines válidos em cache podem reduzir esse total."
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CONFIRM_PAID" != "true" ]; then
+            echo "Execução paga não autorizada. Marque confirm_paid para continuar." >&2
+            exit 1
+          fi
+          if [ "$MAX_PAID_CALLS" -ne "$expected" ]; then
+            echo "Teto inválido: a combinação selecionada exige confirmação de $expected chamadas." >&2
+            exit 1
+          fi
+
   codex:
     name: Codex (${{ matrix.case }})
+    needs: plan
+    if: inputs.agent == 'codex' || inputs.agent == 'both'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,27 +101,57 @@ jobs:
         run: |
           test -n "$OPENAI_API_KEY"
           test -n "$CODEX_EVAL_MODEL"
+      - id: fingerprint
+        name: Calculate baseline fingerprint
+        shell: bash
+        run: |
+          value=$(python evals/run_eval.py --agent codex --case "${{ matrix.case }}" --model "$CODEX_EVAL_MODEL" --print-baseline-fingerprint)
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+      - id: baseline-cache
+        name: Restore comparable baseline
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: evals/baseline-cache
+          key: baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetitions }}
       - name: Build isolated agent image
         run: docker build --file evals/agent.Dockerfile --tag skill-suite-tests-eval-agent:local .
-      - name: Run paired release eval
+      - id: paired
+        name: Run release eval within the approved ceiling
+        continue-on-error: true
         shell: bash
         run: |
           python evals/run_eval.py \
             --agent codex \
             --case "${{ matrix.case }}" \
-            --repetitions 3 \
+            --repetitions "${{ inputs.repetitions }}" \
             --artifacts evals/artifacts \
+            --baseline-cache evals/baseline-cache \
+            --max-agent-calls "$((2 * ${{ inputs.repetitions }}))" \
             --model "$CODEX_EVAL_MODEL" \
             --agent-container-image skill-suite-tests-eval-agent:local
+      - name: Save new comparable baseline
+        if: always() && steps.baseline-cache.outputs.cache-hit != 'true' && hashFiles('evals/baseline-cache/**') != ''
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: evals/baseline-cache
+          key: baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetitions }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: release-eval-codex-${{ matrix.case }}
           path: evals/artifacts
           retention-days: 30
+      - name: Enforce eval outcome
+        if: always()
+        shell: bash
+        env:
+          EVAL_OUTCOME: ${{ steps.paired.outcome }}
+        run: test "$EVAL_OUTCOME" = "success"
 
   cursor:
     name: Cursor (${{ matrix.case }})
+    needs: plan
+    if: inputs.agent == 'cursor' || inputs.agent == 'both'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -78,30 +173,58 @@ jobs:
         run: |
           test -n "$CURSOR_API_KEY"
           test -n "$CURSOR_EVAL_MODEL"
+      - id: fingerprint
+        name: Calculate baseline fingerprint
+        shell: bash
+        run: |
+          value=$(python evals/run_eval.py --agent cursor --case "${{ matrix.case }}" --model "$CURSOR_EVAL_MODEL" --print-baseline-fingerprint)
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+      - id: baseline-cache
+        name: Restore comparable baseline
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: evals/baseline-cache
+          key: baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetitions }}
       - name: Build isolated agent image
         run: docker build --file evals/agent.Dockerfile --tag skill-suite-tests-eval-agent:local .
-      - name: Run paired release eval
+      - id: paired
+        name: Run release eval within the approved ceiling
+        continue-on-error: true
         shell: bash
         run: |
           python evals/run_eval.py \
             --agent cursor \
             --case "${{ matrix.case }}" \
-            --repetitions 3 \
+            --repetitions "${{ inputs.repetitions }}" \
             --artifacts evals/artifacts \
+            --baseline-cache evals/baseline-cache \
+            --max-agent-calls "$((2 * ${{ inputs.repetitions }}))" \
             --model "$CURSOR_EVAL_MODEL" \
             --agent-container-image skill-suite-tests-eval-agent:local
+      - name: Save new comparable baseline
+        if: always() && steps.baseline-cache.outputs.cache-hit != 'true' && hashFiles('evals/baseline-cache/**') != ''
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: evals/baseline-cache
+          key: baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetitions }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: release-eval-cursor-${{ matrix.case }}
           path: evals/artifacts
           retention-days: 30
+      - name: Enforce eval outcome
+        if: always()
+        shell: bash
+        env:
+          EVAL_OUTCOME: ${{ steps.paired.outcome }}
+        run: test "$EVAL_OUTCOME" = "success"
 
   aggregate:
-    name: Aggregate release gate
+    name: Aggregate manual release gate
     runs-on: ubuntu-latest
-    needs: [codex, cursor]
-    if: always()
+    needs: [plan, codex, cursor]
+    if: always() && needs.plan.result == 'success'
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -113,17 +236,25 @@ jobs:
           path: eval-shards
           merge-multiple: true
       - name: Enforce release gate
-        run: >-
-          python evals/aggregate_reports.py
-          --input eval-shards
-          --output release-eval-summary.json
-          --repetitions 3
-          --agent codex
-          --agent cursor
-          --case web-password-reset
-          --case api-payment
-          --case events-order-consumer
-          --enforce-gate
+        shell: bash
+        env:
+          SELECTED_AGENT: ${{ inputs.agent }}
+          REPETITIONS: ${{ inputs.repetitions }}
+        run: |
+          args=(
+            --input eval-shards
+            --output release-eval-summary.json
+            --repetitions "$REPETITIONS"
+            --case web-password-reset
+            --case api-payment
+            --case events-order-consumer
+          )
+          if [ "$SELECTED_AGENT" = "both" ]; then
+            args+=(--agent codex --agent cursor)
+          else
+            args+=(--agent "$SELECTED_AGENT")
+          fi
+          python evals/aggregate_reports.py "${args[@]}" --enforce-gate
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

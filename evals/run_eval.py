@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -37,6 +38,9 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from validate_test_evidence import validate as validate_evidence  # noqa: E402
 
 
+BASELINE_CACHE_VERSION = "1"
+
+
 def build_test_environment(environment: dict[str, str]) -> dict[str, str]:
     """Keep deterministic test runtime settings without exposing agent credentials."""
     result = environment.copy()
@@ -48,6 +52,109 @@ def build_test_environment(environment: dict[str, str]) -> dict[str, str]:
 def normalize_evidence_text(value: str) -> str:
     normalized = unicodedata.normalize("NFKD", value.lower())
     return "".join(character for character in normalized if not unicodedata.combining(character))
+
+
+def planned_agent_calls(
+    agent_count: int,
+    case_count: int,
+    repetitions: int,
+    *,
+    cached_baselines: int = 0,
+) -> int:
+    """Return the paid call count after valid baseline cache hits are applied."""
+    total_pairs = agent_count * case_count * repetitions
+    if cached_baselines < 0 or cached_baselines > total_pairs:
+        raise ValueError("cached baseline count is outside the evaluation matrix")
+    return total_pairs * 2 - cached_baselines
+
+
+def baseline_fingerprint(case: dict[str, Any], agent: str, model: str) -> str:
+    """Fingerprint everything that can change a baseline result."""
+    digest = hashlib.sha256()
+    digest.update(f"baseline-cache-v{BASELINE_CACHE_VERSION}\0{agent}\0{model}\0".encode())
+    paths = [
+        EVAL_ROOT / "agent.Dockerfile",
+        EVAL_ROOT / "cases.json",
+        EVAL_ROOT / "eval_lib.py",
+        EVAL_ROOT / "run_eval.py",
+        EVAL_ROOT / "validate_fixtures.py",
+        EVAL_ROOT / case["workspace"],
+        EVAL_ROOT / case["reference_tests"],
+        REPO_ROOT / "schemas" / "test-evidence.v1.json",
+        REPO_ROOT / "scripts" / "validate_test_evidence.py",
+    ]
+    files: list[Path] = []
+    for path in paths:
+        files.extend(sorted(item for item in path.rglob("*") if item.is_file()) if path.is_dir() else [path])
+    for path in sorted(set(files), key=lambda item: item.as_posix()):
+        digest.update(path.relative_to(REPO_ROOT).as_posix().encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def read_cached_baseline(
+    cache_root: Path,
+    fingerprint: str,
+    agent: str,
+    case_id: str,
+    repetition: int,
+    model: str,
+) -> tuple[dict[str, Any], Path] | None:
+    run_id = f"{agent}-{case_id}-baseline-{repetition}"
+    cached_artifacts = cache_root / fingerprint / run_id
+    result_path = cached_artifacts / "result.json"
+    if not result_path.is_file():
+        return None
+    try:
+        result = json.loads(result_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    expected = {
+        "run_id": run_id,
+        "agent": agent,
+        "case": case_id,
+        "mode": "baseline",
+        "repetition": repetition,
+        "model": model,
+        "dry_run": False,
+        "agent_exit_code": 0,
+    }
+    if any(result.get(key) != value for key, value in expected.items()):
+        return None
+    return result, cached_artifacts
+
+
+def restore_cached_baseline(
+    cached: tuple[dict[str, Any], Path],
+    artifact_root: Path,
+) -> dict[str, Any]:
+    result, cached_artifacts = cached
+    destination = artifact_root / result["run_id"]
+    shutil.copytree(cached_artifacts, destination, dirs_exist_ok=True)
+    restored = {**result, "baseline_reused": True}
+    (destination / "result.json").write_text(
+        json.dumps(restored, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return restored
+
+
+def cache_baseline(
+    result: dict[str, Any],
+    artifact_root: Path,
+    cache_root: Path,
+    fingerprint: str,
+) -> None:
+    if result.get("agent_exit_code") != 0 or result.get("dry_run"):
+        return
+    source = artifact_root / result["run_id"]
+    destination = cache_root / fingerprint / result["run_id"]
+    if destination.exists():
+        return
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(source, destination)
 
 
 def covered_risk_ids(case: dict[str, Any], evidence_text: str) -> list[str]:
@@ -641,6 +748,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run the agent in this prebuilt container image with only the fixture mounted",
     )
     parser.add_argument("--artifacts", type=Path, default=EVAL_ROOT / "artifacts")
+    parser.add_argument(
+        "--baseline-cache",
+        type=Path,
+        help="Reuse valid baseline artifacts and save new baselines under this directory",
+    )
+    parser.add_argument(
+        "--max-agent-calls",
+        type=int,
+        help="Required paid-call ceiling. The run is rejected before an agent starts if it would exceed this value",
+    )
+    parser.add_argument(
+        "--print-baseline-fingerprint",
+        action="store_true",
+        help="Print the cache fingerprint for exactly one agent and case, then exit",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--enforce-gate", action="store_true")
     return parser
@@ -652,26 +774,74 @@ def main() -> int:
     args = build_parser().parse_args()
     if args.repetitions < 1:
         raise SystemExit("--repetitions must be at least 1")
+    if args.max_agent_calls is not None and args.max_agent_calls < 0:
+        raise SystemExit("--max-agent-calls cannot be negative")
     if not args.dry_run and not args.model:
         raise SystemExit("--model is required for comparable eval runs")
     cases = select_cases(args.cases)
+    if args.print_baseline_fingerprint:
+        if not args.model:
+            raise SystemExit("--model is required to calculate a baseline fingerprint")
+        if len(args.agent) != 1 or len(cases) != 1:
+            raise SystemExit("--print-baseline-fingerprint requires exactly one agent and one case")
+        print(baseline_fingerprint(cases[0], args.agent[0], args.model))
+        return 0
+
+    cached: dict[tuple[str, str, int], tuple[dict[str, Any], Path]] = {}
+    if args.baseline_cache and not args.dry_run:
+        for agent in args.agent:
+            for case in cases:
+                fingerprint = baseline_fingerprint(case, agent, args.model)
+                for repetition in range(1, args.repetitions + 1):
+                    hit = read_cached_baseline(
+                        args.baseline_cache,
+                        fingerprint,
+                        agent,
+                        case["id"],
+                        repetition,
+                        args.model,
+                    )
+                    if hit:
+                        cached[(agent, case["id"], repetition)] = hit
+
+    call_count = planned_agent_calls(
+        len(args.agent),
+        len(cases),
+        args.repetitions,
+        cached_baselines=len(cached),
+    )
+    if not args.dry_run:
+        if args.max_agent_calls is None:
+            raise SystemExit("--max-agent-calls is required for paid evals")
+        if call_count > args.max_agent_calls:
+            raise SystemExit(
+                f"planned paid calls ({call_count}) exceed --max-agent-calls ({args.max_agent_calls})"
+            )
+    print(f"Paid agent calls planned: {call_count}; cached baselines: {len(cached)}")
+
     results = []
     for agent in args.agent:
         for case in cases:
+            fingerprint = baseline_fingerprint(case, agent, args.model or "agent-default")
             for repetition in range(1, args.repetitions + 1):
                 for mode in ("baseline", "skill"):
-                    results.append(
-                        run_once(
-                            case,
-                            agent,
-                            mode,
-                            repetition,
-                            args.model,
-                            args.artifacts,
-                            args.dry_run,
-                            args.agent_container_image,
-                        )
+                    cache_key = (agent, case["id"], repetition)
+                    if mode == "baseline" and cache_key in cached:
+                        results.append(restore_cached_baseline(cached[cache_key], args.artifacts))
+                        continue
+                    result = run_once(
+                        case,
+                        agent,
+                        mode,
+                        repetition,
+                        args.model,
+                        args.artifacts,
+                        args.dry_run,
+                        args.agent_container_image,
                     )
+                    results.append(result)
+                    if mode == "baseline" and args.baseline_cache:
+                        cache_baseline(result, args.artifacts, args.baseline_cache, fingerprint)
     report = aggregate(
         results,
         repetitions=args.repetitions,

@@ -98,6 +98,7 @@ python evals/run_eval.py \
   --agent codex \
   --case web-password-reset \
   --repetitions 1 \
+  --max-agent-calls 2 \
   --model <modelo-codex> \
   --agent-container-image skill-suite-tests-eval-agent:local \
   --enforce-gate
@@ -109,6 +110,7 @@ Release completa:
 python evals/run_eval.py \
   --agent codex \
   --repetitions 3 \
+  --max-agent-calls 18 \
   --model <modelo-codex> \
   --agent-container-image skill-suite-tests-eval-agent:local \
   --artifacts evals/artifacts/codex
@@ -116,6 +118,7 @@ python evals/run_eval.py \
 python evals/run_eval.py \
   --agent cursor \
   --repetitions 3 \
+  --max-agent-calls 18 \
   --model <modelo-cursor> \
   --agent-container-image skill-suite-tests-eval-agent:local \
   --artifacts evals/artifacts/cursor
@@ -134,15 +137,31 @@ python evals/aggregate_reports.py \
 
 Use `--dry-run` para conferir comandos e isolamento sem consumir APIs.
 
+Uma execução real exige `--max-agent-calls`. O runner calcula o total antes de iniciar qualquer agente e encerra se ultrapassar o teto. Sem cache, cada par baseline e skill usa duas chamadas por agente, caso e repetição.
+
+Use `--baseline-cache evals/baseline-cache` para reaproveitar o baseline quando agente, modelo, fixture, prompt, contrato, grader, mutantes, harness e imagem das CLIs continuarem equivalentes. A impressão digital invalida o cache quando qualquer um desses elementos muda. Alterações exclusivas na skill preservam o baseline e reduzem o próximo par a uma chamada de tratamento.
+
 Sem `--agent-container-image`, o runner usa as CLIs instaladas no host. Esse modo serve para diagnóstico local e exige `codex` ou `cursor-agent` no `PATH`.
 
 ## GitHub Actions
 
 - `quality.yml`: estrutura, scripts, schema, links, segredos, fixtures e mutantes.
-- `agent-evals.yml`: Codex em todo pull request, uma repetição por caso.
-- `release-evals.yml`: Codex e Cursor, três repetições por caso, em pull requests para `main` e por execução manual.
+- `agent-evals.yml`: execução manual e seletiva do Codex, com um caso ou os três.
+- `release-evals.yml`: execução manual de Codex, Cursor ou ambos, com uma ou três repetições.
 
-As proteções de `develop` exigem o gate agregado de PR. As proteções de `main` exigem os gates agregados de PR e release. Ambos também dependem dos cinco checks de qualidade.
+Pushes, pull requests, merges e tags executam somente `quality.yml`. As proteções de `develop` e `main` dependem dos cinco checks gratuitos de qualidade. Os evals pagos são um gate manual de publicação, separado do CI cotidiano.
+
+### Tetos de chamadas
+
+| Escopo | Primeira execução | Com todos os baselines válidos em cache |
+| --- | ---: | ---: |
+| Um agente, um caso, uma repetição | até 2 | 1 |
+| Um agente, três casos, uma repetição | até 6 | 3 |
+| Dois agentes, três casos, uma repetição | até 12 | 6 |
+| Um agente, três casos, três repetições | até 18 | 9 |
+| Dois agentes, três casos, três repetições | até 36 | 18 |
+
+O formulário do workflow mostra e valida o teto antes de liberar os jobs. O runner aplica uma segunda trava. Esses números representam chamadas, não dólares. O custo varia conforme modelo e tokens.
 
 ### Configuração do repositório
 
@@ -174,11 +193,11 @@ Não coloque chaves em `--body`, arquivos versionados, logs ou mensagens do pull
 
 ### Fluxo da v0.3.0
 
-1. Reexecute `agent-evals.yml` no PR da feature para `develop`.
-2. Exija aprovação do Codex nos três casos antes do merge.
-3. Crie `release/0.3.0` a partir de `develop`.
-4. Abra o PR da release para `main` para executar Codex e Cursor três vezes por caso.
-5. Publique a tag somente depois da aprovação do gate agregado.
+1. Use os checks gratuitos em cada pull request para validar scripts, fixtures, mutantes, links e segredos.
+2. Faça uma execução manual de diagnóstico somente quando a release estiver pronta.
+3. Se houver falha, ajuste localmente e execute apenas o caso ou agente afetado.
+4. Rode três repetições para Codex e Cursor uma única vez como certificação final.
+5. Publique a tag somente depois da aprovação do resumo agregado.
 6. Sincronize a release de `main` para `develop`.
 
 Ausência de credencial ou modelo encerra o workflow no preflight. Falha em score, mutation score, cobertura de risco, preservação do código ou evidência válida bloqueia a release.

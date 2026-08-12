@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 import tempfile
 import unittest
@@ -18,15 +19,20 @@ from eval_lib import (  # noqa: E402
     restore_mutation,
     run_command,
     sanitized_environment,
+    select_cases,
 )
 from run_eval import (  # noqa: E402
     aggregate,
+    baseline_fingerprint,
     build_agent_command,
     build_container_command,
     build_eval_prompt,
     build_test_environment,
     covered_risk_ids,
     evaluation_exit_code,
+    planned_agent_calls,
+    read_cached_baseline,
+    restore_cached_baseline,
 )
 
 
@@ -426,6 +432,65 @@ class AggregateTests(unittest.TestCase):
         self.assertEqual(["codex-web-baseline-1"], report["execution_failures"])
         self.assertFalse(report["passed"])
         self.assertEqual(1, evaluation_exit_code(report, enforce_gate=False))
+
+
+class PaidCallGuardTests(unittest.TestCase):
+    def test_counts_paired_calls_and_cached_baselines(self) -> None:
+        self.assertEqual(6, planned_agent_calls(1, 3, 1))
+        self.assertEqual(3, planned_agent_calls(1, 3, 1, cached_baselines=3))
+        self.assertEqual(36, planned_agent_calls(2, 3, 3))
+
+    def test_rejects_impossible_cache_count(self) -> None:
+        with self.assertRaises(ValueError):
+            planned_agent_calls(1, 1, 1, cached_baselines=2)
+
+    def test_baseline_cache_requires_matching_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            run_id = "codex-web-baseline-1"
+            cached = root / "fingerprint" / run_id
+            cached.mkdir(parents=True)
+            document = {
+                "run_id": run_id,
+                "agent": "codex",
+                "case": "web",
+                "mode": "baseline",
+                "repetition": 1,
+                "model": "model-a",
+                "dry_run": False,
+                "agent_exit_code": 0,
+            }
+            (cached / "result.json").write_text(json.dumps(document), encoding="utf-8")
+
+            self.assertIsNotNone(
+                read_cached_baseline(root, "fingerprint", "codex", "web", 1, "model-a")
+            )
+            self.assertIsNone(
+                read_cached_baseline(root, "fingerprint", "codex", "web", 1, "model-b")
+            )
+
+    def test_restored_baseline_is_marked_and_copied(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cached = root / "cache" / "run"
+            cached.mkdir(parents=True)
+            result_document = {"run_id": "run", "agent_exit_code": 0}
+            (cached / "result.json").write_text(json.dumps(result_document), encoding="utf-8")
+            (cached / "evidence.txt").write_text("kept", encoding="utf-8")
+
+            restored = restore_cached_baseline((result_document, cached), root / "artifacts")
+
+            self.assertTrue(restored["baseline_reused"])
+            self.assertEqual("kept", (root / "artifacts" / "run" / "evidence.txt").read_text())
+
+    def test_fingerprint_changes_with_agent_or_model(self) -> None:
+        case = select_cases(["web-password-reset"])[0]
+        codex = baseline_fingerprint(case, "codex", "model-a")
+        cursor = baseline_fingerprint(case, "cursor", "model-a")
+        other_model = baseline_fingerprint(case, "codex", "model-b")
+
+        self.assertNotEqual(codex, cursor)
+        self.assertNotEqual(codex, other_model)
 
 
 class SkillPackagingTests(unittest.TestCase):
