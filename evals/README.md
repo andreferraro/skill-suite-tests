@@ -2,6 +2,17 @@
 
 O benchmark mede se a skill melhora testes gerados por Codex e Cursor. Baseline e tratamento recebem o mesmo pedido curto, o mesmo projeto e o mesmo contrato de evidência. Os riscos esperados, graders e mutantes ficam fora do workspace entregue ao agente. Assim, o benchmark mede descoberta e tratamento de riscos, sem entregar a resposta no prompt.
 
+## Certificação publicada
+
+A `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andreferraro/skill-suite-tests/commit/7da3f5c243c80b259c330335fe29adab9e80da0f), com três repetições para Codex e Cursor em cada caso. O [relatório consolidado](results/v0.3.0-certification.json) passou o gate com mediana da skill de 100/100 e ganho mediano de 16,875 pontos.
+
+| Agente | API | Eventos | Web | Aprovações críticas com a skill |
+| --- | ---: | ---: | ---: | --- |
+| Codex | 100 | 100 | 96,25 | 3/3, 2/3 e 2/3 |
+| Cursor | 100 | 100 | 96,25 | 3/3, 3/3 e 3/3 |
+
+As notas são medianas. O relatório contém os baselines, ganhos e links para todos os runs. Resultados individuais reprovados permanecem registrados e contam na consolidação.
+
 ## Casos
 
 | Caso | Stack | Riscos obrigatórios |

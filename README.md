@@ -1,6 +1,7 @@
 # Skill Suite Tests
 
 [![Quality](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml/badge.svg)](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml)
+[![Certification: v0.3.0 passed](https://img.shields.io/badge/certification-v0.3.0%20passed-2ea44f)](evals/results/v0.3.0-certification.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Skill para orientar Codex e Cursor na criação de testes automatizados guiados por risco. Você informa a parte do sistema e o risco relevante. O agente inspeciona a stack, escolhe a menor fronteira capaz de provar o comportamento, implementa os testes, executa a suíte e relata evidências.
@@ -11,23 +12,32 @@ Skill para orientar Codex e Cursor na criação de testes automatizados guiados 
 
 ## Estado da v0.3.0
 
-A implementação foi integrada em `develop` pelo [PR #8](https://github.com/andreferraro/skill-suite-tests/pull/8). A release candidate está no [PR #9](https://github.com/andreferraro/skill-suite-tests/pull/9). A tag `v0.3.0` será criada depois que Codex e Cursor passarem os gates definidos para a release.
+A versão `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andreferraro/skill-suite-tests/commit/7da3f5c243c80b259c330335fe29adab9e80da0f) e publicada pelo [PR #9](https://github.com/andreferraro/skill-suite-tests/pull/9). O [relatório consolidado](evals/results/v0.3.0-certification.json) preserva as medianas, os gates e os links para as execuções reais.
 
-| Evidência | Estado atual |
+| Evidência | Resultado |
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
-| Validação local dos scripts | 51 testes unitários aprovados |
+| Validação local dos scripts | 55 testes unitários aprovados |
 | CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml) |
-| Configuração do GitHub | Os dois secrets e as duas variáveis estão cadastrados; saldo não é inferido dessa configuração |
-| Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635717298) |
-| Eval pareado Cursor | Configurado e pendente do gate de release |
-| Ganho mediano sobre baseline | 0 ponto na última execução |
-| Release `v0.3.0` | [PR #9](https://github.com/andreferraro/skill-suite-tests/pull/9) em draft, pendente de certificação manual |
+| Certificação Codex | 3 repetições por caso, gate agregado aprovado |
+| Certificação Cursor | 3 repetições por caso, gate agregado aprovado |
+| Mediana da skill | 100/100 |
+| Ganho mediano sobre baseline | 16,875 pontos |
+| Release | `v0.3.0`, certificada e publicada pelo PR #9 |
 
-A [execução 31635717298](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635717298) comprovou o helper de sensibilidade, mas ainda reprovou o gate. Eventos manteve 100. API ficou em 91,25 porque duas chamadas concorrentes não detectaram a serialização enfraquecida. Web ficou em 83,75 porque cobriu a resposta obsoleta e deixou o estado loading sem cenário sensível. A skill passou a exigir contenção real e prova por mecanismo protetivo de alto impacto; o detector também passou a sinalizar estados assíncronos pendentes.
+### Baseline versus skill
 
-A tentativa seguinte falhou por falta de créditos antes de produzir uma medição válida. Esse incidente revelou o acionamento automático indevido dos benchmarks. Os workflows pagos agora são exclusivamente manuais e limitados.
+| Agente | Caso | Baseline | Com a skill | Ganho |
+| --- | --- | ---: | ---: | ---: |
+| Codex | Pagamento | 87,5 | 100 | +12,5 |
+| Codex | Consumidor de pedidos | 100 | 100 | 0 |
+| Codex | Recuperação de senha | 31,25 | 96,25 | +65 |
+| Cursor | Pagamento | 78,75 | 100 | +21,25 |
+| Cursor | Consumidor de pedidos | 96,25 | 100 | +3,75 |
+| Cursor | Recuperação de senha | 27,5 | 96,25 | +68,75 |
+
+Os valores são medianas de três repetições por agente, caso e modo. A certificação exige aprovação crítica em pelo menos duas repetições. As falhas individuais continuam disponíveis nos artefatos dos runs e participam da mediana.
 
 ## O que esta skill é
 
@@ -47,7 +57,7 @@ Framework de testes autônomo, runner e infraestrutura própria ficam fora do es
 | Validado por fixture e mutações | Node.js, TypeScript, Vitest, RabbitMQ, PostgreSQL e Testcontainers | Consumidor de pedidos |
 | Adaptável | Outros frameworks, linguagens e plataformas | Sem benchmark publicado |
 
-O status validado nesta tabela cobre os fixtures e os 12 mutantes. A eficácia do agente com a skill será comprovada quando os evals pareados superarem o baseline.
+O suporte validado cobre as três fixtures, os 12 mutantes e os evals pareados da `v0.3.0`. Outros ecossistemas continuam como suporte adaptável, sem benchmark publicado.
 
 ## O que pode ser testado
 
@@ -284,29 +294,25 @@ As branches estão protegidas no GitHub:
 
 Os evals pagos ficaram fora dos checks automáticos obrigatórios. O gate de eficácia continua sendo critério de publicação da versão, executado uma única vez quando a release estiver pronta.
 
-### Publicação da v0.3.0
+### Certificação da v0.3.0
 
 Configuração atual em **Settings > Secrets and variables > Actions**:
 
 | Tipo | Nome | Estado |
 | --- | --- | --- |
-| Secret | `OPENAI_API_KEY` | Cadastrado; crédito disponível precisa ser conferido no provedor antes de uma execução autorizada |
-| Secret | `CURSOR_API_KEY` | Cadastrado, validação pendente do eval de release |
-| Variable | `CODEX_EVAL_MODEL` | Cadastrada |
-| Variable | `CURSOR_EVAL_MODEL` | Cadastrada |
+| Secret | `OPENAI_API_KEY` | Validado na certificação Codex |
+| Secret | `CURSOR_API_KEY` | Validado na certificação Cursor |
+| Variable | `CODEX_EVAL_MODEL` | Validada na certificação Codex |
+| Variable | `CURSOR_EVAL_MODEL` | Validada na certificação Cursor |
 
 As chaves devem ser cadastradas diretamente no GitHub. Evite colocá-las em arquivos, comandos com valor literal, commits ou mensagens do PR.
 
-Fluxo de publicação:
+Execuções que compõem a certificação:
 
-1. Faça o merge da feature em `develop` depois dos checks gratuitos de qualidade.
-2. Crie `release/0.3.0` a partir de `develop` e abra um PR para `main`.
-3. Execute **Manual release evals** com uma repetição para diagnóstico somente quando o código estiver pronto.
-4. Corrija localmente e repita apenas o agente ou caso necessário em **Manual agent evals**.
-5. Execute a certificação final com três repetições por caso para Codex e Cursor uma única vez.
-6. Depois do gate aprovado, faça o merge em `main`, crie a tag `v0.3.0` e sincronize `main` com `develop`.
+- Codex: [repetição 1](https://github.com/andreferraro/skill-suite-tests/actions/runs/31648288379), [repetição 2](https://github.com/andreferraro/skill-suite-tests/actions/runs/31648786954) e [repetição 3](https://github.com/andreferraro/skill-suite-tests/actions/runs/31649260230).
+- Cursor: [repetição 1](https://github.com/andreferraro/skill-suite-tests/actions/runs/31649784413), [repetição 2](https://github.com/andreferraro/skill-suite-tests/actions/runs/31650136006) e [repetição 3](https://github.com/andreferraro/skill-suite-tests/actions/runs/31650494601).
 
-A release permanece pendente se o tratamento não superar o baseline. Os critérios e os tetos de chamadas estão em [`evals/README.md`](evals/README.md).
+Os runs foram executados no commit certificado e consolidados pelo mesmo agregador usado no gate de release. Repetir a certificação exige uma nova decisão explícita de custo. Os critérios e os tetos de chamadas estão em [`evals/README.md`](evals/README.md).
 
 ## Referências
 
