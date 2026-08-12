@@ -17,6 +17,7 @@ from eval_lib import (
     EVAL_ROOT,
     REPO_ROOT,
     apply_mutation,
+    copy_artifact_paths,
     copy_eval_contract,
     copy_workspace,
     hash_paths,
@@ -126,6 +127,7 @@ def build_container_command(
     container_home.mkdir(parents=True, exist_ok=True)
     (container_home / ".codex").mkdir(exist_ok=True)
     (container_home / ".cache").mkdir(exist_ok=True)
+    (container_home / "python-site").mkdir(exist_ok=True)
     uid = os.getuid() if hasattr(os, "getuid") else None
     gid = os.getgid() if hasattr(os, "getgid") else None
 
@@ -153,7 +155,7 @@ def build_container_command(
         "--env",
         "PLAYWRIGHT_BROWSERS_PATH=/ms-playwright",
         "--env",
-        "PYTHONPATH=/workspace/.agent-site",
+        "PYTHONPATH=/home/eval/python-site",
     ]
     if uid is not None and gid is not None:
         command.extend(["--user", f"{uid}:{gid}"])
@@ -184,7 +186,7 @@ def prepare_container_workspace(
             "--no-deps",
             "--require-hashes",
             "--target",
-            "/workspace/.agent-site",
+            "/home/eval/python-site",
             "-r",
             "/workspace/requirements.lock",
         ],
@@ -419,6 +421,11 @@ def run_once(
 
         grade = grade_workspace(case, workspace, production_before, manifests_before, artifacts)
         grade["critical_pass"] = grade["critical_pass"] and agent_result.passed
+        copy_artifact_paths(
+            workspace,
+            artifacts,
+            case.get("artifact_paths", ["tests", "test-evidence.json"]),
+        )
         result = {
             "run_id": run_id,
             "agent": agent,

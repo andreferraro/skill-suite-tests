@@ -99,6 +99,18 @@ class DetectTestContextTests(unittest.TestCase):
             self.assertEqual("adaptable", result["support_status"])
             self.assertEqual([], result["technologies"])
 
+    def test_ignores_agent_python_dependencies(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            dependency = root / ".agent-site" / "fake_package" / "tests"
+            dependency.mkdir(parents=True)
+            (dependency / "test_postgres.py").write_text("import redis\n", encoding="utf-8")
+
+            result = detect(root)
+
+            self.assertEqual([], result["test_files"])
+            self.assertEqual([], result["databases"])
+
     def test_jest_dom_does_not_imply_jest_runner(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

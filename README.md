@@ -18,15 +18,15 @@ A implementação está disponível no [PR #8](https://github.com/andreferraro/s
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
-| Validação local dos scripts | 31 testes unitários aprovados |
+| Validação local dos scripts | 36 testes unitários aprovados |
 | CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml) |
 | Configuração do GitHub | Os dois secrets e as duas variáveis estão cadastrados |
-| Eval pareado Codex | [Autenticação aprovada, execução bloqueada por ausência de créditos na API](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml) |
+| Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31631643026) |
 | Eval pareado Cursor | Configurado e pendente do gate de release |
-| Ganho sobre baseline | Sem resultado publicado |
+| Ganho sobre baseline | 0 ponto na última execução |
 | Release `v0.3.0` | Bloqueada até a execução e aprovação dos evals pareados |
 
-O Codex CLI aceitou a chave em um `CODEX_HOME` descartável e tentou iniciar as seis execuções pareadas. A API encerrou as chamadas por ausência de créditos antes da execução dos pedidos. Por isso, ainda não existe resultado válido de baseline, tratamento ou ganho. O histórico verificável fica nos artefatos e resumos dos workflows [Agent evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml) e [Release evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/release-evals.yml).
+A [execução 31631643026](https://github.com/andreferraro/skill-suite-tests/actions/runs/31631643026) concluiu baseline e tratamento nos três casos. API marcou 90 pontos nos dois modos. Web e eventos marcaram 35 pontos nos dois modos. O ganho ficou em zero e bloqueou a release. Os artefatos revelaram falso positivo na preservação de produção, suíte Web incompleta e teardown instável no teste com infraestrutura. As correções seguem pelo mesmo gate, sem alterar a pontuação mínima.
 
 ## O que esta skill é
 

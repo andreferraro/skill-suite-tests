@@ -32,7 +32,7 @@ Tratar outros ecossistemas como **adaptáveis**. Reutilizar a stack encontrada e
 
 ## Fluxo obrigatório
 
-1. **Descobrir o sistema.** Examinar implementação, contratos, testes, fixtures, CI e infraestrutura. Se Python estiver disponível, resolver o diretório desta skill a partir do `SKILL.md` carregado e executar `python <skill-root>/scripts/detect_test_context.py --root <projeto> --json` como inventário inicial. Confirmar o resultado no código.
+1. **Descobrir o sistema.** Examinar implementação, contratos, testes, fixtures, CI e infraestrutura. Inventariar os comandos canônicos de teste e checks definidos em manifests e CI, separando suítes obrigatórias de suítes opt-in. Se Python estiver disponível, resolver o diretório desta skill a partir do `SKILL.md` carregado e executar `python <skill-root>/scripts/detect_test_context.py --root <projeto> --json` como inventário inicial. Confirmar o resultado no código.
 2. **Fixar a base.** Registrar requisito, critério de aceite, contrato, bug, risco ou comportamento aceito que sustenta cada cenário. Marcar lacunas como `<definir>`.
 3. **Classificar o pedido.** Escolher propósito, nível, atributo e técnica. Ler [tipos-de-teste.md](references/tipos-de-teste.md) quando houver dúvida real entre abordagens.
 4. **Delimitar a fronteira.** Declarar navegador, processo, serviço, banco, broker e dependências reais, containerizados, virtualizados ou simulados. Preservar real a fronteira que precisa ser provada.
@@ -41,7 +41,7 @@ Tratar outros ecossistemas como **adaptáveis**. Reutilizar a stack encontrada e
 7. **Projetar o conjunto mínimo.** Para cada cenário, definir risco, precondições, estímulo, dados, oráculo, isolamento, cleanup e evidência esperada.
 8. **Implementar.** Seguir convenções locais e manter a mudança pequena. Adicionar dependência somente diante de lacuna comprovada.
 9. **Provar sensibilidade.** Confirmar que o teste detecta a quebra declarada por reprodução anterior, controle negativo, fixture dirigida ou mutação local temporária e reversível.
-10. **Executar em camadas.** Rodar o teste criado, a suíte relacionada e checks estáticos. Executar cenários intensivos, destrutivos ou externos somente com autorização adequada.
+10. **Executar em camadas.** Rodar o teste criado, o comando canônico que inclui a suíte alterada, a suíte mais ampla configurada e os checks estáticos aplicáveis. Não substituir um comando obrigatório por outro mais estreito. Tratar falha, timeout, hook pendente e `no tests found` como resultado incompleto a diagnosticar e corrigir. Executar cenários intensivos, destrutivos ou externos somente com autorização adequada.
 11. **Relatar evidências.** Informar classificação, base, arquivos, cenários, comandos, resultados, limitações e pendências.
 
 Consultar [bases-tecnicas.md](references/bases-tecnicas.md) quando protocolo, acessibilidade, segurança, performance ou resiliência depender de norma externa.
@@ -52,6 +52,7 @@ Consultar [bases-tecnicas.md](references/bases-tecnicas.md) quando protocolo, ac
 
 - Testar comportamento observável, interação, navegação, estado, acessibilidade e integração.
 - Preferir componente para lógica local e browser real para jornada, layout e comportamento nativo.
+- Quando o projeto já incluir uma suíte de browser no comando canônico e o risco atravessar essa fronteira, criar e executar o teste de browser necessário para manter a suíte completa válida.
 - Manter asserções funcionais junto de screenshots, vídeos ou traces.
 - Exigir baseline aprovada e tolerância explícita para regressão visual.
 
@@ -66,6 +67,8 @@ Consultar [bases-tecnicas.md](references/bases-tecnicas.md) quando protocolo, ac
 - Correlacionar estímulo e efeito por identificadores estáveis.
 - Aguardar condição observável com timeout e diagnóstico do último estado.
 - Verificar schema, ordering, retry, deduplicação, replay, DLQ e recuperação conforme o contrato.
+- Preservar o gate opt-in das suítes com containers ou serviços. O comando unitário não deve iniciar infraestrutura por efeito colateral.
+- Encerrar consumers, clientes, canais, conexões e containers sequencialmente, em ordem de dependência, com cleanup idempotente e tempo limitado. Não fechar recursos dependentes em paralelo. Confirmar que o processo de teste termina sem hooks pendentes.
 
 ## Gates de qualidade
 
@@ -77,7 +80,7 @@ Concluir somente quando os gates aplicáveis passarem:
 - **G3 Isolamento:** dados, relógio, aleatoriedade, paralelismo e cleanup controlados.
 - **G4 Segurança:** ambiente, identidade, carga, duração e blast radius adequados.
 - **G5 Reprodutibilidade:** comandos, configuração, seed e dependências explícitos.
-- **G6 Validação:** resultados executados registrados e falhas diagnosticadas.
+- **G6 Validação:** comandos canônicos executados, processo encerrado e zero falhas, timeouts ou suítes vazias sem diagnóstico.
 
 ## Regras de projeto
 

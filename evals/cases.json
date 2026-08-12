@@ -12,6 +12,7 @@
       ],
       "test_command": ["npm", "run", "test:all"],
       "production_paths": ["src/"],
+      "artifact_paths": ["tests/", "test-evidence.json"],
       "required_risks": ["loading", "error-announcement", "keyboard-accessibility", "stale-response"],
       "mutations": [
         {
@@ -50,6 +51,7 @@
       ],
       "test_command": ["python", "-m", "pytest", "-q"],
       "production_paths": ["app/"],
+      "artifact_paths": ["tests/", "test-evidence.json"],
       "required_risks": ["idempotency", "concurrency", "validation", "rollback"],
       "mutations": [
         {
@@ -89,6 +91,7 @@
       "test_command": ["npm", "test", "--", "--run"],
       "extended_test_command": ["npm", "run", "test:infra"],
       "production_paths": ["src/"],
+      "artifact_paths": ["tests/", "test-evidence.json"],
       "required_risks": ["deduplication", "retry", "dlq", "ordering-correlation"],
       "mutations": [
         {

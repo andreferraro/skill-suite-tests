@@ -89,7 +89,7 @@ docker build \
   .
 ```
 
-A imagem fixa as versões do Codex CLI e do Cursor Agent CLI. O pacote do Cursor também é verificado por SHA-256. O agente recebe dois mounts graváveis: a fixture e um diretório home descartável. O repositório, os graders e os mutantes ficam fora do contêiner.
+A imagem fixa as versões do Codex CLI e do Cursor Agent CLI. O pacote do Cursor também é verificado por SHA-256. O agente recebe dois mounts graváveis: a fixture e um diretório home descartável. Dependências Python exclusivas da execução ficam no home, fora da árvore analisada. O repositório, os graders e os mutantes ficam fora do contêiner.
 
 Codex em um caso:
 
@@ -154,6 +154,8 @@ Configure em **Settings > Secrets and variables > Actions**:
 Essa configuração é exclusiva da manutenção do benchmark no GitHub Actions. Instalar ou usar a skill no Codex ou Cursor não depende desses secrets e variables.
 
 Os modelos devem usar os nomes exatos aceitos pelas respectivas CLIs. Os workflows entregam cada chave somente ao job do agente correspondente e publicam logs, resultados individuais e o resumo consolidado como artefatos.
+
+Cada resultado preserva em `workspace-output` os testes gerados e o `test-evidence.json`. Isso permite auditar a nota sem expor o workspace temporário, os graders ou os mutantes ao agente.
 
 Cada execução cria um home descartável dentro do contêiner. O Codex autentica com `codex login --with-api-key`; a chave entra pela entrada padrão e fica fora do comando e dos artefatos. O Cursor recebe somente `CURSOR_API_KEY`. Ausência de crédito, autenticação inválida ou falha da CLI são registradas como falhas de execução e bloqueiam o gate.
 

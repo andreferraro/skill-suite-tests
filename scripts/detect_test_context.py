@@ -14,6 +14,7 @@ from typing import Iterable
 IGNORED_DIRS = {
     ".git",
     ".agents",
+    ".agent-site",
     ".claude",
     ".codex",
     ".cursor",

@@ -13,6 +13,15 @@ from typing import Any, Iterable
 EVAL_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = EVAL_ROOT.parent
 
+GENERATED_PATH_PARTS = {
+    ".coverage",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    "__pycache__",
+}
+GENERATED_FILE_SUFFIXES = {".pyc", ".pyo"}
+
 
 @dataclass(frozen=True)
 class CommandResult:
@@ -136,10 +145,34 @@ def hash_paths(workspace: Path, prefixes: list[str]) -> dict[str, str]:
             continue
         paths = [base] if base.is_file() else list(base.rglob("*"))
         for path in paths:
-            if path.is_file():
+            relative_parts = path.relative_to(workspace).parts
+            generated = (
+                any(part in GENERATED_PATH_PARTS for part in relative_parts)
+                or path.suffix.lower() in GENERATED_FILE_SUFFIXES
+            )
+            if path.is_file() and not generated:
                 relative = path.relative_to(workspace).as_posix()
                 hashes[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
     return hashes
+
+
+def copy_artifact_paths(workspace: Path, artifacts: Path, prefixes: list[str]) -> None:
+    """Preserve generated tests and evidence before the disposable workspace is removed."""
+    destination_root = artifacts / "workspace-output"
+    for prefix in prefixes:
+        source = workspace / prefix
+        if not source.exists():
+            continue
+        paths = [source] if source.is_file() else list(source.rglob("*"))
+        for path in paths:
+            if not path.is_file():
+                continue
+            relative = path.relative_to(workspace)
+            if any(part in GENERATED_PATH_PARTS or part == "node_modules" for part in relative.parts):
+                continue
+            destination = destination_root / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, destination)
 
 
 def manifest_hashes(workspace: Path) -> dict[str, str]:

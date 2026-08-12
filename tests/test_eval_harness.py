@@ -10,7 +10,15 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "evals"))
 
-from eval_lib import apply_mutation, install_skill, restore_mutation, run_command, sanitized_environment  # noqa: E402
+from eval_lib import (  # noqa: E402
+    apply_mutation,
+    copy_artifact_paths,
+    hash_paths,
+    install_skill,
+    restore_mutation,
+    run_command,
+    sanitized_environment,
+)
 from run_eval import aggregate, build_agent_command, build_container_command, evaluation_exit_code  # noqa: E402
 
 
@@ -53,6 +61,42 @@ class MutationTests(unittest.TestCase):
             mutation = {"id": "missing", "file": "module.py", "search": "absent", "replace": "value"}
             with self.assertRaises(ValueError):
                 apply_mutation(workspace, mutation)
+
+
+class ArtifactTests(unittest.TestCase):
+    def test_production_hash_ignores_python_runtime_cache(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = workspace / "app" / "payment.py"
+            source.parent.mkdir()
+            source.write_text("enabled = True\n", encoding="utf-8")
+            before = hash_paths(workspace, ["app/"])
+
+            cache = workspace / "app" / "__pycache__"
+            cache.mkdir()
+            (cache / "payment.cpython-313.pyc").write_bytes(b"generated")
+
+            self.assertEqual(before, hash_paths(workspace, ["app/"]))
+            source.write_text("enabled = False\n", encoding="utf-8")
+            self.assertNotEqual(before, hash_paths(workspace, ["app/"]))
+
+    def test_copies_only_requested_workspace_outputs(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workspace = root / "workspace"
+            artifacts = root / "artifacts"
+            (workspace / "tests").mkdir(parents=True)
+            (workspace / "tests" / "feature.test.ts").write_text("test()\n", encoding="utf-8")
+            (workspace / "tests" / "__pycache__").mkdir()
+            (workspace / "tests" / "__pycache__" / "test.pyc").write_bytes(b"generated")
+            (workspace / "test-evidence.json").write_text("{}\n", encoding="utf-8")
+
+            copy_artifact_paths(workspace, artifacts, ["tests", "test-evidence.json"])
+
+            output = artifacts / "workspace-output"
+            self.assertTrue((output / "tests" / "feature.test.ts").is_file())
+            self.assertTrue((output / "test-evidence.json").is_file())
+            self.assertFalse((output / "tests" / "__pycache__" / "test.pyc").exists())
 
 
 class CommandTests(unittest.TestCase):
@@ -156,6 +200,7 @@ class CommandTests(unittest.TestCase):
         self.assertEqual("secret-value", environment["OPENAI_API_KEY"])
         self.assertIn("--read-only", command)
         self.assertIn("--cap-drop=ALL", command)
+        self.assertIn("PYTHONPATH=/home/eval/python-site", rendered)
         self.assertTrue(codex_home_created)
 
 
