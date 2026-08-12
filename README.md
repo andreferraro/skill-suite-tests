@@ -6,6 +6,8 @@ Você explica o fluxo, o comportamento esperado e o impacto da falha. A skill an
 
 [Ver apresentação completa](https://docs.google.com/presentation/d/10icBAwszr-oIcf-SeNOB2QKGF9NQE1qs7TGqt0nVeQY/edit?usp=sharing)
 
+![Diagrama dos tipos de teste organizados por propósito, nível, qualidade e técnica](assets/linkedin-tipos-de-testes-diagrama.png)
+
 ## O que pode ser testado
 
 - Frontend: componentes, telas, navegação, estados de UI, acessibilidade e responsividade.
