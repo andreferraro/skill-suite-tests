@@ -146,7 +146,7 @@ Sem `--agent-container-image`, o runner usa as CLIs instaladas no host. Esse mod
 ## GitHub Actions
 
 - `quality.yml`: estrutura, scripts, schema, links, segredos, fixtures e mutantes.
-- `agent-evals.yml`: execução manual e seletiva do Codex, com um caso ou os três.
+- `agent-evals.yml`: execução manual e seletiva de Codex ou Cursor, com um caso ou os três.
 - `release-evals.yml`: execução manual de Codex, Cursor ou ambos, com uma ou três repetições.
 
 Pushes, pull requests, merges e tags executam somente `quality.yml`. As proteções de `develop` e `main` dependem dos cinco checks gratuitos de qualidade. Os evals pagos são um gate manual de publicação, separado do CI cotidiano.
