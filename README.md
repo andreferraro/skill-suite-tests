@@ -21,12 +21,12 @@ A implementação está disponível no [PR #8](https://github.com/andreferraro/s
 | Validação local dos scripts | 46 testes unitários aprovados |
 | CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml) |
 | Configuração do GitHub | Os dois secrets e as duas variáveis estão cadastrados |
-| Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635092731) |
+| Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635717298) |
 | Eval pareado Cursor | Configurado e pendente do gate de release |
-| Ganho mediano sobre baseline | 21,25 pontos na última execução |
+| Ganho mediano sobre baseline | 0 ponto na última execução |
 | Release `v0.3.0` | Bloqueada até a execução e aprovação dos evals pareados |
 
-A [execução 31635092731](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635092731) comprovou o avanço do detector: API subiu de 78,75 para 100 e eventos manteve 100. Web subiu de 27,5 para 83,75, mas deixou escapar o mutante de resposta assíncrona obsoleta. O teste aguardou somente um microtask depois da Promise antiga e terminou antes da atualização incorreta. A prova de sensibilidade passou a exigir execução contra mutação temporária, restauração exata e nova execução verde.
+A [execução 31635717298](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635717298) comprovou o helper de sensibilidade, mas ainda reprovou o gate. Eventos manteve 100. API ficou em 91,25 porque duas chamadas concorrentes não detectaram a serialização enfraquecida. Web ficou em 83,75 porque cobriu a resposta obsoleta e deixou o estado loading sem cenário sensível. A skill passou a exigir contenção real e prova por mecanismo protetivo de alto impacto; o detector também passou a sinalizar estados assíncronos pendentes.
 
 ## O que esta skill é
 

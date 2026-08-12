@@ -40,7 +40,7 @@ Tratar outros ecossistemas como **adaptáveis**. Reutilizar a stack encontrada e
 6. **Escolher ferramentas.** Reutilizar runner, harness, fixtures e infraestrutura existentes. Ler [guia-de-ecossistemas.md](references/guia-de-ecossistemas.md) somente quando a escolha estiver aberta.
 7. **Projetar o conjunto mínimo.** Para cada cenário, definir risco, precondições, estímulo, dados, oráculo, isolamento, cleanup e evidência esperada. Rastrear guards, validações, locks, transações, deduplicação, ordering, retry e mecanismos equivalentes encontrados no alvo para um cenário sensível ou justificar por que estão fora do recorte.
 8. **Implementar.** Seguir convenções locais e manter a mudança pequena. Adicionar dependência somente diante de lacuna comprovada.
-9. **Provar sensibilidade.** Partir de uma execução verde. Para guards e branches identificáveis, preferir uma mutação local temporária: executar o teste, exigir falha, restaurar o arquivo e executar verde novamente. Uma descrição de que o teste falharia não é evidência. Quando ajudar, usar `python <skill-root>/scripts/prove_test_sensitivity.py --root <projeto> --file <arquivo> --search <texto-exato> --replace <mutação> -- <comando-do-teste>`; o helper aceita uma ocorrência, não usa shell e restaura o arquivo mesmo após erro.
+9. **Provar sensibilidade.** Partir de uma execução verde. Para cada mecanismo protetivo de alto impacto usado no desenho, preferir uma mutação local temporária: executar o teste, exigir falha, restaurar o arquivo e executar verde novamente. Quando a mutação não for segura, registrar o motivo e usar um controle negativo executado. Uma descrição de que o teste falharia não é evidência. Quando ajudar, usar `python <skill-root>/scripts/prove_test_sensitivity.py --root <projeto> --file <arquivo> --search <texto-exato> --replace <mutação> -- <comando-do-teste>`; o helper aceita uma ocorrência, não usa shell e restaura o arquivo mesmo após erro.
 10. **Executar em camadas.** Rodar o teste criado, o comando canônico que inclui a suíte alterada, a suíte mais ampla configurada e os checks estáticos aplicáveis. Não substituir um comando obrigatório por outro mais estreito. Tratar falha, timeout, hook pendente e `no tests found` como resultado incompleto a diagnosticar e corrigir. Executar cenários intensivos, destrutivos ou externos somente com autorização adequada.
 11. **Relatar evidências.** Informar classificação, base, arquivos, cenários, comandos, resultados, limitações e pendências.
 
@@ -53,6 +53,7 @@ Consultar [bases-tecnicas.md](references/bases-tecnicas.md) quando protocolo, ac
 - Testar comportamento observável, interação, navegação, estado, acessibilidade e integração.
 - Preferir componente para lógica local e browser real para jornada, layout e comportamento nativo.
 - Quando o projeto já incluir uma suíte de browser no comando canônico e o risco atravessar essa fronteira, criar e executar o teste de browser necessário para manter a suíte completa válida.
+- Para ações assíncronas com estado pending/loading, manter a operação pendente por uma Promise controlada e verificar feedback, bloqueio do controle, supressão de duplicidade e recuperação após sucesso e erro.
 - Em corridas assíncronas, aguardar a liquidação e a estabilização observável do DOM com a primitiva do runner. Um único `Promise.resolve()` não comprova que uma resposta tardia deixou de atualizar a interface.
 - Manter asserções funcionais junto de screenshots, vídeos ou traces.
 - Exigir baseline aprovada e tolerância explícita para regressão visual.
@@ -63,7 +64,7 @@ Consultar [bases-tecnicas.md](references/bases-tecnicas.md) quando protocolo, ac
 - Validar contratos, protocolo e expectativas de consumidores quando aplicáveis.
 - Verificar commit, rollback, idempotência, concorrência, ordering e convergência conforme o risco.
 - Testar uma validação na camada que a implementa. Uma rejeição feita por UI, schema ou controller não comprova o guard equivalente no serviço ou domínio.
-- Tratar lock, transação serializada, constraint única e chave de idempotência como sinais de concorrência. Exercitar chamadas realmente simultâneas contra o mesmo armazenamento e verificar identidade, quantidade de criações e estado final.
+- Tratar lock, transação serializada, constraint única e chave de idempotência como sinais de concorrência. Criar contenção real com barreira ou vários workers, sem depender de duas chamadas oportunistas, e verificar identidade, quantidade de criações e estado final. Em SQLite local, usar ao menos oito operações concorrentes quando o projeto não definir outro limite. Provar que o teste falha ao enfraquecer temporariamente o mecanismo de serialização.
 
 ### Eventos e processos assíncronos
 

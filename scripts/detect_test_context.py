@@ -69,6 +69,9 @@ RISK_SIGNAL_PATTERNS = {
         re.compile(r"\bfor\s+update\b", re.IGNORECASE),
         re.compile(r"\b(mutex|semaphore|lock)\b", re.IGNORECASE),
     ),
+    "async-pending-state": (
+        re.compile(r"\b(loading|isloading|is_loading|pending|ispending|is_pending)\b", re.IGNORECASE),
+    ),
     "dead-letter-control": (
         re.compile(r"\bdlq\b", re.IGNORECASE),
         re.compile(r"dead[-_ ]?letter", re.IGNORECASE),

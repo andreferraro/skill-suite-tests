@@ -158,12 +158,17 @@ def create(idempotency_key, amount, connection):
 """,
                 encoding="utf-8",
             )
+            (root / "src" / "PasswordReset.tsx").write_text(
+                "const [loading, setLoading] = useState(false);\n",
+                encoding="utf-8",
+            )
             (root / "tests").mkdir()
             (root / "tests" / "test_noise.py").write_text("retry = 'DLQ'\n", encoding="utf-8")
 
             result = detect(root)
 
             signals = result["risk_signals"]
+            self.assertEqual(["src/PasswordReset.tsx"], signals["async-pending-state"])
             self.assertEqual(["src/payment.py"], signals["concurrency-control"])
             self.assertEqual(["src/payment.py"], signals["idempotency-control"])
             self.assertEqual(["src/payment.py"], signals["non-positive-validation"])
