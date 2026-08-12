@@ -1,0 +1,77 @@
+name: Agent evals
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-evals-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  codex:
+    name: Codex (${{ matrix.case }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [web-password-reset, api-payment, events-order-consumer]
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      CODEX_EVAL_MODEL: ${{ vars.CODEX_EVAL_MODEL }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Require repository secret
+        shell: bash
+        run: |
+          test -n "$OPENAI_API_KEY"
+          test -n "$CODEX_EVAL_MODEL"
+      - name: Install Codex CLI
+        run: npm install --global @openai/codex@0.147.0
+      - name: Run paired eval
+        shell: bash
+        run: |
+          python evals/run_eval.py \
+            --agent codex \
+            --case "${{ matrix.case }}" \
+            --repetitions 1 \
+            --artifacts evals/artifacts \
+            --model "$CODEX_EVAL_MODEL"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: eval-codex-${{ matrix.case }}
+          path: evals/artifacts
+          retention-days: 14
+
+  aggregate:
+    name: Aggregate PR gate
+    runs-on: ubuntu-latest
+    needs: codex
+    if: always()
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: eval-codex-*
+          path: eval-shards
+          merge-multiple: true
+      - name: Enforce aggregate gate
+        run: python evals/aggregate_reports.py --input eval-shards --output eval-summary.json --repetitions 1 --enforce-gate
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: eval-pr-summary
+          path: eval-summary.json
+          retention-days: 30

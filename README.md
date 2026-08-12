@@ -1,64 +1,83 @@
 # Skill Suite Tests
 
-Skill para planejar, criar, executar e validar testes automatizados a partir do risco real do sistema.
+[![Quality](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml/badge.svg)](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml)
+[![Agent evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml/badge.svg)](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Você explica o fluxo, o comportamento esperado e o impacto da falha. A skill analisa o projeto, escolhe a estratégia de teste, implementa na stack existente e entrega evidências.
+Skill para orientar Codex e Cursor na criação de testes automatizados guiados por risco. Você informa a parte do sistema e o risco relevante. O agente inspeciona a stack, escolhe a menor fronteira capaz de provar o comportamento, implementa os testes, executa a suíte e relata evidências.
 
-[Ver apresentação completa](https://docs.google.com/presentation/d/10icBAwszr-oIcf-SeNOB2QKGF9NQE1qs7TGqt0nVeQY/edit?usp=sharing)
+[Ver apresentação](https://docs.google.com/presentation/d/10icBAwszr-oIcf-SeNOB2QKGF9NQE1qs7TGqt0nVeQY/edit?usp=sharing)
 
 ![Diagrama dos tipos de teste organizados por propósito, nível, qualidade e técnica](assets/linkedin-tipos-de-testes-diagrama.png)
 
+## Estado da v0.3.0
+
+O código desta versão está em preparação. A tag `v0.3.0` só será criada depois que Codex e Cursor passarem os gates de release.
+
+| Evidência | Estado atual |
+| --- | --- |
+| Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
+| Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
+| Validação local dos scripts | 23 testes unitários aprovados |
+| Eval pareado Codex | Pendente de execução no GitHub Actions |
+| Eval pareado Cursor | Pendente de execução no GitHub Actions |
+| Ganho sobre baseline | Sem resultado publicado |
+| Release `v0.3.0` | Bloqueada pelos evals pareados |
+
+O histórico verificável ficará nos artefatos e resumos dos workflows [Agent evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml) e [Release evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/release-evals.yml).
+
+## O que esta skill é
+
+- Um guia operacional para agentes com acesso ao código, terminal e ferramentas do projeto.
+- Um processo de seleção de testes por risco, arquitetura, fronteira e oráculo.
+- Um pacote com detector de contexto, schema de evidência, validador e referências técnicas.
+- Uma skill agnóstica no núcleo, com benchmark inicial em Web, API e eventos.
+
+Framework de testes autônomo, runner e infraestrutura própria ficam fora do escopo. A skill reutiliza o que existe no projeto e pede uma decisão quando falta requisito, baseline, contrato ou ambiente autorizado.
+
+## Suporte
+
+| Status | Stack | Caso de referência |
+| --- | --- | --- |
+| Validado por fixture e mutações | React, TypeScript, Vitest, Testing Library e Playwright | Recuperação de senha |
+| Validado por fixture e mutações | FastAPI, Python, pytest e SQLite | Criação de pagamento |
+| Validado por fixture e mutações | Node.js, TypeScript, Vitest, RabbitMQ, PostgreSQL e Testcontainers | Consumidor de pedidos |
+| Adaptável | Outros frameworks, linguagens e plataformas | Sem benchmark publicado |
+
+O status validado nesta tabela cobre os fixtures e os 12 mutantes. A eficácia do agente com a skill será comprovada quando os evals pareados superarem o baseline.
+
 ## O que pode ser testado
 
-- Frontend: componentes, telas, navegação, estados de UI, acessibilidade e responsividade.
-- Backend: regras de domínio, serviços, jobs, schedulers, banco e cache.
-- APIs: HTTP/REST, GraphQL, gRPC, contratos e compatibilidade.
-- Integrações: webhooks, filas, eventos, mensageria e serviços externos.
-- Dados: persistência, transições de estado, consistência e concorrência.
-- Jornadas completas: interface, serviços, dados e efeitos do início ao fim.
-- Atributos de qualidade: segurança, performance, resiliência, observabilidade e experiência.
+- Frontend: componentes, telas, navegação, estado, teclado, acessibilidade e comportamento visual.
+- Backend: regras de domínio, serviços, jobs, banco, cache, transações e concorrência.
+- APIs: HTTP, REST, GraphQL, gRPC, contratos, protocolo e versionamento.
+- Integrações: webhooks, filas, eventos, retries, DLQ, ordering e idempotência.
+- Jornadas: interface, serviços, dados e efeitos observáveis de ponta a ponta.
+- Qualidade: segurança, performance, resiliência, observabilidade e experiência.
 
-## Conteúdo do repositório
-
-- [`SKILL.md`](SKILL.md): fluxo operacional, gates de qualidade e contrato de saída.
-- [`agents/openai.yaml`](agents/openai.yaml): nome, descrição e prompt exibidos no Codex.
-- [`references/tipos-de-teste.md`](references/tipos-de-teste.md): taxonomia e seleção por risco.
-- [`references/oraculos-e-qualidade.md`](references/oraculos-e-qualidade.md): oráculos, isolamento, sensibilidade e critérios de conclusão.
-- [`references/guia-de-ecossistemas.md`](references/guia-de-ecossistemas.md): ferramentas para frontend, backend, mobile, dados e integrações.
-- [`references/bases-tecnicas.md`](references/bases-tecnicas.md): normas e referências oficiais.
-
-## Como a estratégia é definida
-
-A classificação combina quatro eixos:
+A classificação usa quatro eixos:
 
 | Eixo | Pergunta | Exemplos |
 | --- | --- | --- |
 | Propósito | Por que testar? | smoke, confirmação, regressão, aceitação |
 | Nível | Onde observar? | unidade, componente, contrato, integração, ponta a ponta |
 | Qualidade | Qual risco medir? | funcional, segurança, performance, acessibilidade, resiliência |
-| Técnica | Como gerar casos? | limites, tabela de decisão, property-based, combinatório, fuzz |
+| Técnica | Como gerar os casos? | limites, tabela de decisão, property-based, combinatório, fuzz |
 
-O tipo de teste nasce do risco, da arquitetura e da evidência necessária.
+## Instalação pelo repositório
 
-## Instalação
+Codex e Cursor reconhecem skills em `.agents/skills`. Um clone global atende as duas ferramentas.
 
-### Pré-requisitos
-
-- Git instalado.
-- Codex ou Cursor com suporte a Agent Skills.
-
-Codex e Cursor carregam skills globais de `~/.agents/skills`. Um único clone atende as duas ferramentas.
-
-### Windows com PowerShell
+### Global no Windows
 
 ```powershell
-$skills = "$env:USERPROFILE\.agents\skills"
-New-Item -ItemType Directory -Force $skills | Out-Null
-Set-Location $skills
-git clone https://github.com/andreferraro/skill-suite-tests.git
+$skillsRoot = Join-Path $env:USERPROFILE ".agents\skills"
+$skillPath = Join-Path $skillsRoot "skill-suite-tests"
+New-Item -ItemType Directory -Force $skillsRoot | Out-Null
+git clone https://github.com/andreferraro/skill-suite-tests.git $skillPath
 ```
 
-### macOS ou Linux
+### Global no macOS ou Linux
 
 ```bash
 mkdir -p "$HOME/.agents/skills"
@@ -67,39 +86,40 @@ git clone \
   "$HOME/.agents/skills/skill-suite-tests"
 ```
 
-### Instalação apenas no projeto
+### Somente em um projeto
 
-Execute na raiz do projeto:
+Execute na raiz do projeto que será testado:
 
-```powershell
-New-Item -ItemType Directory -Force .agents\skills | Out-Null
-git clone `
-  https://github.com/andreferraro/skill-suite-tests.git `
-  .agents\skills\skill-suite-tests
+```bash
+git clone \
+  https://github.com/andreferraro/skill-suite-tests.git \
+  .agents/skills/skill-suite-tests
 ```
 
-### Importação pela interface do Cursor
+Para compartilhar a mesma versão com a equipe, use um submódulo:
 
-1. Abra **Customize**.
-2. Entre em **Rules** e escolha **Add Rule**.
-3. Selecione **Remote Rule (GitHub)**.
-4. Informe `https://github.com/andreferraro/skill-suite-tests`.
+```bash
+git submodule add \
+  https://github.com/andreferraro/skill-suite-tests.git \
+  .agents/skills/skill-suite-tests
+git commit -m "build: add skill-suite-tests"
+```
 
-### Validação
+### Conferência
 
-No Windows:
+Windows:
 
 ```powershell
 Test-Path "$env:USERPROFILE\.agents\skills\skill-suite-tests\SKILL.md"
 ```
 
-No macOS ou Linux:
+macOS ou Linux:
 
 ```bash
 test -f "$HOME/.agents/skills/skill-suite-tests/SKILL.md" && echo "Skill instalada"
 ```
 
-Abra um novo chat no Codex ou no Cursor após a instalação.
+Codex detecta alterações automaticamente. Se a skill ainda estiver ausente, reinicie a ferramenta. No Cursor, abra **Customize**, entre em **Skills** e confira `skill-suite-tests`.
 
 ### Atualização
 
@@ -117,94 +137,107 @@ git -C "$HOME/.agents/skills/skill-suite-tests" pull --ff-only
 
 ## Como usar
 
-### Codex
+No Codex, mencione a skill com `$`:
 
 ```text
-Use $skill-suite-tests no checkout. Foque no risco de pedidos duplicados e valide a jornada completa.
+Use $skill-suite-tests na criação de pagamentos. Prove idempotência sob chamadas concorrentes e rollback após falha no insert.
 ```
 
-### Cursor
+No Cursor, selecione a skill com `/`:
 
 ```text
-/skill-suite-tests Valide o login. Cubra loading, erro, navegação, acessibilidade e expiração da sessão.
+/skill-suite-tests Teste a recuperação de senha. Cubra loading, anúncio de erro, teclado, acessibilidade e respostas assíncronas obsoletas.
 ```
 
-A skill também pode ser escolhida automaticamente quando o pedido combina com a descrição do `SKILL.md`.
+O pedido funciona melhor com estas informações:
 
-### Contexto recomendado
+1. Alvo: tela, componente, endpoint, serviço, job, evento ou jornada.
+2. Comportamento: regra, critério de aceite, contrato ou bug conhecido.
+3. Risco: falha e impacto que precisam ser detectados.
+4. Ambiente: local, CI, staging, browser, banco ou broker disponível.
+5. Restrições: dados, serviços externos, carga, duração e permissões.
+6. Entrega: criar, executar, diagnosticar ou preparar os testes.
 
-Informe o que souber:
-
-1. **Alvo:** tela, componente, endpoint, serviço, job, integração ou fluxo.
-2. **Comportamento:** resultado esperado ou regra documentada.
-3. **Risco:** falha e impacto que precisam de cobertura.
-4. **Ambiente:** local, CI, staging, browser ou dispositivo.
-5. **Restrições:** dados, integrações externas, janela e limites de execução.
-6. **Entrega:** criar, executar ou apenas preparar os testes.
-
-## Exemplos
-
-### Frontend
+Exemplo para uma jornada:
 
 ```text
-Use $skill-suite-tests na tela de recuperação de senha. Teste validação, loading, mensagens de erro, acessibilidade e navegação após sucesso.
+Use $skill-suite-tests no checkout. Cubra UI, API, persistência, evento de pedido criado e confirmação ao cliente. Reutilize a stack atual e execute o conjunto mínimo capaz de provar esses riscos.
 ```
 
-### Backend e concorrência
+Exemplo para performance:
 
 ```text
-Use $skill-suite-tests na criação do pagamento. Prove idempotência sob requisições simultâneas e valide o estado final no banco.
+Use $skill-suite-tests na busca. Prepare smoke, carga e pico. Marque thresholds ausentes como <definir> e execute somente no ambiente autorizado.
 ```
 
-### Ponta a ponta
+## Entrega do agente
 
-```text
-Use $skill-suite-tests no checkout. Cubra UI, API, banco, evento de pedido criado e confirmação apresentada ao cliente.
+A resposta humana apresenta:
+
+- suporte validado ou adaptável;
+- classificação nos quatro eixos;
+- base de teste e riscos rastreáveis;
+- fronteiras, cenários, dados e oráculos;
+- arquivos alterados;
+- comandos executados e resultados;
+- prova de sensibilidade;
+- limitações e itens `<definir>`.
+
+Automações também podem exigir `test-evidence.json`. O contrato está em [`schemas/test-evidence.v1.json`](schemas/test-evidence.v1.json) e há um [`exemplo validado`](examples/test-evidence.example.json).
+
+```bash
+python scripts/validate_test_evidence.py test-evidence.json
 ```
 
-### Performance
+## Evals
 
-```text
-Use $skill-suite-tests na busca. Prepare perfis de smoke, carga e pico com thresholds marcados como <definir>. Entregue o plano antes da execução.
+Os evals comparam o mesmo agente, projeto e pedido em dois modos: baseline sem a skill e tratamento com invocação explícita. Os dois modos recebem o mesmo schema e validador do relatório, evitando vantagem artificial de formato. Os testes gerados precisam passar na implementação correta, detectar os mutantes, cobrir os riscos, preservar produção e manifests e gerar evidência válida.
+
+Consulte [`evals/README.md`](evals/README.md) para casos, mutações, pontuação, comandos e gates.
+
+Validação determinística local:
+
+```bash
+python -m unittest discover -s tests -v
+python scripts/validate_repository.py
+python evals/validate_fixtures.py
 ```
 
-## Entrega esperada
+## Estrutura
 
-- Classificação do teste e risco coberto.
-- Código integrado aos padrões do projeto.
-- Cenários, dados, oráculos e fronteiras utilizados.
-- Arquivos criados ou alterados.
-- Comandos executados e resultados reais.
-- Evidências como logs, métricas, traces, screenshots ou vídeos, quando aplicáveis.
-- Limitações, bloqueios e riscos residuais.
+- [`SKILL.md`](SKILL.md): contrato e fluxo do agente.
+- [`scripts/detect_test_context.py`](scripts/detect_test_context.py): inventário determinístico da stack de testes.
+- [`scripts/validate_test_evidence.py`](scripts/validate_test_evidence.py): validação semântica do relatório.
+- [`schemas/test-evidence.v1.json`](schemas/test-evidence.v1.json): contrato JSON Schema.
+- [`references/`](references): taxonomia, oráculos, ecossistemas e bases técnicas.
+- [`evals/`](evals): fixtures, graders, mutantes, runner e agregador.
+- [`tests/`](tests): testes unitários dos scripts e do harness.
 
 ## Segurança operacional
 
-- Credenciais entram por variáveis de ambiente ou cofres de segredo.
-- Dados sensíveis ficam fora de fixtures, logs, commits e exemplos.
-- Carga, estresse, fuzz, exploração automatizada e injeção de falhas exigem ambiente autorizado.
-- Execução em produção exige aprovação explícita, observabilidade, critérios de parada e blast radius controlado.
-- Cada resultado deve refletir a evidência produzida na execução.
+- Credenciais entram somente por variáveis de ambiente ou GitHub Actions secrets.
+- O runner remove tokens e credenciais alheias antes de iniciar agentes.
+- Cada execução usa workspace temporário e recebe somente o projeto do caso.
+- Graders, mutantes e credenciais de produção ficam fora do workspace do agente.
+- Carga, estresse, fuzz externo e injeção de falhas exigem ambiente autorizado.
+- Cleanup fica restrito aos recursos criados pelo teste.
 
-## Fluxo de contribuição
+## Contribuição e release
 
 O repositório usa Gitflow:
 
 - `main`: versões publicadas.
-- `develop`: integração das próximas mudanças.
-- `feature/*`: documentação, funcionalidades e melhorias.
-- `release/*`: preparação de versão.
-- `hotfix/*`: correções urgentes originadas de `main`.
+- `develop`: integração.
+- `feature/*`: mudanças em desenvolvimento.
+- `release/*`: preparação da versão.
+- `hotfix/*`: correções originadas de `main`.
 
-Os commits seguem Conventional Commits:
-
-```text
-docs: improve installation guide
-feat: add frontend testing workflow
-fix: correct skill discovery path
-```
+Commits seguem Conventional Commits. Uma release exige qualidade estrutural, fixtures verdes, eval de PR com Codex e eval de release com Codex e Cursor.
 
 ## Referências
 
-- [Agent Skills no Codex](https://learn.chatgpt.com/docs/build-skills)
+- [Skills no Codex](https://learn.chatgpt.com/docs/build-skills)
+- [Codex em modo não interativo](https://learn.chatgpt.com/docs/non-interactive-mode)
 - [Agent Skills no Cursor](https://cursor.com/docs/skills)
+- [Cursor CLI em modo headless](https://docs.cursor.com/en/cli/headless)
+- [Apresentação da Skill Suite Tests](https://docs.google.com/presentation/d/10icBAwszr-oIcf-SeNOB2QKGF9NQE1qs7TGqt0nVeQY/edit?usp=sharing)
