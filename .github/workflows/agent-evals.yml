@@ -21,6 +21,15 @@ on:
           - api-payment
           - events-order-consumer
           - all
+      repetition:
+        description: Número da amostra desta execução. Use 2 e 3 somente para continuar a certificação.
+        required: true
+        default: "1"
+        type: choice
+        options:
+          - "1"
+          - "2"
+          - "3"
       max_paid_calls:
         description: Confirme o teto total de chamadas pagas desta execução.
         required: true
@@ -56,6 +65,7 @@ jobs:
         env:
           SELECTED_AGENT: ${{ inputs.agent }}
           SELECTED_CASE: ${{ inputs.case }}
+          SELECTED_REPETITION: ${{ inputs.repetition }}
           MAX_PAID_CALLS: ${{ inputs.max_paid_calls }}
           CONFIRM_PAID: ${{ inputs.confirm_paid }}
         run: |
@@ -71,6 +81,7 @@ jobs:
             echo
             echo "Agente: $SELECTED_AGENT"
             echo "Caso: $SELECTED_CASE"
+            echo "Repetição: $SELECTED_REPETITION"
             echo "Teto: $expected chamadas de agente"
             echo "Baselines válidos em cache podem reduzir esse total."
           } >> "$GITHUB_STEP_SUMMARY"
@@ -137,6 +148,7 @@ jobs:
             --agent codex \
             --case "${{ matrix.case }}" \
             --repetitions 1 \
+            --repetition-start "${{ inputs.repetition }}" \
             --artifacts evals/artifacts \
             --baseline-cache evals/baseline-cache \
             --max-agent-calls 2 \
@@ -213,6 +225,7 @@ jobs:
             --agent cursor \
             --case "${{ matrix.case }}" \
             --repetitions 1 \
+            --repetition-start "${{ inputs.repetition }}" \
             --artifacts evals/artifacts \
             --baseline-cache evals/baseline-cache \
             --max-agent-calls 2 \
@@ -257,11 +270,13 @@ jobs:
         env:
           SELECTED_AGENT: ${{ inputs.agent }}
           SELECTED_CASE: ${{ inputs.case }}
+          SELECTED_REPETITION: ${{ inputs.repetition }}
         run: |
           args=(
             --input eval-shards
             --output eval-summary.json
             --repetitions 1
+            --repetition-start "$SELECTED_REPETITION"
             --agent "$SELECTED_AGENT"
           )
           if [ "$SELECTED_CASE" = "all" ]; then

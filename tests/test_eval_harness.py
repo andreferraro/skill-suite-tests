@@ -310,6 +310,17 @@ class CommandTests(unittest.TestCase):
 
 
 class AggregateTests(unittest.TestCase):
+    def test_partial_certification_accepts_a_later_repetition_label(self) -> None:
+        results = [
+            result("codex", "web", "baseline", 20, repetition=2),
+            result("codex", "web", "skill", 100, repetition=2),
+        ]
+
+        report = aggregate(results, repetitions=1, repetition_start=2)
+
+        self.assertTrue(report["passed"])
+        self.assertEqual([], report["matrix_errors"])
+
     def test_release_gate_passes_with_required_gain(self) -> None:
         results = []
         for agent in ("codex", "cursor"):

@@ -615,6 +615,7 @@ def aggregate(
     results: list[dict[str, Any]],
     *,
     repetitions: int,
+    repetition_start: int = 1,
     expected_agents: list[str] | None = None,
     expected_cases: list[str] | None = None,
 ) -> dict[str, Any]:
@@ -623,7 +624,7 @@ def aggregate(
 
     expected_agents = sorted(set(expected_agents or (result["agent"] for result in results)))
     expected_cases = sorted(set(expected_cases or (result["case"] for result in results)))
-    expected_repetitions = set(range(1, repetitions + 1))
+    expected_repetitions = set(range(repetition_start, repetition_start + repetitions))
     expected_modes = {"baseline", "skill"}
     matrix_errors: list[str] = []
 
@@ -742,6 +743,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--agent", action="append", choices=("codex", "cursor"), required=True)
     parser.add_argument("--case", action="append", dest="cases")
     parser.add_argument("--repetitions", type=int, default=1)
+    parser.add_argument(
+        "--repetition-start",
+        type=int,
+        default=1,
+        help="Label the first repetition, allowing a certification to continue without rerunning earlier samples",
+    )
     parser.add_argument("--model")
     parser.add_argument(
         "--agent-container-image",
@@ -774,6 +781,8 @@ def main() -> int:
     args = build_parser().parse_args()
     if args.repetitions < 1:
         raise SystemExit("--repetitions must be at least 1")
+    if args.repetition_start < 1:
+        raise SystemExit("--repetition-start must be at least 1")
     if args.max_agent_calls is not None and args.max_agent_calls < 0:
         raise SystemExit("--max-agent-calls cannot be negative")
     if not args.dry_run and not args.model:
@@ -792,7 +801,10 @@ def main() -> int:
         for agent in args.agent:
             for case in cases:
                 fingerprint = baseline_fingerprint(case, agent, args.model)
-                for repetition in range(1, args.repetitions + 1):
+                for repetition in range(
+                    args.repetition_start,
+                    args.repetition_start + args.repetitions,
+                ):
                     hit = read_cached_baseline(
                         args.baseline_cache,
                         fingerprint,
@@ -823,7 +835,10 @@ def main() -> int:
     for agent in args.agent:
         for case in cases:
             fingerprint = baseline_fingerprint(case, agent, args.model or "agent-default")
-            for repetition in range(1, args.repetitions + 1):
+            for repetition in range(
+                args.repetition_start,
+                args.repetition_start + args.repetitions,
+            ):
                 for mode in ("baseline", "skill"):
                     cache_key = (agent, case["id"], repetition)
                     if mode == "baseline" and cache_key in cached:
@@ -845,6 +860,7 @@ def main() -> int:
     report = aggregate(
         results,
         repetitions=args.repetitions,
+        repetition_start=args.repetition_start,
         expected_agents=args.agent,
         expected_cases=[case["id"] for case in cases],
     )

@@ -137,6 +137,8 @@ python evals/aggregate_reports.py \
 
 Use `--dry-run` para conferir comandos e isolamento sem consumir APIs.
 
+Use `--repetition-start 2` ou `--repetition-start 3` para continuar uma certificação interrompida sem repetir amostras anteriores. O número é gravado nos resultados e validado na consolidação final.
+
 Uma execução real exige `--max-agent-calls`. O runner calcula o total antes de iniciar qualquer agente e encerra se ultrapassar o teto. Sem cache, cada par baseline e skill usa duas chamadas por agente, caso e repetição.
 
 Use `--baseline-cache evals/baseline-cache` para reaproveitar o baseline quando agente, modelo, fixture, prompt, contrato, grader, mutantes, harness e imagem das CLIs continuarem equivalentes. A impressão digital invalida o cache quando qualquer um desses elementos muda. Alterações exclusivas na skill preservam o baseline e reduzem o próximo par a uma chamada de tratamento.
