@@ -19,6 +19,8 @@ def main() -> int:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--repetitions", type=int, required=True)
+    parser.add_argument("--agent", action="append", dest="agents", required=True)
+    parser.add_argument("--case", action="append", dest="cases", required=True)
     parser.add_argument("--enforce-gate", action="store_true")
     args = parser.parse_args()
 
@@ -30,7 +32,12 @@ def main() -> int:
     if not results:
         raise SystemExit("no eval result shards found")
 
-    report = aggregate(results, repetitions=args.repetitions)
+    report = aggregate(
+        results,
+        repetitions=args.repetitions,
+        expected_agents=args.agents,
+        expected_cases=args.cases,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     rendered = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
     args.output.write_text(rendered, encoding="utf-8")
@@ -46,6 +53,10 @@ def main() -> int:
             "| Agente | Caso | Baseline | Skill | Ganho | Gate crítico |",
             "| --- | --- | ---: | ---: | ---: | --- |",
         ]
+        if report.get("matrix_errors"):
+            lines.extend(
+                ["", "### Erros de matriz", "", *[f"- {error}" for error in report["matrix_errors"]]]
+            )
         for comparison in report.get("comparisons", []):
             lines.append(
                 f"| {comparison['agent']} | {comparison['case']} | {comparison['baseline']} | "

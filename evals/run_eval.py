@@ -294,13 +294,54 @@ def run_once(
         return result
 
 
-def aggregate(results: list[dict[str, Any]], *, repetitions: int) -> dict[str, Any]:
+def aggregate(
+    results: list[dict[str, Any]],
+    *,
+    repetitions: int,
+    expected_agents: list[str] | None = None,
+    expected_cases: list[str] | None = None,
+) -> dict[str, Any]:
     if any(result.get("dry_run") for result in results):
         return {"dry_run": True, "passed": True, "results": results}
+
+    expected_agents = sorted(set(expected_agents or (result["agent"] for result in results)))
+    expected_cases = sorted(set(expected_cases or (result["case"] for result in results)))
+    expected_repetitions = set(range(1, repetitions + 1))
+    expected_modes = {"baseline", "skill"}
+    matrix_errors: list[str] = []
 
     grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
     for result in results:
         grouped.setdefault((result["agent"], result["case"], result["mode"]), []).append(result)
+
+    result_agents = {result["agent"] for result in results}
+    result_cases = {result["case"] for result in results}
+    result_modes = {result["mode"] for result in results}
+    unexpected_agents = sorted(result_agents - set(expected_agents))
+    unexpected_cases = sorted(result_cases - set(expected_cases))
+    if unexpected_agents:
+        matrix_errors.append(f"unexpected agents: {', '.join(unexpected_agents)}")
+    if unexpected_cases:
+        matrix_errors.append(f"unexpected cases: {', '.join(unexpected_cases)}")
+    unexpected_modes = sorted(result_modes - expected_modes)
+    if unexpected_modes:
+        matrix_errors.append(f"unexpected modes: {', '.join(unexpected_modes)}")
+
+    run_ids = [result["run_id"] for result in results]
+    duplicate_run_ids = sorted({run_id for run_id in run_ids if run_ids.count(run_id) > 1})
+    if duplicate_run_ids:
+        matrix_errors.append(f"duplicate run IDs: {', '.join(duplicate_run_ids)}")
+
+    for agent in expected_agents:
+        for case in expected_cases:
+            for mode in sorted(expected_modes):
+                runs = grouped.get((agent, case, mode), [])
+                repetitions_found = [run["repetition"] for run in runs]
+                if len(runs) != repetitions or set(repetitions_found) != expected_repetitions:
+                    matrix_errors.append(
+                        f"incomplete matrix for {agent}/{case}/{mode}: "
+                        f"expected repetitions {sorted(expected_repetitions)}, found {sorted(repetitions_found)}"
+                    )
 
     summaries = []
     for (agent, case, mode), runs in sorted(grouped.items()):
@@ -316,13 +357,17 @@ def aggregate(results: list[dict[str, Any]], *, repetitions: int) -> dict[str, A
         )
 
     comparisons = []
-    agents = sorted({result["agent"] for result in results})
-    cases = sorted({result["case"] for result in results})
     required_passes = 2 if repetitions >= 3 else repetitions
-    for agent in agents:
-        for case in cases:
-            baseline = next(item for item in summaries if item["agent"] == agent and item["case"] == case and item["mode"] == "baseline")
-            treatment = next(item for item in summaries if item["agent"] == agent and item["case"] == case and item["mode"] == "skill")
+    summary_index = {
+        (item["agent"], item["case"], item["mode"]): item
+        for item in summaries
+    }
+    for agent in expected_agents:
+        for case in expected_cases:
+            baseline = summary_index.get((agent, case, "baseline"))
+            treatment = summary_index.get((agent, case, "skill"))
+            if baseline is None or treatment is None:
+                continue
             comparisons.append(
                 {
                     "agent": agent,
@@ -341,13 +386,17 @@ def aggregate(results: list[dict[str, Any]], *, repetitions: int) -> dict[str, A
         for result in results
         if result.get("agent_exit_code", 0) != 0
     ]
+    required_improved_cases = min(2, len(expected_cases))
     passed = (
-        not execution_failures
+        not matrix_errors
+        and not execution_failures
+        and bool(skill_scores)
         and statistics.median(skill_scores) >= 85
         and statistics.median(gains) >= 8
         and all(
-            sum(item["gain"] > 0 for item in comparisons if item["agent"] == agent) >= 2
-            for agent in agents
+            sum(item["gain"] > 0 for item in comparisons if item["agent"] == agent)
+            >= required_improved_cases
+            for agent in expected_agents
         )
         and all(gain >= -5 for gain in gains)
         and all(item["critical_gate"] for item in comparisons)
@@ -355,9 +404,11 @@ def aggregate(results: list[dict[str, Any]], *, repetitions: int) -> dict[str, A
     return {
         "dry_run": False,
         "passed": passed,
+        "matrix_errors": matrix_errors,
         "execution_failures": execution_failures,
-        "median_skill_score": statistics.median(skill_scores),
-        "median_gain": statistics.median(gains),
+        "median_skill_score": statistics.median(skill_scores) if skill_scores else None,
+        "median_gain": statistics.median(gains) if gains else None,
+        "required_improved_cases": required_improved_cases,
         "summaries": summaries,
         "comparisons": comparisons,
     }
@@ -406,7 +457,12 @@ def main() -> int:
                             args.dry_run,
                         )
                     )
-    report = aggregate(results, repetitions=args.repetitions)
+    report = aggregate(
+        results,
+        repetitions=args.repetitions,
+        expected_agents=args.agent,
+        expected_cases=[case["id"] for case in cases],
+    )
     args.artifacts.mkdir(parents=True, exist_ok=True)
     (args.artifacts / "summary.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n",

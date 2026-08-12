@@ -47,6 +47,7 @@ Gate por execução:
 
 Gate agregado:
 
+- matriz completa para todos os agentes, casos, modos e repetições esperados;
 - mediana da skill mínima de 85/100;
 - ganho mediano mínimo de 8 pontos sobre o baseline;
 - melhoria em pelo menos dois dos três casos por agente;
@@ -111,6 +112,11 @@ python evals/aggregate_reports.py \
   --input evals/artifacts \
   --output evals/artifacts/release-summary.json \
   --repetitions 3 \
+  --agent codex \
+  --agent cursor \
+  --case web-password-reset \
+  --case api-payment \
+  --case events-order-consumer \
   --enforce-gate
 ```
 
@@ -128,6 +134,8 @@ Configure em **Settings > Secrets and variables > Actions**:
 
 - secrets: `OPENAI_API_KEY` e `CURSOR_API_KEY`;
 - variables: `CODEX_EVAL_MODEL` e `CURSOR_EVAL_MODEL`.
+
+Essa configuração é exclusiva da manutenção do benchmark no GitHub Actions. Instalar ou usar a skill no Codex ou Cursor não depende desses secrets e variables.
 
 Os modelos devem usar os nomes exatos aceitos pelas respectivas CLIs. Os workflows entregam cada chave somente ao job do agente correspondente e publicam logs, resultados individuais e o resumo consolidado como artefatos.
 

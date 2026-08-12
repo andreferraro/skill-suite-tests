@@ -18,15 +18,15 @@ A implementação está disponível no [PR #8](https://github.com/andreferraro/s
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
-| Validação local dos scripts | 26 testes unitários aprovados |
-| CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/runs/31626774650) |
+| Validação local dos scripts | 31 testes unitários aprovados |
+| CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml) |
 | Configuração do GitHub | Os dois secrets e as duas variáveis estão cadastrados |
-| Eval pareado Codex | [Autenticação aprovada, execução bloqueada por ausência de créditos na API](https://github.com/andreferraro/skill-suite-tests/actions/runs/31626774775) |
+| Eval pareado Codex | [Autenticação aprovada, execução bloqueada por ausência de créditos na API](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml) |
 | Eval pareado Cursor | Configurado e pendente do gate de release |
 | Ganho sobre baseline | Sem resultado publicado |
 | Release `v0.3.0` | Bloqueada até a execução e aprovação dos evals pareados |
 
-O Codex CLI aceitou a chave em um `CODEX_HOME` descartável e tentou iniciar os seis agentes. A API encerrou as chamadas por ausência de créditos antes da execução dos pedidos. Por isso, ainda não existe resultado válido de baseline, tratamento ou ganho. O histórico verificável fica nos artefatos e resumos dos workflows [Agent evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml) e [Release evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/release-evals.yml).
+O Codex CLI aceitou a chave em um `CODEX_HOME` descartável e tentou iniciar as seis execuções pareadas. A API encerrou as chamadas por ausência de créditos antes da execução dos pedidos. Por isso, ainda não existe resultado válido de baseline, tratamento ou ganho. O histórico verificável fica nos artefatos e resumos dos workflows [Agent evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml) e [Release evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/release-evals.yml).
 
 ## O que esta skill é
 
@@ -68,9 +68,28 @@ A classificação usa quatro eixos:
 
 ## Instalação pelo repositório
 
-Codex e Cursor reconhecem skills em `.agents/skills`. Um clone global atende as duas ferramentas.
+Instalar e usar a skill no Codex ou no Cursor não exige `OPENAI_API_KEY`, `CURSOR_API_KEY` nem configuração no GitHub. Essas credenciais pertencem somente aos benchmarks automatizados mantidos neste repositório.
 
-### Global no Windows
+Codex e Cursor reconhecem skills em `.agents/skills`. Escolha um dos métodos abaixo.
+
+### Codex com Skill Installer
+
+No Codex, envie:
+
+```text
+Use $skill-installer para instalar a skill deste repositório:
+https://github.com/andreferraro/skill-suite-tests
+```
+
+### Cursor pela interface
+
+1. Abra **Customize**.
+2. Entre em **Rules** e clique em **Add Rule**.
+3. Selecione **Remote Rule (GitHub)**.
+4. Informe `https://github.com/andreferraro/skill-suite-tests`.
+5. Confira `skill-suite-tests` em **Customize > Skills**.
+
+### Clone global no Windows
 
 ```powershell
 $skillsRoot = Join-Path $env:USERPROFILE ".agents\skills"
@@ -79,7 +98,7 @@ New-Item -ItemType Directory -Force $skillsRoot | Out-Null
 git clone https://github.com/andreferraro/skill-suite-tests.git $skillPath
 ```
 
-### Global no macOS ou Linux
+### Clone global no macOS ou Linux
 
 ```bash
 mkdir -p "$HOME/.agents/skills"
@@ -191,9 +210,15 @@ Automações também podem exigir `test-evidence.json`. O contrato está em [`sc
 python scripts/validate_test_evidence.py test-evidence.json
 ```
 
+## Credenciais e custo
+
+O uso comum acontece dentro do Codex ou do Cursor instalado pelo usuário e segue o plano ou provedor configurado nessa ferramenta.
+
+Os secrets `OPENAI_API_KEY` e `CURSOR_API_KEY` aparecem apenas nos workflows de manutenção. Eles executam o benchmark pareado no GitHub Actions para medir se a skill supera o mesmo agente sem a skill. Quem instala a skill para testar um sistema não precisa cadastrar esses secrets.
+
 ## Evals
 
-Os evals comparam o mesmo agente, projeto e pedido em dois modos: baseline sem a skill e tratamento com invocação explícita. Os dois modos recebem o mesmo schema e validador do relatório, evitando vantagem artificial de formato. Os testes gerados precisam passar na implementação correta, detectar os mutantes, cobrir os riscos, preservar produção e manifests e gerar evidência válida.
+Os evals comparam o mesmo agente, projeto e pedido em dois modos: baseline sem a skill e tratamento com invocação explícita. Os dois modos recebem o mesmo schema e validador do relatório, evitando vantagem artificial de formato. Os testes gerados precisam passar na implementação correta, detectar os mutantes, cobrir os riscos, preservar produção e manifests e gerar evidência válida. O gate também rejeita agente, caso, modo ou repetição ausente ou duplicada.
 
 Consulte [`evals/README.md`](evals/README.md) para casos, mutações, pontuação, comandos e gates.
 
@@ -217,7 +242,7 @@ python evals/validate_fixtures.py
 
 ## Segurança operacional
 
-- Credenciais entram somente por variáveis de ambiente ou GitHub Actions secrets.
+- Credenciais dos benchmarks entram somente por variáveis de ambiente ou GitHub Actions secrets.
 - O runner remove tokens e credenciais alheias antes de iniciar agentes.
 - Cada execução usa workspace temporário e recebe somente o projeto do caso.
 - Graders, mutantes e credenciais de produção ficam fora do workspace do agente.
@@ -262,7 +287,7 @@ A release permanece pendente se o tratamento não superar o baseline ou se qualq
 
 ## Referências
 
-- [Skills no Codex](https://learn.chatgpt.com/docs/build-skills)
+- [Skills no Codex](https://developers.openai.com/codex/skills)
 - [Codex em modo não interativo](https://learn.chatgpt.com/docs/non-interactive-mode)
 - [Agent Skills no Cursor](https://cursor.com/docs/skills)
 - [Cursor CLI em modo headless](https://docs.cursor.com/en/cli/headless)

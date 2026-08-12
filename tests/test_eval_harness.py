@@ -14,13 +14,20 @@ from eval_lib import apply_mutation, install_skill, restore_mutation, run_comman
 from run_eval import aggregate, build_agent_command, evaluation_exit_code  # noqa: E402
 
 
-def result(agent: str, case: str, mode: str, score: float, critical: bool = True) -> dict:
+def result(
+    agent: str,
+    case: str,
+    mode: str,
+    score: float,
+    critical: bool = True,
+    repetition: int = 1,
+) -> dict:
     return {
-        "run_id": f"{agent}-{case}-{mode}-1",
+        "run_id": f"{agent}-{case}-{mode}-{repetition}",
         "agent": agent,
         "case": case,
         "mode": mode,
-        "repetition": 1,
+        "repetition": repetition,
         "score": score,
         "critical_pass": critical,
     }
@@ -112,10 +119,8 @@ class AggregateTests(unittest.TestCase):
         for agent in ("codex", "cursor"):
             for case in ("web", "api", "events"):
                 for repetition in range(1, 4):
-                    baseline = result(agent, case, "baseline", 80)
-                    skill = result(agent, case, "skill", 90)
-                    baseline["repetition"] = repetition
-                    skill["repetition"] = repetition
+                    baseline = result(agent, case, "baseline", 80, repetition=repetition)
+                    skill = result(agent, case, "skill", 90, repetition=repetition)
                     results.extend((baseline, skill))
         report = aggregate(results, repetitions=3)
         self.assertTrue(report["passed"])
@@ -137,6 +142,88 @@ class AggregateTests(unittest.TestCase):
         report = aggregate(results, repetitions=1)
 
         self.assertFalse(report["passed"])
+
+    def test_gate_rejects_a_missing_mode_without_crashing(self) -> None:
+        results = [result("codex", "web", "skill", 90)]
+
+        report = aggregate(
+            results,
+            repetitions=1,
+            expected_agents=["codex"],
+            expected_cases=["web"],
+        )
+
+        self.assertFalse(report["passed"])
+        self.assertIn("codex/web/baseline", report["matrix_errors"][0])
+
+    def test_single_case_gate_requires_improvement_in_that_case(self) -> None:
+        results = [
+            result("codex", "web", "baseline", 80),
+            result("codex", "web", "skill", 90),
+        ]
+
+        report = aggregate(
+            results,
+            repetitions=1,
+            expected_agents=["codex"],
+            expected_cases=["web"],
+        )
+
+        self.assertTrue(report["passed"])
+        self.assertEqual(1, report["required_improved_cases"])
+
+    def test_gate_rejects_a_completely_missing_case(self) -> None:
+        results = [
+            result("codex", "web", "baseline", 80),
+            result("codex", "web", "skill", 90),
+        ]
+
+        report = aggregate(
+            results,
+            repetitions=1,
+            expected_agents=["codex"],
+            expected_cases=["web", "api"],
+        )
+
+        self.assertFalse(report["passed"])
+        self.assertTrue(any("codex/api/baseline" in error for error in report["matrix_errors"]))
+        self.assertTrue(any("codex/api/skill" in error for error in report["matrix_errors"]))
+
+    def test_gate_rejects_a_completely_missing_agent(self) -> None:
+        results = [
+            result("codex", "web", "baseline", 80),
+            result("codex", "web", "skill", 90),
+        ]
+
+        report = aggregate(
+            results,
+            repetitions=1,
+            expected_agents=["codex", "cursor"],
+            expected_cases=["web"],
+        )
+
+        self.assertFalse(report["passed"])
+        self.assertTrue(any("cursor/web/baseline" in error for error in report["matrix_errors"]))
+        self.assertTrue(any("cursor/web/skill" in error for error in report["matrix_errors"]))
+
+    def test_release_gate_rejects_duplicate_or_missing_repetitions(self) -> None:
+        results = []
+        for case in ("web", "api", "events"):
+            for mode, score in (("baseline", 80), ("skill", 90)):
+                for repetition in (1, 2, 2):
+                    run = result("codex", case, mode, score, repetition=repetition)
+                    results.append(run)
+
+        report = aggregate(
+            results,
+            repetitions=3,
+            expected_agents=["codex"],
+            expected_cases=["web", "api", "events"],
+        )
+
+        self.assertFalse(report["passed"])
+        self.assertEqual(7, len(report["matrix_errors"]))
+        self.assertTrue(any("duplicate run IDs" in error for error in report["matrix_errors"]))
 
     def test_agent_process_failure_is_reported_and_fails_job(self) -> None:
         results = []

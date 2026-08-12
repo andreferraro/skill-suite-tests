@@ -114,7 +114,17 @@ jobs:
           path: eval-shards
           merge-multiple: true
       - name: Enforce release gate
-        run: python evals/aggregate_reports.py --input eval-shards --output release-eval-summary.json --repetitions 3 --enforce-gate
+        run: >-
+          python evals/aggregate_reports.py
+          --input eval-shards
+          --output release-eval-summary.json
+          --repetitions 3
+          --agent codex
+          --agent cursor
+          --case web-password-reset
+          --case api-payment
+          --case events-order-consumer
+          --enforce-gate
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
