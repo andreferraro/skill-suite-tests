@@ -136,7 +136,7 @@ jobs:
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: evals/baseline-cache
-          key: baseline-${{ steps.fingerprint.outputs.value }}-r1
+          key: baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetition }}
       - name: Build isolated agent image
         run: docker build --file evals/agent.Dockerfile --tag skill-suite-tests-eval-agent:local .
       - id: paired
@@ -160,7 +160,7 @@ jobs:
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: evals/baseline-cache
-          key: baseline-${{ steps.fingerprint.outputs.value }}-r1
+          key: baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetition }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
@@ -214,7 +214,7 @@ jobs:
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: evals/baseline-cache
-          key: baseline-${{ steps.fingerprint.outputs.value }}-r1
+          key: baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetition }}
       - name: Build isolated agent image
         run: docker build --file evals/agent.Dockerfile --tag skill-suite-tests-eval-agent:local .
       - id: paired
@@ -238,7 +238,7 @@ jobs:
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: evals/baseline-cache
-          key: baseline-${{ steps.fingerprint.outputs.value }}-r1
+          key: baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetition }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

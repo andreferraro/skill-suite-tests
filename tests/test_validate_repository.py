@@ -23,6 +23,9 @@ class RepositoryValidationTests(unittest.TestCase):
         for command in paired_commands:
             paired_command = command.split("- name: Save new comparable baseline", 1)[0]
             self.assertIn("--enforce-gate", paired_command)
+        cache_key = "baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetition }}"
+        self.assertEqual(4, workflow.count(cache_key))
+        self.assertNotIn("steps.fingerprint.outputs.value }}-r1", workflow)
 
     def test_local_link_validator_detects_missing_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

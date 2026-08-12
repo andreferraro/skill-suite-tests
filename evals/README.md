@@ -143,6 +143,8 @@ Uma execução real exige `--max-agent-calls`. O runner calcula o total antes de
 
 Use `--baseline-cache evals/baseline-cache` para reaproveitar o baseline quando agente, modelo, fixture, prompt, contrato, grader, mutantes, harness e imagem das CLIs continuarem equivalentes. A impressão digital invalida o cache quando qualquer um desses elementos muda. Alterações exclusivas na skill preservam o baseline e reduzem o próximo par a uma chamada de tratamento.
 
+No GitHub Actions, cada repetição usa uma chave de cache própria. Isso permite continuar as amostras 2 e 3 sem misturar resultados e sem recalcular um baseline já salvo para a mesma impressão digital.
+
 Sem `--agent-container-image`, o runner usa as CLIs instaladas no host. Esse modo serve para diagnóstico local e exige `codex` ou `cursor-agent` no `PATH`.
 
 ## GitHub Actions
