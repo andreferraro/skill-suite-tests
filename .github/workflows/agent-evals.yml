@@ -153,7 +153,7 @@ jobs:
             --baseline-cache evals/baseline-cache \
             --max-agent-calls 2 \
             --model "$CODEX_EVAL_MODEL" \
-            --enforce-gate \
+            --enforce-critical-gate \
             --agent-container-image skill-suite-tests-eval-agent:local
       - name: Save new comparable baseline
         if: always() && steps.baseline-cache.outputs.cache-hit != 'true' && hashFiles('evals/baseline-cache/**') != ''
@@ -231,7 +231,7 @@ jobs:
             --baseline-cache evals/baseline-cache \
             --max-agent-calls 2 \
             --model "$CURSOR_EVAL_MODEL" \
-            --enforce-gate \
+            --enforce-critical-gate \
             --agent-container-image skill-suite-tests-eval-agent:local
       - name: Save new comparable baseline
         if: always() && steps.baseline-cache.outputs.cache-hit != 'true' && hashFiles('evals/baseline-cache/**') != ''

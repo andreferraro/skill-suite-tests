@@ -167,6 +167,8 @@ Pushes, pull requests, merges e tags executam somente `quality.yml`. As proteç�
 
 O formulário do workflow mostra e valida o teto antes de liberar os jobs. Deixe a autorização desmarcada para executar somente a prévia gratuita. O runner aplica uma segunda trava. Esses números representam chamadas, não dólares. O custo varia conforme modelo e tokens.
 
+Cada job de caso exige execução válida e gate técnico aprovado. A comparação de ganho fica no job agregado, porque um caso pode ter baseline perfeito e ganho zero sem representar regressão da skill.
+
 ### Configuração do repositório
 
 Configure em **Settings > Secrets and variables > Actions**:

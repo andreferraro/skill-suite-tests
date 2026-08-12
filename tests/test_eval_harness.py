@@ -379,6 +379,50 @@ class AggregateTests(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(1, report["required_improved_cases"])
 
+    def test_critical_gate_accepts_a_perfect_baseline_without_gain(self) -> None:
+        results = [
+            result("codex", "events", "baseline", 100),
+            result("codex", "events", "skill", 100),
+        ]
+        report = aggregate(
+            results,
+            repetitions=1,
+            expected_agents=["codex"],
+            expected_cases=["events"],
+        )
+
+        self.assertFalse(report["passed"])
+        self.assertEqual(
+            0,
+            evaluation_exit_code(
+                report,
+                enforce_gate=False,
+                enforce_critical_gate=True,
+            ),
+        )
+        self.assertEqual(1, evaluation_exit_code(report, enforce_gate=True))
+
+    def test_critical_gate_rejects_a_failed_treatment(self) -> None:
+        results = [
+            result("codex", "web", "baseline", 20, critical=False),
+            result("codex", "web", "skill", 90, critical=False),
+        ]
+        report = aggregate(
+            results,
+            repetitions=1,
+            expected_agents=["codex"],
+            expected_cases=["web"],
+        )
+
+        self.assertEqual(
+            1,
+            evaluation_exit_code(
+                report,
+                enforce_gate=False,
+                enforce_critical_gate=True,
+            ),
+        )
+
     def test_gate_rejects_a_completely_missing_case(self) -> None:
         results = [
             result("codex", "web", "baseline", 80),

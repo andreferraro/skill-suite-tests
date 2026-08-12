@@ -732,9 +732,21 @@ def aggregate(
     }
 
 
-def evaluation_exit_code(report: dict[str, Any], *, enforce_gate: bool) -> int:
+def evaluation_exit_code(
+    report: dict[str, Any],
+    *,
+    enforce_gate: bool,
+    enforce_critical_gate: bool = False,
+) -> int:
     if report.get("execution_failures"):
         return 1
+    if enforce_critical_gate:
+        if report.get("matrix_errors"):
+            return 1
+        if not report.get("comparisons") or any(
+            not comparison["critical_gate"] for comparison in report["comparisons"]
+        ):
+            return 1
     return 1 if enforce_gate and not report["passed"] else 0
 
 
@@ -772,6 +784,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--enforce-gate", action="store_true")
+    parser.add_argument(
+        "--enforce-critical-gate",
+        action="store_true",
+        help="Fail on execution, matrix, or technical case gates without requiring gain over baseline",
+    )
     return parser
 
 
@@ -870,7 +887,11 @@ def main() -> int:
         encoding="utf-8",
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    return evaluation_exit_code(report, enforce_gate=args.enforce_gate)
+    return evaluation_exit_code(
+        report,
+        enforce_gate=args.enforce_gate,
+        enforce_critical_gate=args.enforce_critical_gate,
+    )
 
 
 if __name__ == "__main__":
