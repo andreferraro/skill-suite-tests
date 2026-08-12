@@ -71,6 +71,7 @@ def build_agent_command(
             "--ephemeral",
             "--ignore-user-config",
             "--ignore-rules",
+            "--skip-git-repo-check",
             "--sandbox",
             "workspace-write",
             "--json",

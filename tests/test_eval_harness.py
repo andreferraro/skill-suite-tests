@@ -91,6 +91,7 @@ class CommandTests(unittest.TestCase):
             self.assertTrue(Path(environment["CODEX_HOME"]).is_dir())
             self.assertTrue(Path(environment["HOME"]).is_dir())
             self.assertIn("--ignore-user-config", command)
+            self.assertIn("--skip-git-repo-check", command)
             self.assertNotIn("CURSOR_API_KEY", environment)
 
 
