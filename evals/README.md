@@ -121,4 +121,33 @@ Use `--dry-run` para conferir comandos e isolamento sem consumir APIs.
 - `agent-evals.yml`: Codex em todo pull request, uma repetição por caso.
 - `release-evals.yml`: Codex e Cursor, três repetições por caso, em pull requests para `main` e por execução manual.
 
-Configure `OPENAI_API_KEY` e `CURSOR_API_KEY` em **Settings > Secrets and variables > Actions**. Crie também as variáveis `CODEX_EVAL_MODEL` e `CURSOR_EVAL_MODEL` com os nomes exatos dos modelos. Os workflows entregam cada chave somente ao job do agente correspondente e publicam logs, resultados individuais e o resumo consolidado como artefatos.
+### Configuração do repositório
+
+Configure em **Settings > Secrets and variables > Actions**:
+
+- secrets: `OPENAI_API_KEY` e `CURSOR_API_KEY`;
+- variables: `CODEX_EVAL_MODEL` e `CURSOR_EVAL_MODEL`.
+
+Os modelos devem usar os nomes exatos aceitos pelas respectivas CLIs. Os workflows entregam cada chave somente ao job do agente correspondente e publicam logs, resultados individuais e o resumo consolidado como artefatos.
+
+Também é possível cadastrar pela GitHub CLI. Os comandos de secret solicitam o valor de forma interativa:
+
+```bash
+gh secret set OPENAI_API_KEY
+gh secret set CURSOR_API_KEY
+gh variable set CODEX_EVAL_MODEL --body "<modelo-codex>"
+gh variable set CURSOR_EVAL_MODEL --body "<modelo-cursor>"
+```
+
+Não coloque chaves em `--body`, arquivos versionados, logs ou mensagens do pull request.
+
+### Fluxo da v0.3.0
+
+1. Reexecute `agent-evals.yml` no PR da feature para `develop`.
+2. Exija aprovação do Codex nos três casos antes do merge.
+3. Crie `release/0.3.0` a partir de `develop`.
+4. Abra o PR da release para `main` para executar Codex e Cursor três vezes por caso.
+5. Publique a tag somente depois da aprovação do gate agregado.
+6. Sincronize a release de `main` para `develop`.
+
+Ausência de credencial ou modelo encerra o workflow no preflight. Falha em score, mutation score, cobertura de risco, preservação do código ou evidência válida bloqueia a release.

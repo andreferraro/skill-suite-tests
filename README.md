@@ -12,19 +12,20 @@ Skill para orientar Codex e Cursor na criação de testes automatizados guiados 
 
 ## Estado da v0.3.0
 
-O código desta versão está em preparação. A tag `v0.3.0` só será criada depois que Codex e Cursor passarem os gates de release.
+A implementação está disponível no [PR #8](https://github.com/andreferraro/skill-suite-tests/pull/8). A tag `v0.3.0` será criada depois que Codex e Cursor passarem os gates definidos para a release.
 
 | Evidência | Estado atual |
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
 | Validação local dos scripts | 23 testes unitários aprovados |
-| Eval pareado Codex | Pendente de execução no GitHub Actions |
-| Eval pareado Cursor | Pendente de execução no GitHub Actions |
+| CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/runs/31607954210) |
+| Eval pareado Codex | Aguardando `OPENAI_API_KEY` e `CODEX_EVAL_MODEL` no GitHub Actions |
+| Eval pareado Cursor | Aguardando `CURSOR_API_KEY` e `CURSOR_EVAL_MODEL` no GitHub Actions |
 | Ganho sobre baseline | Sem resultado publicado |
-| Release `v0.3.0` | Bloqueada pelos evals pareados |
+| Release `v0.3.0` | Aguardando configuração e aprovação dos evals pareados |
 
-O histórico verificável ficará nos artefatos e resumos dos workflows [Agent evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml) e [Release evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/release-evals.yml).
+As tentativas atuais dos evals encerram no preflight porque o repositório ainda não possui as chaves e os modelos. Nenhuma chamada de agente foi executada e nenhum resultado de benchmark foi produzido. O histórico verificável fica nos artefatos e resumos dos workflows [Agent evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/agent-evals.yml) e [Release evals](https://github.com/andreferraro/skill-suite-tests/actions/workflows/release-evals.yml).
 
 ## O que esta skill é
 
@@ -233,6 +234,29 @@ O repositório usa Gitflow:
 - `hotfix/*`: correções originadas de `main`.
 
 Commits seguem Conventional Commits. Uma release exige qualidade estrutural, fixtures verdes, eval de PR com Codex e eval de release com Codex e Cursor.
+
+### O que falta para publicar a v0.3.0
+
+Configure em **Settings > Secrets and variables > Actions**:
+
+| Tipo | Nome | Uso |
+| --- | --- | --- |
+| Secret | `OPENAI_API_KEY` | Eval pareado com Codex |
+| Secret | `CURSOR_API_KEY` | Eval pareado com Cursor |
+| Variable | `CODEX_EVAL_MODEL` | Nome exato do modelo usado pelo Codex |
+| Variable | `CURSOR_EVAL_MODEL` | Nome exato do modelo usado pelo Cursor |
+
+As chaves devem ser cadastradas diretamente no GitHub. Evite colocá-las em arquivos, comandos com valor literal, commits ou mensagens do PR.
+
+Depois da configuração:
+
+1. Reexecute o workflow **Agent evals** no PR #8.
+2. Confirme o gate do Codex nos três casos e faça o merge em `develop`.
+3. Crie `release/0.3.0` a partir de `develop` e abra um PR para `main`.
+4. Confirme o workflow **Release evals** com três repetições por caso para Codex e Cursor.
+5. Faça o merge em `main`, crie a tag `v0.3.0` e sincronize `main` com `develop`.
+
+A release permanece pendente se o tratamento não superar o baseline ou se qualquer gate obrigatório falhar. Os critérios completos estão em [`evals/README.md`](evals/README.md).
 
 ## Referências
 
