@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "target": "Componente de recuperação de senha",
+  "support_status": "validated",
+  "classification": {
+    "purpose": ["regression"],
+    "level": ["component"],
+    "quality_attributes": ["functional", "accessibility", "resilience"],
+    "techniques": ["state-transition", "negative-testing"]
+  },
+  "basis": [
+    {
+      "type": "implementation",
+      "reference": "src/PasswordReset.tsx"
+    }
+  ],
+  "risks": [
+    {
+      "id": "stale-response",
+      "description": "Uma resposta antiga substitui o resultado da solicitação mais recente.",
+      "impact": "A interface confirma uma operação diferente da última ação do usuário."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "newest-response-wins",
+      "risk_ids": ["stale-response"],
+      "name": "Preserva o resultado da solicitação mais recente",
+      "preconditions": "Duas promises controladas e o componente renderizado.",
+      "stimulus": "Enviar duas solicitações e resolver a segunda antes da primeira.",
+      "oracle": "Somente a mensagem da segunda solicitação permanece visível.",
+      "isolation": "Cliente HTTP substituído por promises controladas no teste.",
+      "cleanup": "Testing Library desmonta o componente após o cenário."
+    }
+  ],
+  "boundaries": [
+    {
+      "name": "React component",
+      "mode": "real",
+      "rationale": "O risco está na coordenação do estado assíncrono do componente."
+    },
+    {
+      "name": "Reset client",
+      "mode": "simulated",
+      "rationale": "Promises controladas tornam a ordem das respostas determinística."
+    }
+  ],
+  "files_changed": [
+    "tests/PasswordReset.test.tsx"
+  ],
+  "commands": [
+    {
+      "command": "npm test -- --run",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "A suíte relacionada concluiu sem falhas."
+    }
+  ],
+  "evidence": [
+    {
+      "type": "test-run",
+      "summary": "O cenário dirigido passou na implementação correta e falhou quando a proteção contra resposta obsoleta foi removida."
+    }
+  ],
+  "limitations": [
+    "O exemplo cobre o estado do componente e não executa um navegador real."
+  ]
+}

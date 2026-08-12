@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/andreferraro/skill-suite-tests/schemas/test-evidence.v1.json",
+  "title": "Skill Suite Tests evidence report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "target",
+    "support_status",
+    "classification",
+    "basis",
+    "risks",
+    "scenarios",
+    "boundaries",
+    "files_changed",
+    "commands",
+    "evidence",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "target": { "$ref": "#/$defs/nonEmptyString" },
+    "support_status": { "enum": ["validated", "adaptable"] },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["purpose", "level", "quality_attributes", "techniques"],
+      "properties": {
+        "purpose": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "level": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "quality_attributes": { "$ref": "#/$defs/nonEmptyStringArray" },
+        "techniques": { "$ref": "#/$defs/nonEmptyStringArray" }
+      }
+    },
+    "basis": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "reference"],
+        "properties": {
+          "type": { "$ref": "#/$defs/nonEmptyString" },
+          "reference": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "impact"],
+        "properties": {
+          "id": { "$ref": "#/$defs/nonEmptyString" },
+          "description": { "$ref": "#/$defs/nonEmptyString" },
+          "impact": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "risk_ids", "name", "preconditions", "stimulus", "oracle", "isolation", "cleanup"],
+        "properties": {
+          "id": { "$ref": "#/$defs/nonEmptyString" },
+          "risk_ids": { "$ref": "#/$defs/nonEmptyStringArray" },
+          "name": { "$ref": "#/$defs/nonEmptyString" },
+          "preconditions": { "$ref": "#/$defs/nonEmptyString" },
+          "stimulus": { "$ref": "#/$defs/nonEmptyString" },
+          "oracle": { "$ref": "#/$defs/nonEmptyString" },
+          "isolation": { "$ref": "#/$defs/nonEmptyString" },
+          "cleanup": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "boundaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "mode", "rationale"],
+        "properties": {
+          "name": { "$ref": "#/$defs/nonEmptyString" },
+          "mode": { "enum": ["real", "containerized", "virtualized", "simulated"] },
+          "rationale": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "files_changed": { "$ref": "#/$defs/nonEmptyStringArray" },
+    "commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "status", "exit_code", "evidence"],
+        "properties": {
+          "command": { "$ref": "#/$defs/nonEmptyString" },
+          "status": { "enum": ["passed", "failed", "not_run"] },
+          "exit_code": { "type": ["integer", "null"] },
+          "evidence": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "summary"],
+        "properties": {
+          "type": { "$ref": "#/$defs/nonEmptyString" },
+          "summary": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+    "nonEmptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    }
+  }
+}

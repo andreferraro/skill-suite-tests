@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {
+      "id": "web-password-reset",
+      "workspace": "fixtures/web-password-reset/workspace",
+      "reference_tests": "graders/web-password-reset/reference",
+      "prompt": "Crie e execute testes automatizados guiados por risco para o componente de recuperação de senha. Não altere código de produção. Gere test-evidence.json na raiz do projeto.",
+      "setup_commands": [
+        ["npm", "ci"],
+        ["npx", "playwright", "install", "--with-deps", "chromium"]
+      ],
+      "test_command": ["npm", "run", "test:all"],
+      "production_paths": ["src/"],
+      "artifact_paths": ["tests/", "test-evidence.json"],
+      "required_risks": ["loading", "error-announcement", "keyboard-accessibility", "stale-response"],
+      "risk_signal_groups": {
+        "loading": [["loading", "carregamento", "pendente", "pending"]],
+        "error-announcement": [["error-announcement", "role alert", "anuncio de erro", "alerta acessivel"]],
+        "keyboard-accessibility": [["keyboard-accessibility", "teclado", "keyboard", "nome acessivel", "accessible name"]],
+        "stale-response": [["stale-response", "resposta obsoleta", "resposta antiga", "stale response", "fora de ordem"]]
+      },
+      "mutations": [
+        {
+          "id": "loading-not-disabled",
+          "file": "src/PasswordReset.tsx",
+          "search": "<button type=\"submit\" disabled={loading}>",
+          "replace": "<button type=\"submit\" disabled={false}>"
+        },
+        {
+          "id": "error-not-announced",
+          "file": "src/PasswordReset.tsx",
+          "search": "role={result.kind === \"error\" ? \"alert\" : \"status\"}",
+          "replace": "role=\"status\""
+        },
+        {
+          "id": "input-without-accessible-name",
+          "file": "src/PasswordReset.tsx",
+          "search": "<label htmlFor=\"email\">E-mail</label>",
+          "replace": "<span>E-mail</span>"
+        },
+        {
+          "id": "stale-response-wins",
+          "file": "src/PasswordReset.tsx",
+          "search": "if (requestId !== latestRequest.current) return;",
+          "replace": "// mutation: stale responses are accepted"
+        }
+      ]
+    },
+    {
+      "id": "api-payment",
+      "workspace": "fixtures/api-payment/workspace",
+      "reference_tests": "graders/api-payment/reference",
+      "prompt": "Crie e execute testes automatizados guiados por risco para a criação de pagamentos. Não altere código de produção. Gere test-evidence.json na raiz do projeto.",
+      "setup_commands": [
+        ["python", "-m", "pip", "install", "--require-hashes", "-r", "requirements.lock"]
+      ],
+      "test_command": ["python", "-m", "pytest", "-q"],
+      "production_paths": ["app/"],
+      "artifact_paths": ["tests/", "test-evidence.json"],
+      "required_risks": ["idempotency", "concurrency", "validation", "rollback"],
+      "risk_signal_groups": {
+        "idempotency": [["idempot"]],
+        "concurrency": [["concorr", "concurr", "condicao de corrida", "race condition"]],
+        "validation": [["valor zero", "zero amount", "amount <= 0", "validacao de valor", "valor positivo"]],
+        "rollback": [["rollback", "reversao", "transacao desfeita"]]
+      },
+      "mutations": [
+        {
+          "id": "unstable-idempotent-response",
+          "file": "app/payment.py",
+          "search": "return Payment(id=existing[0], idempotency_key=idempotency_key, amount=existing[1], created=False)",
+          "replace": "return Payment(id=str(uuid4()), idempotency_key=idempotency_key, amount=existing[1], created=False)"
+        },
+        {
+          "id": "deferred-concurrent-transaction",
+          "file": "app/payment.py",
+          "search": "connection.execute(\"BEGIN IMMEDIATE\")",
+          "replace": "connection.execute(\"BEGIN DEFERRED\")"
+        },
+        {
+          "id": "zero-amount-accepted",
+          "file": "app/payment.py",
+          "search": "if amount <= 0:",
+          "replace": "if amount < 0:"
+        },
+        {
+          "id": "failed-insert-committed",
+          "file": "app/payment.py",
+          "search": "connection.rollback()",
+          "replace": "connection.commit()"
+        }
+      ]
+    },
+    {
+      "id": "events-order-consumer",
+      "workspace": "fixtures/events-order-consumer/workspace",
+      "reference_tests": "graders/events-order-consumer/reference",
+      "prompt": "Crie e execute testes automatizados guiados por risco para o consumidor de pedidos. Não altere código de produção. Gere test-evidence.json na raiz do projeto.",
+      "setup_commands": [
+        ["npm", "ci"]
+      ],
+      "test_command": ["npm", "test", "--", "--run"],
+      "extended_test_command": ["npm", "run", "test:infra"],
+      "production_paths": ["src/"],
+      "artifact_paths": ["tests/", "test-evidence.json"],
+      "required_risks": ["deduplication", "retry", "dlq", "ordering-correlation"],
+      "risk_signal_groups": {
+        "deduplication": [["dedup", "duplic"]],
+        "retry": [["retry", "nova tentativa", "retentativa"]],
+        "dlq": [["dlq", "dead letter"]],
+        "ordering-correlation": [
+          ["ordering", "ordem", "sequencia", "sequence"],
+          ["correlation", "correlacao"]
+        ]
+      },
+      "mutations": [
+        {
+          "id": "deduplication-disabled",
+          "file": "src/orderConsumer.ts",
+          "search": "if (await this.dependencies.hasProcessed(message.id)) {",
+          "replace": "if (false && (await this.dependencies.hasProcessed(message.id))) {"
+        },
+        {
+          "id": "retry-attempt-not-incremented",
+          "file": "src/orderConsumer.ts",
+          "search": "attempt: message.attempt + 1,",
+          "replace": "attempt: message.attempt,"
+        },
+        {
+          "id": "dlq-one-attempt-late",
+          "file": "src/orderConsumer.ts",
+          "search": "if (message.attempt >= this.maxAttempts) {",
+          "replace": "if (message.attempt > this.maxAttempts) {"
+        },
+        {
+          "id": "correlation-id-lost",
+          "file": "src/orderConsumer.ts",
+          "search": "correlationId: message.correlationId,",
+          "replace": "correlationId: \"\","
+        }
+      ]
+    }
+  ]
+}
