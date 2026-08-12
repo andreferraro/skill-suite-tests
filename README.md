@@ -10,6 +10,25 @@ Skill para orientar Codex e Cursor na criação de testes automatizados guiados 
 
 ![Diagrama dos tipos de teste organizados por propósito, nível, qualidade e técnica](assets/linkedin-tipos-de-testes-diagrama.png)
 
+## Como a skill prova que ajuda
+
+A certificação é um experimento pareado. Baseline e tratamento recebem o mesmo agente, modelo, pedido, projeto e contrato de evidência. A única diferença é o uso explícito da skill. A release passa quando essa diferença produz testes melhores de forma repetível.
+
+| Proteção | Critério aplicado |
+| --- | --- |
+| Comparação justa | Mesmo agente, modelo, pedido, fixture e schema nos dois modos |
+| Avaliação cega | Riscos esperados, graders e mutantes ficam fora do workspace do agente |
+| Sensibilidade real | Os testes passam na implementação correta e precisam detectar defeitos conhecidos |
+| Segurança da mudança | Código de produção e manifests permanecem intactos |
+| Evidência reproduzível | Comandos, resultados, riscos e limitações precisam formar um relatório válido |
+| Repetibilidade | Três repetições por agente e caso, com aprovação crítica em pelo menos duas |
+| Ganho comprovado | Mediana mínima de 85, ganho mínimo de 8 pontos e melhora em dois dos três casos por agente |
+| Isolamento e custo | Contêiner descartável, graders ocultos e execução paga somente manual, com teto de chamadas |
+
+Falhas individuais permanecem nos artefatos e participam da consolidação. Um baseline perfeito pode empatar em um caso, mas a release ainda precisa demonstrar ganho agregado sem regressão relevante.
+
+Leia a [metodologia completa](evals/README.md#integridade-da-certificação) e consulte o [relatório auditável da v0.3.0](evals/results/v0.3.0-certification.json).
+
 ## Estado da v0.3.0
 
 A versão `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andreferraro/skill-suite-tests/commit/7da3f5c243c80b259c330335fe29adab9e80da0f) e publicada pelo [PR #9](https://github.com/andreferraro/skill-suite-tests/pull/9). O [relatório consolidado](evals/results/v0.3.0-certification.json) preserva as medianas, os gates e os links para as execuções reais.

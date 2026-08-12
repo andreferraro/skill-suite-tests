@@ -13,6 +13,38 @@ A `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andreferraro
 
 As notas são medianas. O relatório contém os baselines, ganhos e links para todos os runs. Resultados individuais reprovados permanecem registrados e contam na consolidação.
 
+## Integridade da certificação
+
+O benchmark foi desenhado para medir a contribuição da skill, preservar resultados desfavoráveis e permitir auditoria por outra pessoa.
+
+### Comparação pareada
+
+Baseline e tratamento usam o mesmo agente, modelo, pedido curto, fixture e schema de evidência. O tratamento acrescenta somente a invocação da skill. A impressão digital do cache inclui agente, modelo, fixture, prompt, contrato, grader, mutantes, harness e imagem das CLIs. Qualquer mudança relevante invalida o baseline armazenado.
+
+### Avaliação cega
+
+O workspace entregue ao agente contém apenas o projeto e a solicitação. Riscos obrigatórios, graders, implementações de referência e mutantes permanecem no host. O agente precisa descobrir os riscos pelo comportamento e pelo código disponível.
+
+### Prova de sensibilidade
+
+Cada suíte gerada é executada na implementação correta e contra quatro mutações conhecidas do caso. A pontuação considera execução, mutation score, cobertura dos riscos, integração com a stack e validade das evidências. Cobertura de linhas isolada não substitui a detecção do defeito.
+
+### Preservação das falhas
+
+Execuções reprovadas continuam nos artefatos e entram na mediana. A certificação exige três repetições por agente e caso e aprovação crítica em pelo menos duas. Uma amostra ruim não é descartada nem substituída por uma nova tentativa conveniente.
+
+### Isolamento e segurança
+
+Cada agente roda em contêiner descartável, com raiz somente leitura, capacidades removidas e mounts explícitos. O repositório do benchmark, os graders e os mutantes ficam fora do alcance do agente. Hashes calculados antes e depois da execução fazem o gate rejeitar mudanças em código de produção ou manifests, além de relatórios sem comandos ou riscos rastreáveis.
+
+### Gate de publicação
+
+A release exige matriz completa, mediana da skill de pelo menos 85/100, ganho mediano mínimo de 8 pontos, melhoria em dois dos três casos por agente e nenhuma regressão maior que 5 pontos. Um caso com baseline perfeito pode terminar empatado, desde que o tratamento preserve a qualidade e o ganho agregado permaneça comprovado.
+
+### Reprodutibilidade e custo
+
+O relatório consolidado registra commit, agente, caso, modo, repetição, notas e links para os runs. Evals pagos exigem acionamento manual, autorização explícita e teto de chamadas. Pull requests, merges e tags executam somente as validações determinísticas gratuitas.
+
 ## Casos
 
 | Caso | Stack | Riscos obrigatórios |
