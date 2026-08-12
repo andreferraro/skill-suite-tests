@@ -11,11 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "evals"))
 
 from eval_lib import apply_mutation, install_skill, restore_mutation, run_command, sanitized_environment  # noqa: E402
-from run_eval import aggregate  # noqa: E402
+from run_eval import aggregate, build_agent_command, evaluation_exit_code  # noqa: E402
 
 
 def result(agent: str, case: str, mode: str, score: float, critical: bool = True) -> dict:
     return {
+        "run_id": f"{agent}-{case}-{mode}-1",
         "agent": agent,
         "case": case,
         "mode": mode,
@@ -65,6 +66,33 @@ class CommandTests(unittest.TestCase):
         self.assertEqual(environment["OPENAI_API_KEY"], "agent-key")
         self.assertNotIn("DATABASE_URL", environment)
 
+    def test_codex_home_exists_before_cli_execution(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            runtime_home = root / "agent-home"
+            with (
+                mock.patch("run_eval.shutil.which", return_value="codex"),
+                mock.patch.dict(
+                    "os.environ",
+                    {"PATH": "runtime-path", "OPENAI_API_KEY": "agent-key"},
+                    clear=True,
+                ),
+            ):
+                command, environment = build_agent_command(
+                    "codex",
+                    "Create tests",
+                    workspace,
+                    runtime_home,
+                    "test-model",
+                )
+
+            self.assertTrue(Path(environment["CODEX_HOME"]).is_dir())
+            self.assertTrue(Path(environment["HOME"]).is_dir())
+            self.assertIn("--ignore-user-config", command)
+            self.assertNotIn("CURSOR_API_KEY", environment)
+
 
 class AggregateTests(unittest.TestCase):
     def test_release_gate_passes_with_required_gain(self) -> None:
@@ -97,6 +125,18 @@ class AggregateTests(unittest.TestCase):
         report = aggregate(results, repetitions=1)
 
         self.assertFalse(report["passed"])
+
+    def test_agent_process_failure_is_reported_and_fails_job(self) -> None:
+        results = []
+        for case in ("web", "api", "events"):
+            results.extend((result("codex", case, "baseline", 80), result("codex", case, "skill", 90)))
+        results[0]["agent_exit_code"] = 1
+
+        report = aggregate(results, repetitions=1)
+
+        self.assertEqual(["codex-web-baseline-1"], report["execution_failures"])
+        self.assertFalse(report["passed"])
+        self.assertEqual(1, evaluation_exit_code(report, enforce_gate=False))
 
 
 class SkillPackagingTests(unittest.TestCase):

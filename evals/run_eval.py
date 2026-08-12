@@ -55,10 +55,16 @@ def build_agent_command(
         "XDG_CONFIG_HOME": str(isolated_home / ".config"),
         "XDG_DATA_HOME": str(isolated_home / ".local" / "share"),
     }
+    for name, value in isolated_paths.items():
+        if name != "PLAYWRIGHT_BROWSERS_PATH":
+            Path(value).mkdir(parents=True, exist_ok=True)
+
     if agent == "codex":
         executable = shutil.which("codex")
         if not executable:
             raise RuntimeError("codex CLI is not available")
+        codex_home = runtime_home / "codex-home"
+        codex_home.mkdir(parents=True, exist_ok=True)
         command = [
             executable,
             "exec",
@@ -73,7 +79,7 @@ def build_agent_command(
             command.extend(["--model", model])
         command.append(prompt)
         environment = sanitized_environment(
-            {**isolated_paths, "CODEX_HOME": str(runtime_home / "codex-home")}
+            {**isolated_paths, "CODEX_HOME": str(codex_home)}
         )
         environment.pop("CURSOR_API_KEY", None)
         return command, environment
@@ -316,8 +322,14 @@ def aggregate(results: list[dict[str, Any]], *, repetitions: int) -> dict[str, A
 
     skill_scores = [item["skill"] for item in comparisons]
     gains = [item["gain"] for item in comparisons]
+    execution_failures = [
+        result["run_id"]
+        for result in results
+        if result.get("agent_exit_code", 0) != 0
+    ]
     passed = (
-        statistics.median(skill_scores) >= 85
+        not execution_failures
+        and statistics.median(skill_scores) >= 85
         and statistics.median(gains) >= 8
         and all(
             sum(item["gain"] > 0 for item in comparisons if item["agent"] == agent) >= 2
@@ -329,11 +341,18 @@ def aggregate(results: list[dict[str, Any]], *, repetitions: int) -> dict[str, A
     return {
         "dry_run": False,
         "passed": passed,
+        "execution_failures": execution_failures,
         "median_skill_score": statistics.median(skill_scores),
         "median_gain": statistics.median(gains),
         "summaries": summaries,
         "comparisons": comparisons,
     }
+
+
+def evaluation_exit_code(report: dict[str, Any], *, enforce_gate: bool) -> int:
+    if report.get("execution_failures"):
+        return 1
+    return 1 if enforce_gate and not report["passed"] else 0
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -380,7 +399,7 @@ def main() -> int:
         encoding="utf-8",
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    return 1 if args.enforce_gate and not report["passed"] else 0
+    return evaluation_exit_code(report, enforce_gate=args.enforce_gate)
 
 
 if __name__ == "__main__":
