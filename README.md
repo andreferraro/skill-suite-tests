@@ -18,15 +18,15 @@ A implementação está disponível no [PR #8](https://github.com/andreferraro/s
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
-| Validação local dos scripts | 43 testes unitários aprovados |
+| Validação local dos scripts | 46 testes unitários aprovados |
 | CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml) |
 | Configuração do GitHub | Os dois secrets e as duas variáveis estão cadastrados |
-| Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31634174537) |
+| Eval pareado Codex | [Seis execuções concluídas, gate de eficácia reprovado](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635092731) |
 | Eval pareado Cursor | Configurado e pendente do gate de release |
-| Ganho mediano sobre baseline | -8,75 pontos na última execução |
+| Ganho mediano sobre baseline | 21,25 pontos na última execução |
 | Release `v0.3.0` | Bloqueada até a execução e aprovação dos evals pareados |
 
-A [execução 31634174537](https://github.com/andreferraro/skill-suite-tests/actions/runs/31634174537) usou pedidos curtos e riscos ocultos. Web subiu de 27,5 para 96,25. API caiu de 87,5 para 78,75 porque a skill não transformou os controles de concorrência e validação do serviço em cenários sensíveis. Eventos caiu de 100 para 35 porque o teste de infraestrutura injetou a falha removendo uma tabela e quebrou uma leitura anterior ao ponto pretendido. O detector e o contrato foram ajustados a partir dessas evidências, mantendo os mesmos mutantes e gates.
+A [execução 31635092731](https://github.com/andreferraro/skill-suite-tests/actions/runs/31635092731) comprovou o avanço do detector: API subiu de 78,75 para 100 e eventos manteve 100. Web subiu de 27,5 para 83,75, mas deixou escapar o mutante de resposta assíncrona obsoleta. O teste aguardou somente um microtask depois da Promise antiga e terminou antes da atualização incorreta. A prova de sensibilidade passou a exigir execução contra mutação temporária, restauração exata e nova execução verde.
 
 ## O que esta skill é
 
@@ -234,6 +234,7 @@ python evals/validate_fixtures.py
 
 - [`SKILL.md`](SKILL.md): contrato e fluxo do agente.
 - [`scripts/detect_test_context.py`](scripts/detect_test_context.py): inventário determinístico da stack e de sinais de risco confirmáveis no código.
+- [`scripts/prove_test_sensitivity.py`](scripts/prove_test_sensitivity.py): mutação local de uma ocorrência, execução do teste e restauração garantida do arquivo.
 - [`scripts/validate_test_evidence.py`](scripts/validate_test_evidence.py): validação semântica do relatório.
 - [`schemas/test-evidence.v1.json`](schemas/test-evidence.v1.json): contrato JSON Schema.
 - [`references/`](references): taxonomia, oráculos, ecossistemas e bases técnicas.

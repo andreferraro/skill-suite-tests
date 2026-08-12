@@ -435,6 +435,7 @@ class SkillPackagingTests(unittest.TestCase):
             install_skill(destination)
             self.assertTrue((destination / "SKILL.md").is_file())
             self.assertTrue((destination / "scripts" / "detect_test_context.py").is_file())
+            self.assertTrue((destination / "scripts" / "prove_test_sensitivity.py").is_file())
             self.assertTrue((destination / "examples" / "test-evidence.example.json").is_file())
             self.assertFalse((destination / "scripts" / "validate_repository.py").exists())
             self.assertFalse((destination / "evals").exists())

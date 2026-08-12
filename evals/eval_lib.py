@@ -238,6 +238,7 @@ def skill_runtime_files() -> list[Path]:
         REPO_ROOT / "SKILL.md",
         REPO_ROOT / "agents" / "openai.yaml",
         REPO_ROOT / "scripts" / "detect_test_context.py",
+        REPO_ROOT / "scripts" / "prove_test_sensitivity.py",
         REPO_ROOT / "scripts" / "validate_test_evidence.py",
     ]
     for directory in ("examples", "references", "schemas"):
