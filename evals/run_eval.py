@@ -245,6 +245,19 @@ def run_once(
         if not environment.get(required_secret):
             raise RuntimeError(f"{required_secret} is required for {agent} evals")
 
+        if agent == "codex":
+            authentication = run_command(
+                [command[0], "login", "--with-api-key"],
+                workspace,
+                env=environment,
+                input_text=environment[required_secret] + "\n",
+                timeout=30,
+            )
+            authentication_log = artifacts / "agent-auth.json"
+            write_command_log(authentication_log, authentication)
+            if not authentication.passed:
+                raise RuntimeError(f"authentication failed for {run_id}; see {authentication_log}")
+
         for index, setup_command in enumerate(case["setup_commands"], start=1):
             setup = run_command(setup_command, workspace, env=environment, timeout=900)
             setup_log = artifacts / f"setup-{index}.json"

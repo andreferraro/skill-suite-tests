@@ -55,6 +55,17 @@ class CommandTests(unittest.TestCase):
         self.assertTrue(command.passed)
         self.assertEqual(command.stdout.strip(), "ok")
 
+    def test_run_command_passes_stdin_without_adding_it_to_command(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            command = run_command(
+                [sys.executable, "-c", "import sys; print(len(sys.stdin.read()))"],
+                Path(directory),
+                input_text="sensitive-value\n",
+            )
+        self.assertTrue(command.passed)
+        self.assertEqual("16", command.stdout.strip())
+        self.assertNotIn("sensitive-value", " ".join(command.command))
+
     def test_agent_environment_uses_allowlist(self) -> None:
         with mock.patch.dict(
             "os.environ",

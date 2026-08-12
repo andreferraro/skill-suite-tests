@@ -80,12 +80,18 @@ def run_command(
     cwd: Path,
     *,
     env: dict[str, str] | None = None,
+    input_text: str | None = None,
     timeout: int = 300,
 ) -> CommandResult:
     resolved = shutil.which(command[0], path=(env or os.environ).get("PATH"))
     if resolved is None:
         return CommandResult(command, 127, "", f"executable not found: {command[0]}")
     executable_command = [resolved, *command[1:]]
+    input_options: dict[str, Any]
+    if input_text is None:
+        input_options = {"stdin": subprocess.DEVNULL}
+    else:
+        input_options = {"input": input_text}
     try:
         process = subprocess.run(
             executable_command,
@@ -97,6 +103,7 @@ def run_command(
             capture_output=True,
             timeout=timeout,
             check=False,
+            **input_options,
         )
     except subprocess.TimeoutExpired as error:
         stdout = error.stdout.decode("utf-8", errors="replace") if isinstance(error.stdout, bytes) else (error.stdout or "")
