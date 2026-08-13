@@ -1,0 +1,47 @@
+name: Propor uma melhoria
+description: Sugira uma melhoria de contrato, suporte, automação ou documentação.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Verificação inicial
+      options:
+        - label: Procurei issues abertas sobre a mesma proposta.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema observado
+      description: Qual limitação concreta precisa ser resolvida?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Resultado desejado
+      description: Descreva o comportamento e como ele poderia ser validado.
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Área principal
+      options:
+        - Contrato da skill
+        - Detector ou validador
+        - Tipos e técnicas de teste
+        - Fixture ou benchmark
+        - Integração com Codex
+        - Integração com Cursor
+        - Documentação
+        - Outro
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidência ou exemplo
+      description: Inclua um caso real, risco, cenário ou referência técnica.

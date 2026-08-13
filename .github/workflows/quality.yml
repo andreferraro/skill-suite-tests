@@ -63,7 +63,7 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
         with:
-          args: --no-progress --accept 200,429 './**/*.md'
+          args: --no-progress --max-retries 3 --retry-wait-time 2 --timeout 30 --accept 200,429 './**/*.md'
           fail: true
 
   secrets:
