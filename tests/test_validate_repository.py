@@ -28,6 +28,7 @@ class RepositoryValidationTests(unittest.TestCase):
             "Proteções distintas para estados ou fases distintas exigem provas distintas.",
             skill,
         )
+        self.assertIn("uma inversão que falha não substitui essa prova", skill)
         self.assertIn(
             "Primeiro executar a ação e aguardar o estado pós-cancelamento observável.",
             skill,
@@ -36,6 +37,8 @@ class RepositoryValidationTests(unittest.TestCase):
             "disparar `reset` e callback obsoleto no mesmo ciclo pode esconder a regressão",
             skill,
         )
+        self.assertIn("usar payload não vazio capaz de produzir um efeito proibido", skill)
+        self.assertIn("Distinguir falha fatal do parser ou transporte de erros parciais", skill)
 
     def test_paid_agent_jobs_enforce_the_case_gate(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "agent-evals.yml").read_text(

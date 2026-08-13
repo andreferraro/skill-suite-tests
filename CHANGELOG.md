@@ -9,6 +9,8 @@
 - Separação temporal entre a confirmação do cancelamento e a liquidação de callbacks obsoletos.
 - Prova de sensibilidade por mecanismo e fase, evitando generalização a partir de uma única mutação.
 - Saída do helper de mutação compatível com consoles Windows configurados com CP1252.
+- Oráculos de callback obsoleto exigem payload capaz de produzir efeito proibido.
+- Falhas fatais e erros parciais retornados com dados passam a exigir cenários distintos.
 
 ### Adicionado
 

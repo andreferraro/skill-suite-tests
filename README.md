@@ -126,7 +126,7 @@ A classificação usa quatro eixos:
 | Qualidade | Qual risco medir? | funcional, segurança, performance, acessibilidade, resiliência |
 | Técnica | Como gerar os casos? | limites, tabela de decisão, property-based, combinatório, fuzz |
 
-Em fluxos assíncronos, a skill separa estados que possuem proteções diferentes. Cancelamento durante parsing, processamento ou espera entre lotes vira cenários distintos quando cada fase pode falhar de uma forma própria. O teste confirma o estado cancelado antes de liberar callbacks obsoletos em outro ciclo assíncrono, evitando falsos verdes causados por batching. A prova de sensibilidade remove temporariamente cada proteção relevante e confirma que o cenário correspondente detecta a falha.
+Em fluxos assíncronos, a skill separa estados que possuem proteções diferentes. Cancelamento durante parsing, processamento ou espera entre lotes vira cenários distintos quando cada fase pode falhar de uma forma própria. O teste confirma o estado cancelado antes de liberar callbacks obsoletos, usando payload capaz de causar um efeito proibido caso o guard falhe. Erros fatais e erros parciais retornados com os dados também recebem oráculos distintos. A prova de sensibilidade remove temporariamente cada proteção relevante e confirma que o cenário correspondente detecta a falha.
 
 ## Instalação pelo repositório
 
