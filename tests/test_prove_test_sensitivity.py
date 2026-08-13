@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 
@@ -13,6 +14,13 @@ from prove_test_sensitivity import prove  # noqa: E402
 
 
 class ProveTestSensitivityTests(unittest.TestCase):
+    def test_result_with_unicode_can_be_printed_on_cp1252_console(self) -> None:
+        serialized = json.dumps({"stdout_tail": "✓ ❯"}, ensure_ascii=True, indent=2)
+
+        serialized.encode("cp1252")
+        self.assertIn(r"\u2713", serialized)
+        self.assertIn(r"\u276f", serialized)
+
     def test_proves_failure_and_restores_source_exactly(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
