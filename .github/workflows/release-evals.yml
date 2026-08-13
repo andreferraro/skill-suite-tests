@@ -140,7 +140,7 @@ jobs:
         with:
           path: evals/baseline-cache
           key: baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetitions }}
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: release-eval-codex-${{ matrix.case }}
@@ -212,7 +212,7 @@ jobs:
         with:
           path: evals/baseline-cache
           key: baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetitions }}
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: release-eval-cursor-${{ matrix.case }}
@@ -260,7 +260,7 @@ jobs:
             args+=(--agent "$SELECTED_AGENT")
           fi
           python evals/aggregate_reports.py "${args[@]}" --enforce-gate
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: release-eval-summary
