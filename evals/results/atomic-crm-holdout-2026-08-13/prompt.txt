@@ -1,0 +1,38 @@
+Crie e execute o conjunto mínimo de testes automatizados que falta para a máquina de estados da importação CSV implementada em src/components/atomic-crm/misc/usePapaParse.tsx.
+
+O objetivo é testar o comportamento observável do hook durante parsing, processamento em lotes, progresso, falhas e cancelamento.
+
+Reutilize Vitest, Vitest Browser e Playwright já configurados no projeto.
+
+Restrições:
+
+1. O resultado final pode alterar somente arquivos de teste e test-evidence.json.
+2. Mutações temporárias para provar sensibilidade são permitidas somente se o código de produção for restaurado byte a byte.
+3. Não altere package.json, package-lock.json, vitest.config.ts ou Makefile.
+4. Não instale dependências.
+5. Não execute npm audit fix.
+6. Não suba Supabase.
+7. Não crie testes E2E.
+8. Não use sleeps fixos.
+9. Controle operações assíncronas com Promises determinísticas.
+10. Trabalhe somente neste workspace.
+
+Use a imagem mcr.microsoft.com/playwright:v1.60.0-noble e o volume Docker definido na variável de ambiente ATOMIC_NODE_MODULES_VOLUME.
+
+Execute o teste criado com:
+
+docker run --rm --init --ipc=host --volume "${PWD}:/work" --volume "${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules" --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run test:unit:app -- --run --project app CAMINHO_DO_TESTE_CRIADO
+
+Execute a suíte canônica com:
+
+docker run --rm --init --ipc=host --volume "${PWD}:/work" --volume "${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules" --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run test:unit:app -- --run --project app
+
+Execute o typecheck com:
+
+docker run --rm --init --ipc=host --volume "${PWD}:/work" --volume "${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules" --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run typecheck
+
+Gere test-evidence.json conforme .eval-contract/test-evidence.v1.json e valide com:
+
+python .eval-contract/validate_test_evidence.py test-evidence.json --json
+
+Entregue arquivos criados, cenários cobertos, comandos executados, resultados reais e limitações. Limite suas conclusões ao que for efetivamente executado.

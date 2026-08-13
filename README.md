@@ -1,7 +1,7 @@
 # Skill Suite Tests
 
 [![Quality](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml/badge.svg)](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml)
-[![Certification: v0.3.0 passed](https://img.shields.io/badge/certification-v0.3.0%20passed-2ea44f)](evals/results/v0.3.0-certification.json)
+[![Certification: v0.4.0 passed](https://img.shields.io/badge/certification-v0.4.0%20passed-2ea44f)](evals/results/v0.4.0-certification.json)
 [![Release](https://img.shields.io/github/v/release/andreferraro/skill-suite-tests)](https://github.com/andreferraro/skill-suite-tests/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -53,37 +53,41 @@ A certificação é um experimento pareado. Baseline e tratamento recebem o mesm
 
 Falhas individuais permanecem nos artefatos e participam da consolidação. Um baseline perfeito pode empatar em um caso, mas a release ainda precisa demonstrar ganho agregado sem regressão relevante.
 
-Leia a [metodologia completa](evals/README.md#integridade-da-certificação) e consulte o [relatório auditável da v0.3.0](evals/results/v0.3.0-certification.json).
+Leia a [metodologia completa](evals/README.md#integridade-da-certificação) e consulte o [relatório auditável da v0.4.0](evals/results/v0.4.0-certification.json).
 
-## Estado da v0.3.0
+### Holdout em projeto open source
 
-A versão `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andreferraro/skill-suite-tests/commit/7da3f5c243c80b259c330335fe29adab9e80da0f) e publicada pelo [PR #9](https://github.com/andreferraro/skill-suite-tests/pull/9). O [relatório consolidado](evals/results/v0.3.0-certification.json) preserva as medianas, os gates e os links para as execuções reais.
+Além das fixtures controladas, a versão em desenvolvimento foi aplicada ao hook de importação CSV do [Atomic CRM](https://github.com/marmelab/atomic-crm). Com o mesmo modelo, projeto, pedido e contrato, o mutation score passou de **60% no baseline para 80% com a skill**. O tratamento aprovou o gate técnico, preservou o código de produção e matou quatro dos cinco defeitos ocultos.
 
-A `v0.3.1` reúne os ajustes de documentação, segurança e governança necessários para distribuição pública. O runtime da skill permanece igual ao certificado na `v0.3.0`, por isso a patch não repete os evals pagos.
+Consulte os [testes gerados, relatórios estruturados, comandos e resultados de cada mutação](evals/results/atomic-crm-holdout-2026-08-13/README.md). O holdout comprova ganho em uma execução real e complementa a certificação de três repetições da `v0.4.0`.
+
+## Estado da v0.4.0
+
+A versão `v0.4.0` fortalece testes de estados assíncronos, cancelamento, callbacks obsoletos e guards repetidos. Foi certificada no commit [`635c8e2`](https://github.com/andreferraro/skill-suite-tests/commit/635c8e24bb387745aea41573ba57d6724ea64bff) com Codex e Cursor, três repetições por caso e baselines equivalentes reaproveitados por fingerprint. O [relatório consolidado](evals/results/v0.4.0-certification.json) preserva as medianas, os gates, a falha individual e os links para todas as execuções.
 
 | Evidência | Resultado |
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
-| Validação local dos scripts | 55 testes unitários aprovados |
+| Validação local dos scripts | 61 testes unitários aprovados |
 | CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml) |
 | Certificação Codex | 3 repetições por caso, gate agregado aprovado |
 | Certificação Cursor | 3 repetições por caso, gate agregado aprovado |
-| Mediana da skill | 100/100 |
-| Ganho mediano sobre baseline | 16,875 pontos |
-| Certificação técnica | `v0.3.0`, aprovada e publicada pelo PR #9 |
-| Release pública atual | `v0.3.1`, sem alteração no runtime certificado |
+| Mediana da skill | 96,25/100 |
+| Ganho mediano sobre baseline | 8,75 pontos |
+| Certificação técnica | `v0.4.0`, aprovada em 13 de agosto de 2026 |
+| Holdout open source | Atomic CRM: 60% no baseline e 80% com a skill |
 
 ### Baseline versus skill
 
 | Agente | Caso | Baseline | Com a skill | Ganho |
 | --- | --- | ---: | ---: | ---: |
-| Codex | Pagamento | 87,5 | 100 | +12,5 |
+| Codex | Pagamento | 87,5 | 96,25 | +8,75 |
 | Codex | Consumidor de pedidos | 100 | 100 | 0 |
-| Codex | Recuperação de senha | 31,25 | 96,25 | +65 |
-| Cursor | Pagamento | 78,75 | 100 | +21,25 |
+| Codex | Recuperação de senha | 27,5 | 96,25 | +68,75 |
+| Cursor | Pagamento | 87,5 | 96,25 | +8,75 |
 | Cursor | Consumidor de pedidos | 96,25 | 100 | +3,75 |
-| Cursor | Recuperação de senha | 27,5 | 96,25 | +68,75 |
+| Cursor | Recuperação de senha | 27,5 | 92,5 | +65 |
 
 Os valores são medianas de três repetições por agente, caso e modo. A certificação exige aprovação crítica em pelo menos duas repetições. As falhas individuais continuam disponíveis nos artefatos dos runs e participam da mediana.
 
@@ -91,6 +95,7 @@ Os valores são medianas de três repetições por agente, caso e modo. A certif
 
 - Um guia operacional para agentes com acesso ao código, terminal e ferramentas do projeto.
 - Um processo de seleção de testes por risco, arquitetura, fronteira e oráculo.
+- Uma matriz de rastreabilidade entre risco, mecanismo protetivo, estado, cenário e oráculo.
 - Um pacote com detector de contexto, schema de evidência, validador e referências técnicas.
 - Uma skill agnóstica no núcleo, com benchmark inicial em Web, API e eventos.
 
@@ -105,7 +110,7 @@ Framework de testes autônomo, runner e infraestrutura própria ficam fora do es
 | Validado por fixture e mutações | Node.js, TypeScript, Vitest, RabbitMQ, PostgreSQL e Testcontainers | Consumidor de pedidos |
 | Adaptável | Outros frameworks, linguagens e plataformas | Sem benchmark publicado |
 
-O suporte validado cobre as três fixtures, os 12 mutantes e os evals pareados da `v0.3.0`. Outros ecossistemas continuam como suporte adaptável, sem benchmark publicado.
+O suporte validado cobre as três fixtures, os 12 mutantes, os evals pareados da `v0.4.0` e o holdout no Atomic CRM. Outros ecossistemas continuam como suporte adaptável, sem benchmark publicado.
 
 ## O que pode ser testado
 
@@ -124,6 +129,8 @@ A classificação usa quatro eixos:
 | Nível | Onde observar? | unidade, componente, contrato, integração, ponta a ponta |
 | Qualidade | Qual risco medir? | funcional, segurança, performance, acessibilidade, resiliência |
 | Técnica | Como gerar os casos? | limites, tabela de decisão, property-based, combinatório, fuzz |
+
+Em fluxos assíncronos, a skill separa estados que possuem proteções diferentes. Cancelamento durante parsing, processamento ou espera entre lotes vira cenários distintos quando cada fase pode falhar de uma forma própria. O teste confirma o estado cancelado antes de liberar callbacks obsoletos, usando payload capaz de causar um efeito proibido caso o guard falhe. Erros fatais e erros parciais retornados com os dados também recebem oráculos distintos. A prova de sensibilidade remove temporariamente cada proteção relevante e confirma que o cenário correspondente detecta a falha.
 
 ## Instalação pelo repositório
 
@@ -308,7 +315,8 @@ Essa validação não usa agentes nem consome créditos de API.
 
 - [`SKILL.md`](SKILL.md): contrato e fluxo do agente.
 - [`scripts/detect_test_context.py`](scripts/detect_test_context.py): inventário determinístico da stack e de sinais de risco confirmáveis no código.
-- [`scripts/prove_test_sensitivity.py`](scripts/prove_test_sensitivity.py): mutação local de uma ocorrência, execução do teste e restauração garantida do arquivo.
+- [`scripts/analyze_test_target.py`](scripts/analyze_test_target.py): inventário focado de estados, ações de ciclo de vida, fronteiras assíncronas e guards protetivos do alvo.
+- [`scripts/prove_test_sensitivity.py`](scripts/prove_test_sensitivity.py): mutação temporária restaurável, com seleção por ocorrência para guards repetidos.
 - [`scripts/validate_test_evidence.py`](scripts/validate_test_evidence.py): validação semântica do relatório.
 - [`schemas/test-evidence.v1.json`](schemas/test-evidence.v1.json): contrato JSON Schema.
 - [`references/`](references): taxonomia, oráculos, ecossistemas e bases técnicas.
@@ -346,7 +354,7 @@ As branches estão protegidas no GitHub:
 
 Os evals pagos ficaram fora dos checks automáticos obrigatórios. O gate de eficácia continua sendo critério de publicação da versão, executado uma única vez quando a release estiver pronta.
 
-### Certificação da v0.3.0
+### Certificação da v0.4.0
 
 Configuração atual em **Settings > Secrets and variables > Actions**:
 
@@ -361,10 +369,10 @@ As chaves devem ser cadastradas diretamente no GitHub. Evite colocá-las em arqu
 
 Execuções que compõem a certificação:
 
-- Codex: [repetição 1](https://github.com/andreferraro/skill-suite-tests/actions/runs/31648288379), [repetição 2](https://github.com/andreferraro/skill-suite-tests/actions/runs/31648786954) e [repetição 3](https://github.com/andreferraro/skill-suite-tests/actions/runs/31649260230).
-- Cursor: [repetição 1](https://github.com/andreferraro/skill-suite-tests/actions/runs/31649784413), [repetição 2](https://github.com/andreferraro/skill-suite-tests/actions/runs/31650136006) e [repetição 3](https://github.com/andreferraro/skill-suite-tests/actions/runs/31650494601).
+- Codex: [repetição 1](https://github.com/andreferraro/skill-suite-tests/actions/runs/31742296719), [repetição 2](https://github.com/andreferraro/skill-suite-tests/actions/runs/31743290197) e [repetição 3](https://github.com/andreferraro/skill-suite-tests/actions/runs/31744307025).
+- Cursor: [repetição 1](https://github.com/andreferraro/skill-suite-tests/actions/runs/31742301749), [repetição 2](https://github.com/andreferraro/skill-suite-tests/actions/runs/31743295147) e [repetição 3](https://github.com/andreferraro/skill-suite-tests/actions/runs/31744312140).
 
-Os runs foram executados no commit certificado e consolidados pelo mesmo agregador usado no gate de release. Repetir a certificação exige uma nova decisão explícita de custo. Os critérios e os tetos de chamadas estão em [`evals/README.md`](evals/README.md).
+Os tratamentos foram executados no commit certificado e consolidados pelo mesmo agregador usado no gate de release. Os baselines foram restaurados por fingerprint a partir de execuções equivalentes. A falha individual do Codex em Web na terceira repetição foi preservada e contou na mediana. Repetir a certificação exige uma nova decisão explícita de custo. Os critérios e os tetos de chamadas estão em [`evals/README.md`](evals/README.md).
 
 ## Referências
 

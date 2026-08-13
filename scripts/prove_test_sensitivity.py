@@ -18,6 +18,7 @@ def prove(
     replace: str,
     command: list[str],
     timeout: int,
+    occurrence: int | None = None,
 ) -> tuple[int, dict[str, object]]:
     root = root.resolve()
     target = (root / relative_file).resolve()
@@ -38,14 +39,30 @@ def prove(
         text = original.decode("utf-8")
     except UnicodeDecodeError:
         return 2, {"proved": False, "error": "mutation target must be UTF-8 text"}
-    if text.count(search) != 1:
-        return 2, {"proved": False, "error": "mutation search must match exactly once"}
+    match_count = text.count(search)
+    if occurrence is None and match_count != 1:
+        return 2, {
+            "proved": False,
+            "error": "mutation search must match exactly once or --occurrence must be provided",
+        }
+    if occurrence is not None and (occurrence < 1 or occurrence > match_count):
+        return 2, {
+            "proved": False,
+            "error": f"mutation occurrence must be between 1 and {match_count}",
+        }
+
+    if occurrence is None:
+        mutated_text = text.replace(search, replace)
+    else:
+        parts = text.split(search)
+        index = occurrence - 1
+        mutated_text = search.join(parts[: index + 1]) + replace + search.join(parts[index + 1 :])
 
     result: dict[str, object] = {"proved": False}
     exit_code = 2
     try:
         try:
-            target.write_text(text.replace(search, replace), encoding="utf-8", newline="")
+            target.write_text(mutated_text, encoding="utf-8", newline="")
         except OSError as error:
             result = {"proved": False, "error": f"unable to apply mutation: {error}"}
         else:
@@ -100,6 +117,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--search", required=True)
     parser.add_argument("--replace", required=True)
     parser.add_argument("--timeout", type=int, default=300)
+    parser.add_argument("--occurrence", type=int)
     parser.add_argument("command", nargs=argparse.REMAINDER)
     return parser
 
@@ -114,8 +132,11 @@ def main() -> int:
         args.replace,
         command,
         args.timeout,
+        args.occurrence,
     )
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    # Keep CLI output encodable on Windows consoles configured with cp1252.
+    # Captured test runners commonly emit symbols such as ✓ and ❯.
+    print(json.dumps(result, ensure_ascii=True, indent=2))
     return exit_code
 
 

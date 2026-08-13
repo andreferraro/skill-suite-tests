@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.4.0] - 2026-08-13
+
+### Alterado
+
+- Rastreabilidade explícita entre risco, mecanismo protetivo, estado ou fase, cenário e oráculo.
+- Cobertura separada de cancelamento, reset, timeout, retry, desconexão e unmount em cada estado ativo relevante.
+- Separação temporal entre a confirmação do cancelamento e a liquidação de callbacks obsoletos.
+- Prova de sensibilidade por mecanismo e fase, evitando generalização a partir de uma única mutação.
+- Saída do helper de mutação compatível com consoles Windows configurados com CP1252.
+- Oráculos de callback obsoleto exigem payload capaz de produzir efeito proibido.
+- Falhas fatais e erros parciais retornados com dados passam a exigir cenários distintos.
+
+### Adicionado
+
+- Analisador determinístico de estados, ações de ciclo de vida, fronteiras assíncronas e guards repetidos no arquivo alvo.
+- Seleção `--occurrence` no helper de sensibilidade para mutar guards repetidos isoladamente.
+- Holdout pareado no Atomic CRM, com artefatos publicados, ganho de 60% para 80% no mutation score e gate técnico aprovado.
+
+### Certificação
+
+- Três repetições aprovadas por caso no Cursor e duas de três ou mais no Codex.
+- Mediana da skill de 96,25/100 e ganho mediano de 8,75 pontos.
+- Baselines equivalentes reaproveitados por fingerprint; 18 chamadas de tratamento executadas.
+- Uma falha individual do Codex em Web preservada nos artefatos e incluída na consolidação.
+
 ## [0.3.1] - 2026-08-12
 
 ### Adicionado

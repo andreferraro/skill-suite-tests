@@ -13,6 +13,33 @@ from validate_repository import scan_secrets, validate_local_links  # noqa: E402
 
 
 class RepositoryValidationTests(unittest.TestCase):
+    def test_skill_requires_lifecycle_state_traceability(self) -> None:
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn(
+            "risco -> mecanismo protetivo -> estado ou fase -> cenário -> oráculo",
+            skill,
+        )
+        self.assertIn(
+            "Não tratar um cenário representativo como cobertura de todo o ciclo de vida.",
+            skill,
+        )
+        self.assertIn(
+            "Proteções distintas para estados ou fases distintas exigem provas distintas.",
+            skill,
+        )
+        self.assertIn("uma inversão que falha não substitui essa prova", skill)
+        self.assertIn(
+            "Primeiro executar a ação e aguardar o estado pós-cancelamento observável.",
+            skill,
+        )
+        self.assertIn(
+            "disparar `reset` e callback obsoleto no mesmo ciclo pode esconder a regressão",
+            skill,
+        )
+        self.assertIn("usar payload não vazio capaz de produzir um efeito proibido", skill)
+        self.assertIn("Distinguir falha fatal do parser ou transporte de erros parciais", skill)
+
     def test_paid_agent_jobs_enforce_the_case_gate(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "agent-evals.yml").read_text(
             encoding="utf-8"

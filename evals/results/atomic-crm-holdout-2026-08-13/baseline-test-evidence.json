@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "target": "state machine behavior in src/components/atomic-crm/misc/usePapaParse.tsx",
+  "support_status": "validated",
+  "classification": {
+    "purpose": ["regression", "behavioral verification"],
+    "level": ["unit", "component"],
+    "quality_attributes": ["reliability", "correctness", "fault tolerance"],
+    "techniques": ["state transition testing", "deterministic async control", "error-path testing"]
+  },
+  "basis": [
+    {
+      "type": "source",
+      "reference": "src/components/atomic-crm/misc/usePapaParse.tsx"
+    },
+    {
+      "type": "test",
+      "reference": "src/components/atomic-crm/misc/usePapaParse.test.tsx"
+    }
+  ],
+  "risks": [
+    {
+      "id": "R1",
+      "description": "Hook may not transition through parsing/running/complete with accurate counters during batched import.",
+      "impact": "Progress UI can show wrong status and completion values."
+    },
+    {
+      "id": "R2",
+      "description": "Batch processing failure may stop import or miscount failed rows.",
+      "impact": "Partial imports can be reported as successful and hide row-level loss."
+    },
+    {
+      "id": "R3",
+      "description": "CSV parser-level failure may not propagate to observable error state.",
+      "impact": "Users may not receive actionable import failure feedback."
+    },
+    {
+      "id": "R4",
+      "description": "Reset/cancel may not cancel in-flight import side effects.",
+      "impact": "Canceled imports can still mutate state after user cancellation."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "S1",
+      "risk_ids": ["R1"],
+      "name": "parsing to running to complete with progress updates",
+      "preconditions": "usePapaParse is mounted with batchSize=2 and deterministic processBatch Promises.",
+      "stimulus": "Trigger parseCsv, then resolve first and second batch in order.",
+      "oracle": "State moves parsing->running->complete, counts are updated, and remainingTime is computed during running then cleared at completion.",
+      "isolation": "papaparse.parse is mocked and Date.now is stubbed deterministically.",
+      "cleanup": "Mocks restored after test."
+    },
+    {
+      "id": "S2",
+      "risk_ids": ["R2"],
+      "name": "batch failure increments errorCount and import continues",
+      "preconditions": "usePapaParse is mounted with two deterministic batches.",
+      "stimulus": "Reject first processBatch Promise, then resolve second Promise.",
+      "oracle": "errorCount increases by failed batch size, second batch still executes, and final state is complete.",
+      "isolation": "papaparse.parse and console.error are mocked; no timers or sleeps.",
+      "cleanup": "Mocks restored after test."
+    },
+    {
+      "id": "S3",
+      "risk_ids": ["R3"],
+      "name": "parser error transitions to error state",
+      "preconditions": "usePapaParse is mounted and parse options are captured from mocked papaparse.",
+      "stimulus": "Invoke parser error callback with a concrete Error.",
+      "oracle": "Hook state becomes error and processBatch is never called.",
+      "isolation": "papaparse.parse and console.error are mocked.",
+      "cleanup": "Mocks restored after test."
+    },
+    {
+      "id": "S4",
+      "risk_ids": ["R4"],
+      "name": "reset cancels in-flight import",
+      "preconditions": "usePapaParse is running with one unresolved processBatch Promise.",
+      "stimulus": "Trigger reset before batch Promise resolves, then resolve the Promise.",
+      "oracle": "State returns to idle and remains idle after the previously in-flight Promise resolves.",
+      "isolation": "Promise resolution is controlled manually; no fixed sleeps are used.",
+      "cleanup": "Mocks restored after test."
+    }
+  ],
+  "boundaries": [
+    {
+      "name": "Vitest Browser app project",
+      "mode": "real",
+      "rationale": "Tests execute in real Chromium via Vitest Browser + Playwright."
+    },
+    {
+      "name": "Docker runtime",
+      "mode": "containerized",
+      "rationale": "All required commands were executed inside mcr.microsoft.com/playwright:v1.60.0-noble."
+    },
+    {
+      "name": "CSV parsing and time model",
+      "mode": "simulated",
+      "rationale": "papaparse.parse and Date.now are mocked to enforce deterministic asynchronous state transitions."
+    }
+  ],
+  "files_changed": [
+    "src/components/atomic-crm/misc/usePapaParse.test.tsx",
+    "test-evidence.json"
+  ],
+  "commands": [
+    {
+      "command": "docker run --rm --init --ipc=host --volume ${PWD}:/work --volume ${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run test:unit:app -- --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx",
+      "status": "failed",
+      "exit_code": 1,
+      "evidence": "Initial attempt failed due to vi.mock hoisting error in test file."
+    },
+    {
+      "command": "docker run --rm --init --ipc=host --volume ${PWD}:/work --volume ${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run test:unit:app -- --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx",
+      "status": "failed",
+      "exit_code": 1,
+      "evidence": "Second attempt failed by test timeout while awaiting unresolved deterministic Promises."
+    },
+    {
+      "command": "docker run --rm --init --ipc=host --volume ${PWD}:/work --volume ${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run test:unit:app -- --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Focused suite passed: 1 file, 4 tests."
+    },
+    {
+      "command": "docker run --rm --init --ipc=host --volume ${PWD}:/work --volume ${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run test:unit:app -- --run --project app",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Canonical app suite passed: 20 files, 147 passed, 1 skipped."
+    },
+    {
+      "command": "docker run --rm --init --ipc=host --volume ${PWD}:/work --volume ${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run typecheck",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "TypeScript typecheck passed with no diagnostics."
+    }
+  ],
+  "evidence": [
+    {
+      "type": "test_run",
+      "summary": "New deterministic tests validated observable state transitions, progress accounting, parser failure handling, batch failure handling, and cancellation behavior in usePapaParse."
+    },
+    {
+      "type": "regression_suite",
+      "summary": "Full app unit suite remained green after adding the new test file."
+    },
+    {
+      "type": "typecheck",
+      "summary": "No type errors after introducing the new tests."
+    }
+  ],
+  "limitations": [
+    "Evidence is limited to execution in the provided Docker image and current workspace state.",
+    "Scenarios validate hook-level behavior only; they do not cover higher-level CSV import UI integration flows.",
+    "No E2E coverage was added by design per request constraints."
+  ]
+}

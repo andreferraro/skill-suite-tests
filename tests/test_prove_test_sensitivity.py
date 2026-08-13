@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+import json
 from pathlib import Path
 
 
@@ -13,6 +14,13 @@ from prove_test_sensitivity import prove  # noqa: E402
 
 
 class ProveTestSensitivityTests(unittest.TestCase):
+    def test_result_with_unicode_can_be_printed_on_cp1252_console(self) -> None:
+        serialized = json.dumps({"stdout_tail": "✓ ❯"}, ensure_ascii=True, indent=2)
+
+        serialized.encode("cp1252")
+        self.assertIn(r"\u2713", serialized)
+        self.assertIn(r"\u276f", serialized)
+
     def test_proves_failure_and_restores_source_exactly(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -69,3 +77,47 @@ class ProveTestSensitivityTests(unittest.TestCase):
 
             self.assertEqual(2, exit_code)
             self.assertFalse(result["proved"])
+
+    def test_mutates_selected_occurrence_and_restores_source(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "feature.py"
+            original = "guard = True\nfirst = guard\nsecond = guard\n"
+            source.write_text(original, encoding="utf-8", newline="")
+
+            exit_code, result = prove(
+                root,
+                "feature.py",
+                "guard",
+                "disabled",
+                [
+                    sys.executable,
+                    "-c",
+                    "from pathlib import Path; text=Path('feature.py').read_text(); raise SystemExit(1 if 'second = disabled' in text and 'first = guard' in text else 0)",
+                ],
+                30,
+                occurrence=3,
+            )
+
+            self.assertEqual(0, exit_code)
+            self.assertTrue(result["proved"])
+            self.assertTrue(result["restored"])
+            self.assertEqual(original, source.read_text(encoding="utf-8"))
+
+    def test_requires_occurrence_for_repeated_search(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "feature.py"
+            source.write_text("guard\nguard\n", encoding="utf-8")
+
+            exit_code, result = prove(
+                root,
+                "feature.py",
+                "guard",
+                "disabled",
+                [sys.executable, "-c", "raise SystemExit(1)"],
+                30,
+            )
+
+            self.assertEqual(2, exit_code)
+            self.assertIn("--occurrence", result["error"])
