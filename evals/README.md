@@ -4,18 +4,18 @@ O benchmark mede se a skill melhora testes gerados por Codex e Cursor. Baseline 
 
 ## Certificação publicada
 
-A `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andreferraro/skill-suite-tests/commit/7da3f5c243c80b259c330335fe29adab9e80da0f), com três repetições para Codex e Cursor em cada caso. O [relatório consolidado](results/v0.3.0-certification.json) passou o gate com mediana da skill de 100/100 e ganho mediano de 16,875 pontos.
+A `v0.4.0` foi certificada no commit [`635c8e2`](https://github.com/andreferraro/skill-suite-tests/commit/635c8e24bb387745aea41573ba57d6724ea64bff), com três repetições para Codex e Cursor em cada caso. O [relatório consolidado](results/v0.4.0-certification.json) passou o gate com mediana da skill de 96,25/100 e ganho mediano de 8,75 pontos.
 
 | Agente | API | Eventos | Web | Aprovações críticas com a skill |
 | --- | ---: | ---: | ---: | --- |
-| Codex | 100 | 100 | 96,25 | 3/3, 2/3 e 2/3 |
-| Cursor | 100 | 100 | 96,25 | 3/3, 3/3 e 3/3 |
+| Codex | 96,25 | 100 | 96,25 | 3/3, 3/3 e 2/3 |
+| Cursor | 96,25 | 100 | 92,5 | 3/3, 3/3 e 3/3 |
 
 As notas são medianas. O relatório contém os baselines, ganhos e links para todos os runs. Resultados individuais reprovados permanecem registrados e contam na consolidação.
 
 ## Holdout externo publicado
 
-Em 13 de agosto de 2026, a versão em desenvolvimento foi avaliada no `usePapaParse` do [Atomic CRM](https://github.com/marmelab/atomic-crm/tree/167a4cdb652b1ab2b4b030831cfa7adcf2099321). O baseline matou 3 de 5 mutantes e o tratamento matou 4 de 5, elevando o mutation score de 60% para 80% e aprovando o gate técnico sem alterações em produção.
+Em 13 de agosto de 2026, a `v0.4.0` foi avaliada no `usePapaParse` do [Atomic CRM](https://github.com/marmelab/atomic-crm/tree/167a4cdb652b1ab2b4b030831cfa7adcf2099321). O baseline matou 3 de 5 mutantes e o tratamento matou 4 de 5, elevando o mutation score de 60% para 80% e aprovando o gate técnico sem alterações em produção.
 
 Os [artefatos do holdout](results/atomic-crm-holdout-2026-08-13/README.md) incluem os testes gerados, relatórios de evidência, metadados, comandos e resultados individuais. Essa execução mede transferência para código open source real. Ela complementa a certificação publicada e não substitui a matriz completa de release.
 
@@ -246,7 +246,7 @@ gh variable set CURSOR_EVAL_MODEL --body "<modelo-cursor>"
 
 Não coloque chaves em `--body`, arquivos versionados, logs ou mensagens do pull request.
 
-### Fluxo da v0.3.0
+### Fluxo da v0.4.0
 
 1. Use os checks gratuitos em cada pull request para validar scripts, fixtures, mutantes, links e segredos.
 2. Faça uma execução manual de diagnóstico somente quando a release estiver pronta.
