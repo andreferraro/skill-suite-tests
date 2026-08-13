@@ -13,6 +13,7 @@
 ### Adicionado
 
 - Analisador determinístico de estados, ações de ciclo de vida, fronteiras assíncronas e guards repetidos no arquivo alvo.
+- Seleção `--occurrence` no helper de sensibilidade para mutar guards repetidos isoladamente.
 
 ## [0.3.1] - 2026-08-12
 
