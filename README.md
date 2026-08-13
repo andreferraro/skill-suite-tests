@@ -91,6 +91,7 @@ Os valores são medianas de três repetições por agente, caso e modo. A certif
 
 - Um guia operacional para agentes com acesso ao código, terminal e ferramentas do projeto.
 - Um processo de seleção de testes por risco, arquitetura, fronteira e oráculo.
+- Uma matriz de rastreabilidade entre risco, mecanismo protetivo, estado, cenário e oráculo.
 - Um pacote com detector de contexto, schema de evidência, validador e referências técnicas.
 - Uma skill agnóstica no núcleo, com benchmark inicial em Web, API e eventos.
 
@@ -124,6 +125,8 @@ A classificação usa quatro eixos:
 | Nível | Onde observar? | unidade, componente, contrato, integração, ponta a ponta |
 | Qualidade | Qual risco medir? | funcional, segurança, performance, acessibilidade, resiliência |
 | Técnica | Como gerar os casos? | limites, tabela de decisão, property-based, combinatório, fuzz |
+
+Em fluxos assíncronos, a skill separa estados que possuem proteções diferentes. Cancelamento durante parsing, processamento ou espera entre lotes vira cenários distintos quando cada fase pode falhar de uma forma própria. A prova de sensibilidade remove temporariamente cada proteção relevante e confirma que o cenário correspondente detecta a falha.
 
 ## Instalação pelo repositório
 
