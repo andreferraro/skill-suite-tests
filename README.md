@@ -312,6 +312,7 @@ Essa validação não usa agentes nem consome créditos de API.
 - [`SKILL.md`](SKILL.md): contrato e fluxo do agente.
 - [`scripts/detect_test_context.py`](scripts/detect_test_context.py): inventário determinístico da stack e de sinais de risco confirmáveis no código.
 - [`scripts/analyze_test_target.py`](scripts/analyze_test_target.py): inventário focado de estados, ações de ciclo de vida, fronteiras assíncronas e guards protetivos do alvo.
+- [`scripts/prove_test_sensitivity.py`](scripts/prove_test_sensitivity.py): mutação temporária restaurável, incluindo seleção por ocorrência para guards repetidos.
 - [`scripts/prove_test_sensitivity.py`](scripts/prove_test_sensitivity.py): mutação local de uma ocorrência, execução do teste e restauração garantida do arquivo.
 - [`scripts/validate_test_evidence.py`](scripts/validate_test_evidence.py): validação semântica do relatório.
 - [`schemas/test-evidence.v1.json`](schemas/test-evidence.v1.json): contrato JSON Schema.
