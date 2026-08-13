@@ -6,12 +6,12 @@
 
 - Início rápido com instalação e primeira invocação no Codex e Cursor.
 - Guia de contribuição, política de segurança, código de conduta e templates do GitHub.
-- Atualizações automatizadas de dependências para Actions e fixtures.
 
 ### Alterado
 
 - Documentação de instalação confirmada por uma instalação real a partir da raiz do repositório.
 - Estado da release separado da certificação técnica da `v0.3.0`.
+- Política de atualização deliberada para preservar a reprodutibilidade das fixtures certificadas.
 
 ### Certificação
 
