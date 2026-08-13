@@ -2,6 +2,7 @@
 
 [![Quality](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml/badge.svg)](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml)
 [![Certification: v0.3.0 passed](https://img.shields.io/badge/certification-v0.3.0%20passed-2ea44f)](evals/results/v0.3.0-certification.json)
+[![Release](https://img.shields.io/github/v/release/andreferraro/skill-suite-tests)](https://github.com/andreferraro/skill-suite-tests/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Skill para orientar Codex e Cursor na criação de testes automatizados guiados por risco. Você informa a parte do sistema e o risco relevante. O agente inspeciona a stack, escolhe a menor fronteira capaz de provar o comportamento, implementa os testes, executa a suíte e relata evidências.
@@ -9,6 +10,31 @@ Skill para orientar Codex e Cursor na criação de testes automatizados guiados 
 [Ver apresentação](https://docs.google.com/presentation/d/10icBAwszr-oIcf-SeNOB2QKGF9NQE1qs7TGqt0nVeQY/edit?usp=sharing)
 
 ![Diagrama dos tipos de teste organizados por propósito, nível, qualidade e técnica](assets/linkedin-tipos-de-testes-diagrama.png)
+
+## Comece em 2 minutos
+
+Você precisa de Git e do Codex ou Cursor. Chaves de API e configuração no GitHub ficam fora do uso comum.
+
+No Codex, envie:
+
+```text
+Use $skill-installer para instalar a skill deste repositório:
+https://github.com/andreferraro/skill-suite-tests
+```
+
+Depois, faça um pedido com alvo e risco:
+
+```text
+Use $skill-suite-tests no checkout. Cubra cálculo do total, idempotência do pagamento e rollback quando a persistência falhar.
+```
+
+No Cursor, abra **Customize > Rules > Add Rule > Remote Rule (GitHub)**, informe a URL do repositório e use:
+
+```text
+/skill-suite-tests Teste a recuperação de senha. Cubra loading, erro, teclado, acessibilidade e respostas assíncronas obsoletas.
+```
+
+Veja a [instalação detalhada](#instalação-pelo-repositório) e os [exemplos de uso](#como-usar).
 
 ## Como a skill prova que ajuda
 
@@ -33,6 +59,8 @@ Leia a [metodologia completa](evals/README.md#integridade-da-certificação) e c
 
 A versão `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andreferraro/skill-suite-tests/commit/7da3f5c243c80b259c330335fe29adab9e80da0f) e publicada pelo [PR #9](https://github.com/andreferraro/skill-suite-tests/pull/9). O [relatório consolidado](evals/results/v0.3.0-certification.json) preserva as medianas, os gates e os links para as execuções reais.
 
+A `v0.3.1` reúne os ajustes de documentação, segurança e governança necessários para distribuição pública. O runtime da skill permanece igual ao certificado na `v0.3.0`, por isso a patch não repete os evals pagos.
+
 | Evidência | Resultado |
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
@@ -43,7 +71,8 @@ A versão `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andr
 | Certificação Cursor | 3 repetições por caso, gate agregado aprovado |
 | Mediana da skill | 100/100 |
 | Ganho mediano sobre baseline | 16,875 pontos |
-| Release | `v0.3.0`, certificada e publicada pelo PR #9 |
+| Certificação técnica | `v0.3.0`, aprovada e publicada pelo PR #9 |
+| Release pública atual | `v0.3.1`, sem alteração no runtime certificado |
 
 ### Baseline versus skill
 
@@ -110,6 +139,8 @@ No Codex, envie:
 Use $skill-installer para instalar a skill deste repositório:
 https://github.com/andreferraro/skill-suite-tests
 ```
+
+Esse fluxo foi validado instalando o conteúdo da raiz do repositório, incluindo `SKILL.md`, metadados, scripts, schema e referências.
 
 ### Cursor pela interface
 
@@ -294,6 +325,8 @@ Essa validação não usa agentes nem consome créditos de API.
 - Cleanup fica restrito aos recursos criados pelo teste.
 
 ## Contribuição e release
+
+Leia o [guia de contribuição](CONTRIBUTING.md), a [política de segurança](SECURITY.md) e o [código de conduta](CODE_OF_CONDUCT.md) antes de abrir uma contribuição.
 
 O repositório usa Gitflow:
 

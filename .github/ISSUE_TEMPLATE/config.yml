@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Relatar vulnerabilidade
+    url: https://github.com/andreferraro/skill-suite-tests/security/advisories/new
+    about: Envie vulnerabilidades e dados sensíveis por um canal privado.
