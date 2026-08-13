@@ -12,6 +12,7 @@
 - Documentação de instalação confirmada por uma instalação real a partir da raiz do repositório.
 - Estado da release separado da certificação técnica da `v0.3.0`.
 - Política de atualização deliberada para preservar a reprodutibilidade das fixtures certificadas.
+- Check de links externos com retry limitado para tolerar falhas transitórias sem aceitar links quebrados.
 
 ### Certificação
 
