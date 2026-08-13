@@ -1,0 +1,45 @@
+{
+  "version": "v0.4.0",
+  "certified_commit": "635c8e24bb387745aea41573ba57d6724ea64bff",
+  "certified_at": "2026-08-13",
+  "passed": true,
+  "matrix_errors": [],
+  "execution_failures": [],
+  "median_skill_score": 96.25,
+  "median_gain": 8.75,
+  "required_improved_cases": 2,
+  "runs": {
+    "codex": [
+      "https://github.com/andreferraro/skill-suite-tests/actions/runs/31742296719",
+      "https://github.com/andreferraro/skill-suite-tests/actions/runs/31743290197",
+      "https://github.com/andreferraro/skill-suite-tests/actions/runs/31744307025"
+    ],
+    "cursor": [
+      "https://github.com/andreferraro/skill-suite-tests/actions/runs/31742301749",
+      "https://github.com/andreferraro/skill-suite-tests/actions/runs/31743295147",
+      "https://github.com/andreferraro/skill-suite-tests/actions/runs/31744312140"
+    ]
+  },
+  "summaries": [
+    { "agent": "codex", "case": "api-payment", "mode": "baseline", "median_score": 87.5, "critical_passes": 0, "runs": 3 },
+    { "agent": "codex", "case": "api-payment", "mode": "skill", "median_score": 96.25, "critical_passes": 3, "runs": 3 },
+    { "agent": "codex", "case": "events-order-consumer", "mode": "baseline", "median_score": 100.0, "critical_passes": 3, "runs": 3 },
+    { "agent": "codex", "case": "events-order-consumer", "mode": "skill", "median_score": 100.0, "critical_passes": 3, "runs": 3 },
+    { "agent": "codex", "case": "web-password-reset", "mode": "baseline", "median_score": 27.5, "critical_passes": 0, "runs": 3 },
+    { "agent": "codex", "case": "web-password-reset", "mode": "skill", "median_score": 96.25, "critical_passes": 2, "runs": 3 },
+    { "agent": "cursor", "case": "api-payment", "mode": "baseline", "median_score": 87.5, "critical_passes": 0, "runs": 3 },
+    { "agent": "cursor", "case": "api-payment", "mode": "skill", "median_score": 96.25, "critical_passes": 3, "runs": 3 },
+    { "agent": "cursor", "case": "events-order-consumer", "mode": "baseline", "median_score": 96.25, "critical_passes": 3, "runs": 3 },
+    { "agent": "cursor", "case": "events-order-consumer", "mode": "skill", "median_score": 100.0, "critical_passes": 3, "runs": 3 },
+    { "agent": "cursor", "case": "web-password-reset", "mode": "baseline", "median_score": 27.5, "critical_passes": 0, "runs": 3 },
+    { "agent": "cursor", "case": "web-password-reset", "mode": "skill", "median_score": 92.5, "critical_passes": 3, "runs": 3 }
+  ],
+  "comparisons": [
+    { "agent": "codex", "case": "api-payment", "baseline": 87.5, "skill": 96.25, "gain": 8.75, "critical_gate": true },
+    { "agent": "codex", "case": "events-order-consumer", "baseline": 100.0, "skill": 100.0, "gain": 0.0, "critical_gate": true },
+    { "agent": "codex", "case": "web-password-reset", "baseline": 27.5, "skill": 96.25, "gain": 68.75, "critical_gate": true },
+    { "agent": "cursor", "case": "api-payment", "baseline": 87.5, "skill": 96.25, "gain": 8.75, "critical_gate": true },
+    { "agent": "cursor", "case": "events-order-consumer", "baseline": 96.25, "skill": 100.0, "gain": 3.75, "critical_gate": true },
+    { "agent": "cursor", "case": "web-password-reset", "baseline": 27.5, "skill": 92.5, "gain": 65.0, "critical_gate": true }
+  ]
+}
