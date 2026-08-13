@@ -9,6 +9,10 @@
 - Separação temporal entre a confirmação do cancelamento e a liquidação de callbacks obsoletos.
 - Prova de sensibilidade por mecanismo e fase, evitando generalização a partir de uma única mutação.
 
+### Adicionado
+
+- Analisador determinístico de estados, ações de ciclo de vida, fronteiras assíncronas e guards repetidos no arquivo alvo.
+
 ## [0.3.1] - 2026-08-12
 
 ### Adicionado
