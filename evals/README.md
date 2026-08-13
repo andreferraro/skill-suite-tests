@@ -13,6 +13,12 @@ A `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andreferraro
 
 As notas são medianas. O relatório contém os baselines, ganhos e links para todos os runs. Resultados individuais reprovados permanecem registrados e contam na consolidação.
 
+## Holdout externo publicado
+
+Em 13 de agosto de 2026, a versão em desenvolvimento foi avaliada no `usePapaParse` do [Atomic CRM](https://github.com/marmelab/atomic-crm/tree/167a4cdb652b1ab2b4b030831cfa7adcf2099321). O baseline matou 3 de 5 mutantes e o tratamento matou 4 de 5, elevando o mutation score de 60% para 80% e aprovando o gate técnico sem alterações em produção.
+
+Os [artefatos do holdout](results/atomic-crm-holdout-2026-08-13/README.md) incluem os testes gerados, relatórios de evidência, metadados, comandos e resultados individuais. Essa execução mede transferência para código open source real. Ela complementa a certificação publicada e não substitui a matriz completa de release.
+
 ## Integridade da certificação
 
 O benchmark foi desenhado para medir a contribuição da skill, preservar resultados desfavoráveis e permitir auditoria por outra pessoa.

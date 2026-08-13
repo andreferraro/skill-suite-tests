@@ -1,0 +1,269 @@
+{
+  "mode": "baseline",
+  "changed_paths": [
+    ".eval-contract/test-evidence.v1.json",
+    ".eval-contract/validate_test_evidence.py",
+    "src/components/atomic-crm/misc/usePapaParse.test.tsx",
+    "test-evidence.json"
+  ],
+  "test_files": [
+    "src/components/atomic-crm/misc/usePapaParse.test.tsx"
+  ],
+  "forbidden_changes": [],
+  "correct_target_tests": {
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--init",
+      "--ipc=host",
+      "--volume",
+      "C:\\Users\\aferr\\Projects\\AFTech\\sandbox\\test_skill\\work\\atomic-crm-baseline:/work",
+      "--volume",
+      "atomic-crm-baseline-node-modules:/work/node_modules",
+      "--workdir",
+      "/work",
+      "mcr.microsoft.com/playwright:v1.60.0-noble",
+      "npm",
+      "run",
+      "test:unit:app",
+      "--",
+      "--run",
+      "--project",
+      "app",
+      "src/components/atomic-crm/misc/usePapaParse.test.tsx"
+    ],
+    "exit_code": 0,
+    "passed": true,
+    "duration_seconds": 4.0,
+    "output_tail": "> atomic-crm@0.1.0 test:unit:app\n> vitest --config vitest.config.ts --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx\n\n\n\u001b[1m\u001b[46m RUN \u001b[49m\u001b[22m \u001b[36mv4.1.0 \u001b[39m\u001b[90m/work\u001b[39m\n\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 622\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[32m1 passed\u001b[39m\u001b[22m\u001b[90m (1)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[32m4 passed\u001b[39m\u001b[22m\u001b[90m (4)\u001b[39m\n\u001b[2m   Start at \u001b[22m 20:33:28\n\u001b[2m   Duration \u001b[22m 2.68s\u001b[2m (transform 0ms, setup 0ms, import 188ms, tests 622ms, environment 0ms)\u001b[22m\n\n\nnpm notice\nnpm notice New major version of npm available! 11.12.1 -> 12.0.2\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2\nnpm notice To update run: npm install -g npm@12.0.2\nnpm notice"
+  },
+  "canonical_app_suite": {
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--init",
+      "--ipc=host",
+      "--volume",
+      "C:\\Users\\aferr\\Projects\\AFTech\\sandbox\\test_skill\\work\\atomic-crm-baseline:/work",
+      "--volume",
+      "atomic-crm-baseline-node-modules:/work/node_modules",
+      "--workdir",
+      "/work",
+      "mcr.microsoft.com/playwright:v1.60.0-noble",
+      "npm",
+      "run",
+      "test:unit:app",
+      "--",
+      "--run",
+      "--project",
+      "app"
+    ],
+    "exit_code": 0,
+    "passed": true,
+    "duration_seconds": 26.183,
+    "output_tail": "> atomic-crm@0.1.0 test:unit:app\n> vitest --config vitest.config.ts --run --project app\n\n\n\u001b[1m\u001b[46m RUN \u001b[49m\u001b[22m \u001b[36mv4.1.0 \u001b[39m\u001b[90m/work\u001b[39m\n\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/deals/dealUtils.test.ts \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 263\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/providers/commons/getContactAvatar.test.ts \u001b[2m(\u001b[22m\u001b[2m7 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 508\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/providers/fakerest/internal/supabaseAdapter.test.ts \u001b[2m(\u001b[22m\u001b[2m27 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 14\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 772\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/providers/fakerest/internal/transformContainsFilter.test.ts \u001b[2m(\u001b[22m\u001b[2m6 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 2\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/tasks/tasksPredicate.test.ts \u001b[2m(\u001b[22m\u001b[2m22 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 4\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/providers/fakerest/internal/transformInFilter.test.ts \u001b[2m(\u001b[22m\u001b[2m6 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 3\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/tasks/TasksListFilter.test.tsx \u001b[2m(\u001b[22m\u001b[2m5 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 473\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/providers/commons/i18nProvider.test.ts \u001b[2m(\u001b[22m\u001b[2m7 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 3\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/providers/commons/getCompanyAvatar.test.ts \u001b[2m(\u001b[22m\u001b[2m2 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 1\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/settings/SettingsPage.test.ts \u001b[2m(\u001b[22m\u001b[2m9 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 2\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/providers/fakerest/internal/transformOrFilter.test.ts \u001b[2m(\u001b[22m\u001b[2m3 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 4\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/notes/NotesIteratorMobile.test.tsx \u001b[2m(\u001b[22m\u001b[2m1 test\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 136\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/notes/NoteInputsMobile.test.tsx \u001b[2m(\u001b[22m\u001b[2m8 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 518\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/notes/NoteInputs.test.tsx \u001b[2m(\u001b[22m\u001b[2m15 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 1088\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/contacts/ContactShow.test.tsx \u001b[2m(\u001b[22m\u001b[2m2 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 1351\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m renders a safe zero-task label before nb_tasks is available \u001b[33m 430\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m updates the contact status from the aside \u001b[33m 919\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/contacts/ContactCreate.test.tsx \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 1991\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m shows empty email and phone placeholder inputs \u001b[33m 513\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m does not submit empty email and phone entries \u001b[33m 906\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m submits only filled email and phone entries, stripping empty ones \u001b[33m 337\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/tasks/TaskCreateSheet.test.tsx \u001b[2m(\u001b[22m\u001b[2m1 test\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 3234\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m creates a task for a selected contact and updates last_seen \u001b[33m 3232\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/contacts/ContactList.test.tsx \u001b[2m(\u001b[22m\u001b[2m7 tests\u001b[22m\u001b[2m | \u001b[22m\u001b[33m1 skipped\u001b[39m\u001b[2m)\u001b[22m\u001b[33m 6062\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m renders an invite to create the first contact when the app is empty \u001b[33m 509\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m renders contacts in a list \u001b[33m 484\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m shows the bulk tag button only after selecting contacts \u001b[33m 403\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m adds an existing tag to selected contacts without duplicating it \u001b[33m 2622\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m creates a new tag inline and applies it to the full selected list \u001b[33m 1917\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/contacts/ContactEdit.test.tsx \u001b[2m(\u001b[22m\u001b[2m8 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 10641\u001b[2mms\u001b[22m\u001b[39m\n       \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m shows empty email and phone inputs when the contact has none \u001b[33m 694\u001b[2mms\u001b[22m\u001b[39m\n       \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m does not submit empty email and phone entries \u001b[33m 1176\u001b[2mms\u001b[22m\u001b[39m\n       \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m submits only filled email and phone entries, stripping empty ones \u001b[33m 1601\u001b[2mms\u001b[22m\u001b[39m\n       \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m preserves existing email and phone entries on edit \u001b[33m 981\u001b[2mms\u001b[22m\u001b[39m\n       \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m shows empty email and phone inputs when the contact has none on mobile \u001b[33m 980\u001b[2mms\u001b[22m\u001b[39m\n       \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m does not submit empty email and phone entries on mobile \u001b[33m 1155\u001b[2mms\u001b[22m\u001b[39m\n       \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m submits only filled email and phone entries, stripping empty ones on mobile \u001b[33m 2065\u001b[2mms\u001b[22m\u001b[39m\n       \u001b[33m\u001b[2m\u2713\u001b[22m\u001b[39m preserves existing email and phone entries on edit on mobile \u001b[33m 1983\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[32m20 passed\u001b[39m\u001b[22m\u001b[90m (20)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[32m147 passed\u001b[39m\u001b[22m\u001b[2m | \u001b[22m\u001b[33m1 skipped\u001b[39m\u001b[90m (148)\u001b[39m\n\u001b[2m   Start at \u001b[22m 20:33:32\n\u001b[2m   Duration \u001b[22m 24.83s\u001b[2m (transform 0ms, setup 0ms, import 105.93s, tests 27.07s, environment 0ms)\u001b[22m\n\n\nWarning: A vi.mock(\"../../misc/fetchWithTimeout\") call in \"/work/src/components/atomic-crm/providers/commons/getContactAvatar.test.ts\" is not at the top level of the module. Although it appears nested, it will be hoisted and executed before any tests run. Move it to the top level to reflect its actual execution order. This will become an error in a future version.\nSee: https://vitest.dev/guide/mocking/modules#how-it-works\nnpm notice\nnpm notice New major version of npm available! 11.12.1 -> 12.0.2\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2\nnpm notice To update run: npm install -g npm@12.0.2\nnpm notice"
+  },
+  "typecheck": {
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "--init",
+      "--ipc=host",
+      "--volume",
+      "C:\\Users\\aferr\\Projects\\AFTech\\sandbox\\test_skill\\work\\atomic-crm-baseline:/work",
+      "--volume",
+      "atomic-crm-baseline-node-modules:/work/node_modules",
+      "--workdir",
+      "/work",
+      "mcr.microsoft.com/playwright:v1.60.0-noble",
+      "npm",
+      "run",
+      "typecheck"
+    ],
+    "exit_code": 0,
+    "passed": true,
+    "duration_seconds": 12.984,
+    "output_tail": "> atomic-crm@0.1.0 typecheck\n> tsc --noEmit --project tsconfig.app.json\n\n\nnpm notice\nnpm notice New major version of npm available! 11.12.1 -> 12.0.2\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2\nnpm notice To update run: npm install -g npm@12.0.2\nnpm notice"
+  },
+  "evidence_validation": {
+    "command": [
+      "python",
+      ".eval-contract/validate_test_evidence.py",
+      "test-evidence.json",
+      "--json"
+    ],
+    "exit_code": 0,
+    "passed": true,
+    "duration_seconds": 0.072,
+    "output_tail": "{\n  \"valid\": true,\n  \"errors\": []\n}"
+  },
+  "mutations": [
+    {
+      "id": "cancel-during-parsing-ignored",
+      "killed": false,
+      "execution": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--init",
+          "--ipc=host",
+          "--volume",
+          "C:\\Users\\aferr\\Projects\\AFTech\\sandbox\\test_skill\\work\\atomic-crm-baseline:/work",
+          "--volume",
+          "atomic-crm-baseline-node-modules:/work/node_modules",
+          "--workdir",
+          "/work",
+          "mcr.microsoft.com/playwright:v1.60.0-noble",
+          "npm",
+          "run",
+          "test:unit:app",
+          "--",
+          "--run",
+          "--project",
+          "app",
+          "src/components/atomic-crm/misc/usePapaParse.test.tsx"
+        ],
+        "exit_code": 0,
+        "passed": true,
+        "duration_seconds": 4.214,
+        "output_tail": "> atomic-crm@0.1.0 test:unit:app\n> vitest --config vitest.config.ts --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx\n\n\n\u001b[1m\u001b[46m RUN \u001b[49m\u001b[22m \u001b[36mv4.1.0 \u001b[39m\u001b[90m/work\u001b[39m\n\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 578\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[32m1 passed\u001b[39m\u001b[22m\u001b[90m (1)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[32m4 passed\u001b[39m\u001b[22m\u001b[90m (4)\u001b[39m\n\u001b[2m   Start at \u001b[22m 20:34:11\n\u001b[2m   Duration \u001b[22m 2.98s\u001b[2m (transform 0ms, setup 0ms, import 177ms, tests 578ms, environment 0ms)\u001b[22m\n\n\nnpm notice\nnpm notice New major version of npm available! 11.12.1 -> 12.0.2\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2\nnpm notice To update run: npm install -g npm@12.0.2\nnpm notice"
+      }
+    },
+    {
+      "id": "cancel-during-running-ignored",
+      "killed": false,
+      "execution": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--init",
+          "--ipc=host",
+          "--volume",
+          "C:\\Users\\aferr\\Projects\\AFTech\\sandbox\\test_skill\\work\\atomic-crm-baseline:/work",
+          "--volume",
+          "atomic-crm-baseline-node-modules:/work/node_modules",
+          "--workdir",
+          "/work",
+          "mcr.microsoft.com/playwright:v1.60.0-noble",
+          "npm",
+          "run",
+          "test:unit:app",
+          "--",
+          "--run",
+          "--project",
+          "app",
+          "src/components/atomic-crm/misc/usePapaParse.test.tsx"
+        ],
+        "exit_code": 0,
+        "passed": true,
+        "duration_seconds": 4.231,
+        "output_tail": "> atomic-crm@0.1.0 test:unit:app\n> vitest --config vitest.config.ts --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx\n\n\n\u001b[1m\u001b[46m RUN \u001b[49m\u001b[22m \u001b[36mv4.1.0 \u001b[39m\u001b[90m/work\u001b[39m\n\n \u001b[32m\u2713\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 617\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[32m1 passed\u001b[39m\u001b[22m\u001b[90m (1)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[32m4 passed\u001b[39m\u001b[22m\u001b[90m (4)\u001b[39m\n\u001b[2m   Start at \u001b[22m 20:34:15\n\u001b[2m   Duration \u001b[22m 2.98s\u001b[2m (transform 0ms, setup 0ms, import 194ms, tests 617ms, environment 0ms)\u001b[22m\n\n\nnpm notice\nnpm notice New major version of npm available! 11.12.1 -> 12.0.2\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2\nnpm notice To update run: npm install -g npm@12.0.2\nnpm notice"
+      }
+    },
+    {
+      "id": "import-count-counts-batches",
+      "killed": true,
+      "execution": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--init",
+          "--ipc=host",
+          "--volume",
+          "C:\\Users\\aferr\\Projects\\AFTech\\sandbox\\test_skill\\work\\atomic-crm-baseline:/work",
+          "--volume",
+          "atomic-crm-baseline-node-modules:/work/node_modules",
+          "--workdir",
+          "/work",
+          "mcr.microsoft.com/playwright:v1.60.0-noble",
+          "npm",
+          "run",
+          "test:unit:app",
+          "--",
+          "--run",
+          "--project",
+          "app",
+          "src/components/atomic-crm/misc/usePapaParse.test.tsx"
+        ],
+        "exit_code": 1,
+        "passed": false,
+        "duration_seconds": 6.224,
+        "output_tail": "> atomic-crm@0.1.0 test:unit:app\n> vitest --config vitest.config.ts --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx\n\n\n\u001b[1m\u001b[46m RUN \u001b[49m\u001b[22m \u001b[36mv4.1.0 \u001b[39m\u001b[90m/work\u001b[39m\n\n \u001b[31m\u276f\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m | \u001b[22m\u001b[31m2 failed\u001b[39m\u001b[2m)\u001b[22m\u001b[33m 2695\u001b[2mms\u001b[22m\u001b[39m\n\u001b[31m     \u001b[31m\u00d7\u001b[31m tracks parsing, batching progress and completion\u001b[39m\u001b[33m 1243\u001b[2mms\u001b[22m\u001b[39m\n\u001b[31m     \u001b[31m\u00d7\u001b[31m adds batch size to errorCount when processBatch fails and then continues\u001b[39m\u001b[33m 1210\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[32m\u2713\u001b[39m moves to error state when papaparse fails\u001b[32m 109\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[32m\u2713\u001b[39m cancels an in-flight import when reset is called\u001b[32m 132\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[31m1 failed\u001b[39m\u001b[22m\u001b[90m (1)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[31m2 failed\u001b[39m\u001b[22m\u001b[2m | \u001b[22m\u001b[1m\u001b[32m2 passed\u001b[39m\u001b[22m\u001b[90m (4)\u001b[39m\n\u001b[2m   Start at \u001b[22m 20:34:19\n\u001b[2m   Duration \u001b[22m 4.82s\u001b[2m (transform 0ms, setup 0ms, import 171ms, tests 2.70s, environment 0ms)\u001b[22m\n\n\n\n\u001b[31m\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u001b[39m\u001b[1m\u001b[41m Failed Tests 2 \u001b[49m\u001b[22m\u001b[31m\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u001b[39m\n\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx\u001b[2m > \u001b[22musePapaParse\u001b[2m > \u001b[22mtracks parsing, batching progress and completion\n\u001b[31m\u001b[1mAssertionError\u001b[22m: expected { importCount: 1, rowCount: 3, \u2026(2) } to deeply equal { importCount: 2, rowCount: 3, \u2026(2) }\u001b[39m\n\nFailure screenshot:\n  - \u001b[2msrc/components/atomic-crm/misc/__screenshots__/usePapaParse.test.tsx/usePapaParse-tracks-parsing--batching-progress-and-completion-1.png\u001b[22m\n\n\u001b[32m- Expected\u001b[39m\n\u001b[31m+ Received\u001b[39m\n\n\u001b[2m  {\u001b[22m\n\u001b[2m    \"errorCount\": 1,\u001b[22m\n\u001b[2m    \"hasRemainingTime\": true,\u001b[22m\n\u001b[32m-   \"importCount\": 2,\u001b[39m\n\u001b[31m+   \"importCount\": 1,\u001b[39m\n\u001b[2m    \"rowCount\": 3,\u001b[22m\n\u001b[2m  }\u001b[22m\n\n\u001b[36m \u001b[2m\u276f\u001b[22m src/components/atomic-crm/misc/usePapaParse.test.tsx:\u001b[2m127:7\u001b[22m\u001b[39m\n    \u001b[90m125|\u001b[39m         }\u001b[33m;\u001b[39m\n    \u001b[90m126|\u001b[39m       \u001b[33m}\u001b[39m)\n    \u001b[90m127|\u001b[39m       .toEqual(\u001b[33m{\u001b[39m\n    \u001b[90m   |\u001b[39m       \u001b[31m^\u001b[39m\n    \u001b[90m128|\u001b[39m         importCount\u001b[33m:\u001b[39m \u001b[34m2\u001b[39m\u001b[33m,\u001b[39m\n    \u001b[90m129|\u001b[39m         rowCount\u001b[33m:\u001b[39m \u001b[34m3\u001b[39m\u001b[33m,\u001b[39m\n\n\u001b[31m\u001b[1mCaused by: Error\u001b[22m: Matcher did not succeed in time.\u001b[39m\n\u001b[36m \u001b[2m\u276f\u001b[22m src/components/atomic-crm/misc/usePapaParse.test.tsx:\u001b[2m114:4\u001b[22m\u001b[39m\n\n\u001b[31m\u001b[2m\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[1/2]\u23af\u001b[22m\u001b[39m\n\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx\u001b[2m > \u001b[22musePapaParse\u001b[2m > \u001b[22madds batch size to errorCount when processBatch fails and then continues\n\u001b[31m\u001b[1mAssertionError\u001b[22m: expected { Object (state, rowCount, ...) } to deeply equal { state: 'complete', \u2026(4) }\u001b[39m\n\nFailure screenshot:\n  - \u001b[2msrc/components/atomic-crm/misc/__screenshots__/usePapaParse.test.tsx/usePapaParse-adds-batch-size-to-errorCount-when-processBatch-fails-and-then-continues-1.png\u001b[22m\n\n\u001b[32m- Expected\u001b[39m\n\u001b[31m+ Received\u001b[39m\n\n\u001b[2m  {\u001b[22m\n\u001b[2m    \"errorCount\": 2,\u001b[22m\n\u001b[32m-   \"importCount\": 2,\u001b[39m\n\u001b[31m+   \"importCount\": 1,\u001b[39m\n\u001b[2m    \"remainingTime\": null,\u001b[22m\n\u001b[2m    \"rowCount\": 4,\u001b[22m\n\u001b[2m    \"state\": \"complete\",\u001b[22m\n\u001b[2m  }\u001b[22m\n\n\u001b[36m \u001b[2m\u276f\u001b[22m src/components/atomic-crm/misc/usePapaParse.test.tsx:\u001b[2m183:51\u001b[22m\u001b[39m\n    \u001b[90m181|\u001b[39m\n    \u001b[90m182|\u001b[39m     secondBatch.resolve();\n    \u001b[90m183|\u001b[39m     await expect.poll(() =\u001b[37m\u001b[41m\u001b[1m>\u001b[22m\u001b[49m\u001b[39m importerStates.at(-1)).toEqual(\u001b[33m{\u001b[39m\n    \u001b[90m   |\u001b[39m                                                   \u001b[31m^\u001b[39m\n    \u001b[90m184|\u001b[39m       state\u001b[33m:\u001b[39m \u001b[32m\"complete\"\u001b[39m\u001b[33m,\u001b[39m\n    \u001b[90m185|\u001b[39m       importCount\u001b[33m:\u001b[39m \u001b[34m2\u001b[39m\u001b[33m,\u001b[39m\n\n\u001b[31m\u001b[1mCaused by: Error\u001b[22m: Matcher did not succeed in time.\u001b[39m\n\u001b[36m \u001b[2m\u276f\u001b[22m src/components/atomic-crm/misc/usePapaParse.test.tsx:\u001b[2m183:4\u001b[22m\u001b[39m\n\n\u001b[31m\u001b[2m\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[2/2]\u23af\u001b[22m\u001b[39m\n\nnpm notice\nnpm notice New major version of npm available! 11.12.1 -> 12.0.2\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2\nnpm notice To update run: npm install -g npm@12.0.2\nnpm notice"
+      }
+    },
+    {
+      "id": "failed-batch-counts-once",
+      "killed": true,
+      "execution": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--init",
+          "--ipc=host",
+          "--volume",
+          "C:\\Users\\aferr\\Projects\\AFTech\\sandbox\\test_skill\\work\\atomic-crm-baseline:/work",
+          "--volume",
+          "atomic-crm-baseline-node-modules:/work/node_modules",
+          "--workdir",
+          "/work",
+          "mcr.microsoft.com/playwright:v1.60.0-noble",
+          "npm",
+          "run",
+          "test:unit:app",
+          "--",
+          "--run",
+          "--project",
+          "app",
+          "src/components/atomic-crm/misc/usePapaParse.test.tsx"
+        ],
+        "exit_code": 1,
+        "passed": false,
+        "duration_seconds": 5.539,
+        "output_tail": "> atomic-crm@0.1.0 test:unit:app\n> vitest --config vitest.config.ts --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx\n\n\n\u001b[1m\u001b[46m RUN \u001b[49m\u001b[22m \u001b[36mv4.1.0 \u001b[39m\u001b[90m/work\u001b[39m\n\n \u001b[31m\u276f\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m | \u001b[22m\u001b[31m1 failed\u001b[39m\u001b[2m)\u001b[22m\u001b[33m 1614\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[32m\u2713\u001b[39m tracks parsing, batching progress and completion\u001b[32m 198\u001b[2mms\u001b[22m\u001b[39m\n\u001b[31m     \u001b[31m\u00d7\u001b[31m adds batch size to errorCount when processBatch fails and then continues\u001b[39m\u001b[33m 1159\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[32m\u2713\u001b[39m moves to error state when papaparse fails\u001b[32m 107\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[32m\u2713\u001b[39m cancels an in-flight import when reset is called\u001b[32m 149\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[31m1 failed\u001b[39m\u001b[22m\u001b[90m (1)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[31m1 failed\u001b[39m\u001b[22m\u001b[2m | \u001b[22m\u001b[1m\u001b[32m3 passed\u001b[39m\u001b[22m\u001b[90m (4)\u001b[39m\n\u001b[2m   Start at \u001b[22m 20:34:26\n\u001b[2m   Duration \u001b[22m 4.27s\u001b[2m (transform 0ms, setup 0ms, import 229ms, tests 1.61s, environment 0ms)\u001b[22m\n\n\n\n\u001b[31m\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u001b[39m\u001b[1m\u001b[41m Failed Tests 1 \u001b[49m\u001b[22m\u001b[31m\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u001b[39m\n\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx\u001b[2m > \u001b[22musePapaParse\u001b[2m > \u001b[22madds batch size to errorCount when processBatch fails and then continues\n\u001b[31m\u001b[1mAssertionError\u001b[22m: expected 1 to be 2 // Object.is equality\u001b[39m\n\nFailure screenshot:\n  - \u001b[2msrc/components/atomic-crm/misc/__screenshots__/usePapaParse.test.tsx/usePapaParse-adds-batch-size-to-errorCount-when-processBatch-fails-and-then-continues-1.png\u001b[22m\n\n\u001b[32m- Expected\u001b[39m\n\u001b[31m+ Received\u001b[39m\n\n\u001b[32m- 2\u001b[39m\n\u001b[31m+ 1\u001b[39m\n\n\u001b[36m \u001b[2m\u276f\u001b[22m src/components/atomic-crm/misc/usePapaParse.test.tsx:\u001b[2m180:7\u001b[22m\u001b[39m\n    \u001b[90m178|\u001b[39m         \u001b[35mreturn\u001b[39m latest\u001b[33m.\u001b[39merrorCount\u001b[33m;\u001b[39m\n    \u001b[90m179|\u001b[39m       \u001b[33m}\u001b[39m)\n    \u001b[90m180|\u001b[39m       .toBe(2);\n    \u001b[90m   |\u001b[39m       \u001b[31m^\u001b[39m\n    \u001b[90m181|\u001b[39m\n    \u001b[90m182|\u001b[39m     secondBatch.resolve();\n\n\u001b[31m\u001b[1mCaused by: Error\u001b[22m: Matcher did not succeed in time.\u001b[39m\n\u001b[36m \u001b[2m\u276f\u001b[22m src/components/atomic-crm/misc/usePapaParse.test.tsx:\u001b[2m172:4\u001b[22m\u001b[39m\n\n\u001b[31m\u001b[2m\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[1/1]\u23af\u001b[22m\u001b[39m\n\nnpm notice\nnpm notice New major version of npm available! 11.12.1 -> 12.0.2\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2\nnpm notice To update run: npm install -g npm@12.0.2\nnpm notice"
+      }
+    },
+    {
+      "id": "parser-errors-discarded",
+      "killed": true,
+      "execution": {
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--init",
+          "--ipc=host",
+          "--volume",
+          "C:\\Users\\aferr\\Projects\\AFTech\\sandbox\\test_skill\\work\\atomic-crm-baseline:/work",
+          "--volume",
+          "atomic-crm-baseline-node-modules:/work/node_modules",
+          "--workdir",
+          "/work",
+          "mcr.microsoft.com/playwright:v1.60.0-noble",
+          "npm",
+          "run",
+          "test:unit:app",
+          "--",
+          "--run",
+          "--project",
+          "app",
+          "src/components/atomic-crm/misc/usePapaParse.test.tsx"
+        ],
+        "exit_code": 1,
+        "passed": false,
+        "duration_seconds": 5.296,
+        "output_tail": "> atomic-crm@0.1.0 test:unit:app\n> vitest --config vitest.config.ts --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx\n\n\n\u001b[1m\u001b[46m RUN \u001b[49m\u001b[22m \u001b[36mv4.1.0 \u001b[39m\u001b[90m/work\u001b[39m\n\n \u001b[31m\u276f\u001b[39m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m | \u001b[22m\u001b[31m1 failed\u001b[39m\u001b[2m)\u001b[22m\u001b[33m 1671\u001b[2mms\u001b[22m\u001b[39m\n\u001b[31m     \u001b[31m\u00d7\u001b[31m tracks parsing, batching progress and completion\u001b[39m\u001b[33m 1280\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[32m\u2713\u001b[39m adds batch size to errorCount when processBatch fails and then continues\u001b[32m 158\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[32m\u2713\u001b[39m moves to error state when papaparse fails\u001b[32m 100\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[32m\u2713\u001b[39m cancels an in-flight import when reset is called\u001b[32m 132\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[31m1 failed\u001b[39m\u001b[22m\u001b[90m (1)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[31m1 failed\u001b[39m\u001b[22m\u001b[2m | \u001b[22m\u001b[1m\u001b[32m3 passed\u001b[39m\u001b[22m\u001b[90m (4)\u001b[39m\n\u001b[2m   Start at \u001b[22m 20:34:31\n\u001b[2m   Duration \u001b[22m 4.02s\u001b[2m (transform 0ms, setup 0ms, import 189ms, tests 1.67s, environment 0ms)\u001b[22m\n\n\n\n\u001b[31m\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u001b[39m\u001b[1m\u001b[41m Failed Tests 1 \u001b[49m\u001b[22m\u001b[31m\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u001b[39m\n\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[46m app (chromium) \u001b[49m\u001b[39m src/components/atomic-crm/misc/usePapaParse.test.tsx\u001b[2m > \u001b[22musePapaParse\u001b[2m > \u001b[22mtracks parsing, batching progress and completion\n\u001b[31m\u001b[1mAssertionError\u001b[22m: expected { importCount: 2, rowCount: 3, \u2026(2) } to deeply equal { importCount: 2, rowCount: 3, \u2026(2) }\u001b[39m\n\nFailure screenshot:\n  - \u001b[2msrc/components/atomic-crm/misc/__screenshots__/usePapaParse.test.tsx/usePapaParse-tracks-parsing--batching-progress-and-completion-1.png\u001b[22m\n\n\u001b[32m- Expected\u001b[39m\n\u001b[31m+ Received\u001b[39m\n\n\u001b[2m  {\u001b[22m\n\u001b[32m-   \"errorCount\": 1,\u001b[39m\n\u001b[31m+   \"errorCount\": 0,\u001b[39m\n\u001b[2m    \"hasRemainingTime\": true,\u001b[22m\n\u001b[2m    \"importCount\": 2,\u001b[22m\n\u001b[2m    \"rowCount\": 3,\u001b[22m\n\u001b[2m  }\u001b[22m\n\n\u001b[36m \u001b[2m\u276f\u001b[22m src/components/atomic-crm/misc/usePapaParse.test.tsx:\u001b[2m127:7\u001b[22m\u001b[39m\n    \u001b[90m125|\u001b[39m         }\u001b[33m;\u001b[39m\n    \u001b[90m126|\u001b[39m       \u001b[33m}\u001b[39m)\n    \u001b[90m127|\u001b[39m       .toEqual(\u001b[33m{\u001b[39m\n    \u001b[90m   |\u001b[39m       \u001b[31m^\u001b[39m\n    \u001b[90m128|\u001b[39m         importCount\u001b[33m:\u001b[39m \u001b[34m2\u001b[39m\u001b[33m,\u001b[39m\n    \u001b[90m129|\u001b[39m         rowCount\u001b[33m:\u001b[39m \u001b[34m3\u001b[39m\u001b[33m,\u001b[39m\n\n\u001b[31m\u001b[1mCaused by: Error\u001b[22m: Matcher did not succeed in time.\u001b[39m\n\u001b[36m \u001b[2m\u276f\u001b[22m src/components/atomic-crm/misc/usePapaParse.test.tsx:\u001b[2m114:4\u001b[22m\u001b[39m\n\n\u001b[31m\u001b[2m\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[1/1]\u23af\u001b[22m\u001b[39m\n\nnpm notice\nnpm notice New major version of npm available! 11.12.1 -> 12.0.2\nnpm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2\nnpm notice To update run: npm install -g npm@12.0.2\nnpm notice"
+      }
+    }
+  ],
+  "mutation_score": 0.6,
+  "target_restored": true,
+  "agent_usage": null,
+  "gate_passed": false
+}
