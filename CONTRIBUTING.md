@@ -37,6 +37,8 @@ Mudanças somente em documentação, arquivos de comunidade ou CI gratuito dispe
 
 Mudanças em fixtures, graders, mutantes, pontuação ou harness exigem validação completa de fixtures e justificativa para preservar a comparabilidade histórica.
 
+As dependências das fixtures permanecem fixadas para tornar os resultados reproduzíveis. Atualize versões em lote, dentro de uma mudança planejada, com validação das fixtures e decisão explícita sobre nova certificação.
+
 ## Pull request
 
 - Use Conventional Commits.
