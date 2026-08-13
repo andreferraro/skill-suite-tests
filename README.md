@@ -55,6 +55,12 @@ Falhas individuais permanecem nos artefatos e participam da consolidação. Um b
 
 Leia a [metodologia completa](evals/README.md#integridade-da-certificação) e consulte o [relatório auditável da v0.3.0](evals/results/v0.3.0-certification.json).
 
+### Holdout em projeto open source
+
+Além das fixtures controladas, a versão em desenvolvimento foi aplicada ao hook de importação CSV do [Atomic CRM](https://github.com/marmelab/atomic-crm). Com o mesmo modelo, projeto, pedido e contrato, o mutation score passou de **60% no baseline para 80% com a skill**. O tratamento aprovou o gate técnico, preservou o código de produção e matou quatro dos cinco defeitos ocultos.
+
+Consulte os [testes gerados, relatórios estruturados, comandos e resultados de cada mutação](evals/results/atomic-crm-holdout-2026-08-13/README.md). O holdout comprova ganho em uma execução real e complementa a certificação de três repetições da `v0.3.0`.
+
 ## Estado da v0.3.0
 
 A versão `v0.3.0` foi certificada no commit [`7da3f5c`](https://github.com/andreferraro/skill-suite-tests/commit/7da3f5c243c80b259c330335fe29adab9e80da0f) e publicada pelo [PR #9](https://github.com/andreferraro/skill-suite-tests/pull/9). O [relatório consolidado](evals/results/v0.3.0-certification.json) preserva as medianas, os gates e os links para as execuções reais.
@@ -312,8 +318,7 @@ Essa validação não usa agentes nem consome créditos de API.
 - [`SKILL.md`](SKILL.md): contrato e fluxo do agente.
 - [`scripts/detect_test_context.py`](scripts/detect_test_context.py): inventário determinístico da stack e de sinais de risco confirmáveis no código.
 - [`scripts/analyze_test_target.py`](scripts/analyze_test_target.py): inventário focado de estados, ações de ciclo de vida, fronteiras assíncronas e guards protetivos do alvo.
-- [`scripts/prove_test_sensitivity.py`](scripts/prove_test_sensitivity.py): mutação temporária restaurável, incluindo seleção por ocorrência para guards repetidos.
-- [`scripts/prove_test_sensitivity.py`](scripts/prove_test_sensitivity.py): mutação local de uma ocorrência, execução do teste e restauração garantida do arquivo.
+- [`scripts/prove_test_sensitivity.py`](scripts/prove_test_sensitivity.py): mutação temporária restaurável, com seleção por ocorrência para guards repetidos.
 - [`scripts/validate_test_evidence.py`](scripts/validate_test_evidence.py): validação semântica do relatório.
 - [`schemas/test-evidence.v1.json`](schemas/test-evidence.v1.json): contrato JSON Schema.
 - [`references/`](references): taxonomia, oráculos, ecossistemas e bases técnicas.

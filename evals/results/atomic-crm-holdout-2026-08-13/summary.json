@@ -1,0 +1,32 @@
+{
+  "benchmark": "atomic-crm-use-papa-parse",
+  "executed_at": "2026-08-13",
+  "source": {
+    "repository": "https://github.com/marmelab/atomic-crm",
+    "commit": "167a4cdb652b1ab2b4b030831cfa7adcf2099321",
+    "target": "src/components/atomic-crm/misc/usePapaParse.tsx"
+  },
+  "agent": "cursor",
+  "model": "gpt-5.3-codex-low",
+  "baseline": {
+    "mutation_score": 0.6,
+    "gate_passed": false,
+    "duration_seconds": 342.597
+  },
+  "skill": {
+    "commit": "a3a710c",
+    "mutation_score": 0.8,
+    "gate_passed": true,
+    "duration_seconds": 581.859
+  },
+  "gain": 0.2,
+  "forbidden_changes": [],
+  "target_restored": true,
+  "mutations": [
+    { "id": "cancel-during-parsing-ignored", "baseline_killed": false, "skill_killed": false },
+    { "id": "cancel-during-running-ignored", "baseline_killed": false, "skill_killed": true },
+    { "id": "import-count-counts-batches", "baseline_killed": true, "skill_killed": true },
+    { "id": "failed-batch-counts-once", "baseline_killed": true, "skill_killed": true },
+    { "id": "parser-errors-discarded", "baseline_killed": true, "skill_killed": true }
+  ]
+}

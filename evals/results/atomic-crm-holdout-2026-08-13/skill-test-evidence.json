@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "target": "src/components/atomic-crm/misc/usePapaParse.tsx",
+  "support_status": "validated",
+  "classification": {
+    "purpose": ["regression", "risk-based"],
+    "level": ["component", "browser-unit"],
+    "quality_attributes": ["correctness", "resilience", "state-consistency"],
+    "techniques": ["deterministic-promises", "state-observation", "temporary-mutation-sensitivity"]
+  },
+  "basis": [
+    {
+      "type": "implementation",
+      "reference": "State machine and stale-import guards in src/components/atomic-crm/misc/usePapaParse.tsx"
+    },
+    {
+      "type": "request",
+      "reference": "Test observable behavior for parsing, batch processing, progress, failures, and cancellation"
+    }
+  ],
+  "risks": [
+    {
+      "id": "R1",
+      "description": "Hook does not transition parsing -> running -> complete correctly across batch boundaries.",
+      "impact": "Users receive wrong progress/completion feedback during CSV import."
+    },
+    {
+      "id": "R2",
+      "description": "Batch failure path does not aggregate failed rows and continue with remaining batches.",
+      "impact": "Import metrics become inconsistent and downstream retry decisions are wrong."
+    },
+    {
+      "id": "R3",
+      "description": "Fatal parser errors are not exposed in observable error state.",
+      "impact": "UI cannot surface a blocking CSV parse failure."
+    },
+    {
+      "id": "R4",
+      "description": "Cancellation/reset allows stale async callbacks to mutate state.",
+      "impact": "Canceled imports can resume unexpectedly or apply obsolete callbacks."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "S1",
+      "risk_ids": ["R1"],
+      "name": "Tracks parsing, running progress and completion with deterministic batch timing",
+      "preconditions": "Hook mounted with batchSize=2 and processBatch promises controlled by deferred resolvers.",
+      "stimulus": "Trigger parseCsv and resolve two deferred batches in order after parser complete callback receives 3 rows.",
+      "oracle": "State sequence reaches parsing, running(rowCount=3, importCount=0), running(importCount=2, remainingTime=5), then complete(importCount=3, remainingTime=null).",
+      "isolation": "papaparse.parse mocked; Date.now mocked; no network or backend dependencies.",
+      "cleanup": "Mocks restored after each test."
+    },
+    {
+      "id": "S2",
+      "risk_ids": ["R2"],
+      "name": "Counts failed batch rows and continues with next batch",
+      "preconditions": "Hook mounted with two deferred batch promises and one parser warning.",
+      "stimulus": "Reject first batch promise, then resolve second batch promise.",
+      "oracle": "State reflects running(importCount=0,errorCount=3) after first rejection and complete(importCount=1,errorCount=3) after second batch.",
+      "isolation": "Deferred promises drive async deterministically without sleeps.",
+      "cleanup": "Mocks restored after each test."
+    },
+    {
+      "id": "S3",
+      "risk_ids": ["R3"],
+      "name": "Parser fatal error transitions to error state",
+      "preconditions": "Hook mounted and parse callback captured from papaparse mock.",
+      "stimulus": "Invoke parser error callback with Error('invalid csv stream').",
+      "oracle": "Latest observable importer state is error with matching message.",
+      "isolation": "No filesystem, browser navigation, or external service interaction.",
+      "cleanup": "Mocks restored after each test."
+    },
+    {
+      "id": "S4",
+      "risk_ids": ["R4"],
+      "name": "Reset during parsing ignores stale complete callback",
+      "preconditions": "Hook started parsing and reset is triggered before invoking captured complete callback.",
+      "stimulus": "Call reset then execute stale complete callback with non-empty rows.",
+      "oracle": "Latest state remains idle and processBatch is never called.",
+      "isolation": "Stale callback injected directly through mock parser options.",
+      "cleanup": "Mocks restored after each test."
+    },
+    {
+      "id": "S5",
+      "risk_ids": ["R4"],
+      "name": "Reset while first batch pending blocks stale running-loop continuation",
+      "preconditions": "First batch promise intentionally kept pending after entering running state.",
+      "stimulus": "Trigger reset while batch pending, then resolve stale pending promise.",
+      "oracle": "State stays idle after stale resolution and processBatch call count does not advance to a second batch.",
+      "isolation": "Deferred promise controls pending window deterministically.",
+      "cleanup": "Mocks restored after each test."
+    }
+  ],
+  "boundaries": [
+    {
+      "name": "Vitest Browser app project",
+      "mode": "real",
+      "rationale": "Tests run in real Chromium via Playwright through the configured app project."
+    },
+    {
+      "name": "Container runtime",
+      "mode": "containerized",
+      "rationale": "All commands executed inside mcr.microsoft.com/playwright:v1.60.0-noble with workspace and node_modules volume mounts."
+    },
+    {
+      "name": "CSV parser callbacks",
+      "mode": "simulated",
+      "rationale": "papaparse parse callbacks are mocked to deterministically drive state-machine branches."
+    }
+  ],
+  "files_changed": [
+    "src/components/atomic-crm/misc/usePapaParse.test.tsx",
+    "test-evidence.json"
+  ],
+  "commands": [
+    {
+      "command": "docker run --rm --init --ipc=host --volume ${PWD}:/work --volume ${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run test:unit:app -- --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "5 tests passed in src/components/atomic-crm/misc/usePapaParse.test.tsx."
+    },
+    {
+      "command": "python .agents/skills/skill-suite-tests/scripts/prove_test_sensitivity.py --root . --file src/components/atomic-crm/misc/usePapaParse.tsx --search \"            if (importIdRef.current !== importId) {\" --replace \"            if (false) {\" -- docker run --rm --init --ipc=host --volume ${PWD}:/work --volume ${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run test:unit:app -- --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx -t \"keeps idle after reset while pending batch resolves\"",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Sensitivity proved: mutated guard caused test failure (mutated_exit_code=1) and file restoration succeeded."
+    },
+    {
+      "command": "python .agents/skills/skill-suite-tests/scripts/prove_test_sensitivity.py --root . --file src/components/atomic-crm/misc/usePapaParse.tsx --search \"          if (importIdRef.current !== importId) {\" --replace \"          if (false) {\" --occurrence 1 -- docker run --rm --init --ipc=host --volume ${PWD}:/work --volume ${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run test:unit:app -- --run --project app src/components/atomic-crm/misc/usePapaParse.test.tsx -t \"ignores stale complete callback after reset during parsing\"",
+      "status": "failed",
+      "exit_code": 1,
+      "evidence": "Sensitivity not proved for this mutation attempt: mutated test run stayed green (mutated_exit_code=0), file restoration succeeded."
+    },
+    {
+      "command": "docker run --rm --init --ipc=host --volume ${PWD}:/work --volume ${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run test:unit:app -- --run --project app",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Canonical suite passed: 20 files, 148 tests passed, 1 skipped."
+    },
+    {
+      "command": "docker run --rm --init --ipc=host --volume ${PWD}:/work --volume ${env:ATOMIC_NODE_MODULES_VOLUME}:/work/node_modules --workdir /work mcr.microsoft.com/playwright:v1.60.0-noble npm run typecheck",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "TypeScript typecheck passed (tsc --noEmit --project tsconfig.app.json)."
+    }
+  ],
+  "evidence": [
+    {
+      "type": "test-results",
+      "summary": "New browser-unit suite covers parsing, batch progress, parser failure, batch failure, and two cancellation phases with deterministic async control."
+    },
+    {
+      "type": "mutation-sensitivity",
+      "summary": "Running-loop stale guard sensitivity demonstrated with temporary mutation and automatic byte-for-byte restoration."
+    },
+    {
+      "type": "gates",
+      "summary": "Targeted test command, canonical app suite, and typecheck were executed successfully in the requested Docker image."
+    }
+  ],
+  "limitations": [
+    "Sensitivity for the early stale-complete guard mutation attempt was not demonstrated by the current scenario and remains an open test-strengthening item.",
+    "No visual baseline or screenshot-oracle approval was defined for this task."
+  ]
+}

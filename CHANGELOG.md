@@ -16,6 +16,7 @@
 
 - Analisador determinístico de estados, ações de ciclo de vida, fronteiras assíncronas e guards repetidos no arquivo alvo.
 - Seleção `--occurrence` no helper de sensibilidade para mutar guards repetidos isoladamente.
+- Holdout pareado no Atomic CRM, com artefatos publicados, ganho de 60% para 80% no mutation score e gate técnico aprovado.
 
 ## [0.3.1] - 2026-08-12
 
