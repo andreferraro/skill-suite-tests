@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.5.0] - 2026-08-13
+
+### Adicionado
+
+- Manifesto de plugin para distribuição no ChatGPT e Codex.
+- Marketplace Git instalável diretamente pelo repositório.
+- Validação determinística de consistência entre plugin, marketplace e skill.
+
+### Alterado
+
+- Runtime movido, sem mudança de conteúdo, para `skills/skill-suite-tests`.
+- Instalação atualizada para plugin no ChatGPT e Codex e skill remota no Cursor.
+- Harness adaptado para instalar a skill a partir da fonte única do plugin.
+
+### Certificação
+
+- Conteúdo do runtime preservado em relação à `v0.4.0` certificada.
+- Validação estrutural do plugin e da skill aprovada sem chamadas pagas de agentes.
+
 ## [0.4.0] - 2026-08-13
 
 ### Alterado

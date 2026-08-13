@@ -9,12 +9,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from validate_repository import scan_secrets, validate_local_links  # noqa: E402
+from validate_repository import (  # noqa: E402
+    scan_secrets,
+    validate_local_links,
+    validate_plugin,
+)
 
 
 class RepositoryValidationTests(unittest.TestCase):
     def test_skill_requires_lifecycle_state_traceability(self) -> None:
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        skill = (ROOT / "skills" / "skill-suite-tests" / "SKILL.md").read_text(encoding="utf-8")
 
         self.assertIn(
             "risco -> mecanismo protetivo -> estado ou fase -> cenário -> oráculo",
@@ -53,6 +57,9 @@ class RepositoryValidationTests(unittest.TestCase):
         cache_key = "baseline-${{ steps.fingerprint.outputs.value }}-r${{ inputs.repetition }}"
         self.assertEqual(4, workflow.count(cache_key))
         self.assertNotIn("steps.fingerprint.outputs.value }}-r1", workflow)
+
+    def test_plugin_and_marketplace_are_consistent(self) -> None:
+        self.assertEqual([], validate_plugin(ROOT))
 
     def test_local_link_validator_detects_missing_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

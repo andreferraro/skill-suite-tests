@@ -1,0 +1,21 @@
+{
+  "name": "skill-suite-tests",
+  "interface": {
+    "displayName": "Skill Suite Tests"
+  },
+  "plugins": [
+    {
+      "name": "skill-suite-tests",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/andreferraro/skill-suite-tests.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

@@ -15,11 +15,19 @@ Skill para orientar Codex e Cursor na criação de testes automatizados guiados 
 
 Você precisa de Git e do Codex ou Cursor. Chaves de API e configuração no GitHub ficam fora do uso comum.
 
-No Codex, envie:
+No Codex ou ChatGPT desktop, adicione o catálogo do projeto:
+
+```bash
+codex plugin marketplace add andreferraro/skill-suite-tests --ref main
+```
+
+Reinicie o aplicativo, abra **Plugins Directory**, escolha **Skill Suite Tests** e clique em **Install**.
+
+No Codex CLI ou IDE, também é possível instalar somente a skill:
 
 ```text
-Use $skill-installer para instalar a skill deste repositório:
-https://github.com/andreferraro/skill-suite-tests
+Use $skill-installer para instalar:
+https://github.com/andreferraro/skill-suite-tests/tree/main/skills/skill-suite-tests
 ```
 
 Depois, faça um pedido com alvo e risco:
@@ -34,7 +42,7 @@ No Cursor, abra **Customize > Rules > Add Rule > Remote Rule (GitHub)**, informe
 /skill-suite-tests Teste a recuperação de senha. Cubra loading, erro, teclado, acessibilidade e respostas assíncronas obsoletas.
 ```
 
-Veja a [instalação detalhada](#instalação-pelo-repositório) e os [exemplos de uso](#como-usar).
+Veja a [instalação detalhada](#instalação) e os [exemplos de uso](#como-usar).
 
 ## Como a skill prova que ajuda
 
@@ -54,6 +62,17 @@ A certificação é um experimento pareado. Baseline e tratamento recebem o mesm
 Falhas individuais permanecem nos artefatos e participam da consolidação. Um baseline perfeito pode empatar em um caso, mas a release ainda precisa demonstrar ganho agregado sem regressão relevante.
 
 Leia a [metodologia completa](evals/README.md#integridade-da-certificação) e consulte o [relatório auditável da v0.4.0](evals/results/v0.4.0-certification.json).
+
+## Distribuição v0.5.0
+
+A `v0.5.0` adota o formato instalável atual do ChatGPT e Codex:
+
+- manifesto em `.codex-plugin/plugin.json`;
+- catálogo Git em `.agents/plugins/marketplace.json`;
+- runtime único em `skills/skill-suite-tests`;
+- instalação portátil no Cursor pelo mesmo repositório.
+
+Os arquivos executados pela skill mantêm o mesmo conteúdo certificado na `v0.4.0`. A mudança reorganiza o pacote e atualiza o instalador dos evals, sem alterar instruções, scripts, schema ou referências. Por isso, a certificação técnica continua identificada como `v0.4.0` até uma mudança funcional do runtime exigir nova rodada paga.
 
 ### Holdout em projeto open source
 
@@ -132,22 +151,47 @@ A classificação usa quatro eixos:
 
 Em fluxos assíncronos, a skill separa estados que possuem proteções diferentes. Cancelamento durante parsing, processamento ou espera entre lotes vira cenários distintos quando cada fase pode falhar de uma forma própria. O teste confirma o estado cancelado antes de liberar callbacks obsoletos, usando payload capaz de causar um efeito proibido caso o guard falhe. Erros fatais e erros parciais retornados com os dados também recebem oráculos distintos. A prova de sensibilidade remove temporariamente cada proteção relevante e confirma que o cenário correspondente detecta a falha.
 
-## Instalação pelo repositório
+## Instalação
 
 Instalar e usar a skill no Codex ou no Cursor não exige `OPENAI_API_KEY`, `CURSOR_API_KEY` nem configuração no GitHub. Essas credenciais pertencem somente aos benchmarks automatizados mantidos neste repositório.
 
-Codex e Cursor reconhecem skills em `.agents/skills`. Escolha um dos métodos abaixo.
+O repositório segue os dois formatos atuais de distribuição: plugin para ChatGPT e Codex, skill portátil para Cursor e instalações locais.
 
-### Codex com Skill Installer
+O plugin está disponível pelo marketplace Git deste repositório. A publicação no diretório público da OpenAI exige submissão e verificação do desenvolvedor em uma etapa separada.
 
-No Codex, envie:
+### ChatGPT e Codex como plugin
 
-```text
-Use $skill-installer para instalar a skill deste repositório:
-https://github.com/andreferraro/skill-suite-tests
+Adicione o marketplace pelo terminal:
+
+```bash
+codex plugin marketplace add andreferraro/skill-suite-tests --ref main
 ```
 
-Esse fluxo foi validado instalando o conteúdo da raiz do repositório, incluindo `SKILL.md`, metadados, scripts, schema e referências.
+Depois:
+
+1. Reinicie o ChatGPT desktop.
+2. Abra **Plugins Directory**.
+3. Selecione o catálogo **Skill Suite Tests**.
+4. Instale o plugin **Skill Suite Tests**.
+
+O plugin distribui a skill que está em `skills/skill-suite-tests`. Ele não possui MCP, serviço externo nem autenticação própria.
+
+Para receber versões novas do catálogo:
+
+```bash
+codex plugin marketplace upgrade skill-suite-tests
+```
+
+### Codex CLI ou IDE com Skill Installer
+
+Envie:
+
+```text
+Use $skill-installer para instalar:
+https://github.com/andreferraro/skill-suite-tests/tree/main/skills/skill-suite-tests
+```
+
+Esse modo instala apenas o runtime da skill em `~/.codex/skills/skill-suite-tests`.
 
 ### Cursor pela interface
 
@@ -157,72 +201,17 @@ Esse fluxo foi validado instalando o conteúdo da raiz do repositório, incluind
 4. Informe `https://github.com/andreferraro/skill-suite-tests`.
 5. Confira `skill-suite-tests` em **Customize > Skills**.
 
-### Clone global no Windows
-
-```powershell
-$skillsRoot = Join-Path $env:USERPROFILE ".agents\skills"
-$skillPath = Join-Path $skillsRoot "skill-suite-tests"
-New-Item -ItemType Directory -Force $skillsRoot | Out-Null
-git clone https://github.com/andreferraro/skill-suite-tests.git $skillPath
-```
-
-### Clone global no macOS ou Linux
-
-```bash
-mkdir -p "$HOME/.agents/skills"
-git clone \
-  https://github.com/andreferraro/skill-suite-tests.git \
-  "$HOME/.agents/skills/skill-suite-tests"
-```
-
-### Somente em um projeto
-
-Execute na raiz do projeto que será testado:
-
-```bash
-git clone \
-  https://github.com/andreferraro/skill-suite-tests.git \
-  .agents/skills/skill-suite-tests
-```
-
-Para compartilhar a mesma versão com a equipe, use um submódulo:
-
-```bash
-git submodule add \
-  https://github.com/andreferraro/skill-suite-tests.git \
-  .agents/skills/skill-suite-tests
-git commit -m "build: add skill-suite-tests"
-```
-
 ### Conferência
 
-Windows:
+No Codex CLI ou IDE:
 
-```powershell
-Test-Path "$env:USERPROFILE\.agents\skills\skill-suite-tests\SKILL.md"
+```text
+/skills
 ```
 
-macOS ou Linux:
+No Cursor, abra **Customize > Skills**. Nos dois casos, procure por `skill-suite-tests`.
 
-```bash
-test -f "$HOME/.agents/skills/skill-suite-tests/SKILL.md" && echo "Skill instalada"
-```
-
-Codex detecta alterações automaticamente. Se a skill ainda estiver ausente, reinicie a ferramenta. No Cursor, abra **Customize**, entre em **Skills** e confira `skill-suite-tests`.
-
-### Atualização
-
-Windows:
-
-```powershell
-git -C "$env:USERPROFILE\.agents\skills\skill-suite-tests" pull --ff-only
-```
-
-macOS ou Linux:
-
-```bash
-git -C "$HOME/.agents/skills/skill-suite-tests" pull --ff-only
-```
+Codex detecta skills instaladas automaticamente. Se ela ainda estiver ausente, reinicie a ferramenta.
 
 ## Como usar
 
@@ -272,10 +261,10 @@ A resposta humana apresenta:
 - prova de sensibilidade;
 - limitações e itens `<definir>`.
 
-Automações também podem exigir `test-evidence.json`. O contrato está em [`schemas/test-evidence.v1.json`](schemas/test-evidence.v1.json) e há um [`exemplo validado`](examples/test-evidence.example.json).
+Automações também podem exigir `test-evidence.json`. O contrato está em [`skills/skill-suite-tests/schemas/test-evidence.v1.json`](skills/skill-suite-tests/schemas/test-evidence.v1.json) e há um [`exemplo validado`](skills/skill-suite-tests/examples/test-evidence.example.json).
 
 ```bash
-python scripts/validate_test_evidence.py test-evidence.json
+python skills/skill-suite-tests/scripts/validate_test_evidence.py test-evidence.json
 ```
 
 ## Credenciais e custo
@@ -313,13 +302,13 @@ Essa validação não usa agentes nem consome créditos de API.
 
 ## Estrutura
 
-- [`SKILL.md`](SKILL.md): contrato e fluxo do agente.
-- [`scripts/detect_test_context.py`](scripts/detect_test_context.py): inventário determinístico da stack e de sinais de risco confirmáveis no código.
-- [`scripts/analyze_test_target.py`](scripts/analyze_test_target.py): inventário focado de estados, ações de ciclo de vida, fronteiras assíncronas e guards protetivos do alvo.
-- [`scripts/prove_test_sensitivity.py`](scripts/prove_test_sensitivity.py): mutação temporária restaurável, com seleção por ocorrência para guards repetidos.
-- [`scripts/validate_test_evidence.py`](scripts/validate_test_evidence.py): validação semântica do relatório.
-- [`schemas/test-evidence.v1.json`](schemas/test-evidence.v1.json): contrato JSON Schema.
-- [`references/`](references): taxonomia, oráculos, ecossistemas e bases técnicas.
+- [`.codex-plugin/plugin.json`](.codex-plugin/plugin.json): identidade e metadados do plugin.
+- [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json): catálogo instalável pelo repositório.
+- [`skills/skill-suite-tests/`](skills/skill-suite-tests): fonte única do runtime distribuído.
+- [`skills/skill-suite-tests/SKILL.md`](skills/skill-suite-tests/SKILL.md): contrato e fluxo do agente.
+- [`skills/skill-suite-tests/scripts/`](skills/skill-suite-tests/scripts): detectores, validação de evidência e prova de sensibilidade.
+- [`skills/skill-suite-tests/schemas/test-evidence.v1.json`](skills/skill-suite-tests/schemas/test-evidence.v1.json): contrato JSON Schema.
+- [`skills/skill-suite-tests/references/`](skills/skill-suite-tests/references): taxonomia, oráculos, ecossistemas e bases técnicas.
 - [`evals/`](evals): fixtures, graders, mutantes, runner e agregador.
 - [`tests/`](tests): testes unitários dos scripts e do harness.
 
