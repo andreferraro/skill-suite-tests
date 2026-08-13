@@ -30,7 +30,7 @@ jobs:
       - name: Validate package, links, schema, and secrets
         run: python scripts/validate_repository.py
       - name: Validate evidence example
-        run: python scripts/validate_test_evidence.py examples/test-evidence.example.json
+        run: python skills/skill-suite-tests/scripts/validate_test_evidence.py skills/skill-suite-tests/examples/test-evidence.example.json
 
   fixtures:
     name: Fixtures and 12 mutations

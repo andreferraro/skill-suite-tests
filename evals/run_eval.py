@@ -18,6 +18,7 @@ from typing import Any
 from eval_lib import (
     EVAL_ROOT,
     REPO_ROOT,
+    SKILL_ROOT,
     apply_mutation,
     copy_artifact_paths,
     copy_eval_contract,
@@ -34,7 +35,7 @@ from eval_lib import (
 
 import sys
 
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
+sys.path.insert(0, str(SKILL_ROOT / "scripts"))
 from validate_test_evidence import validate as validate_evidence  # noqa: E402
 
 
@@ -80,8 +81,8 @@ def baseline_fingerprint(case: dict[str, Any], agent: str, model: str) -> str:
         EVAL_ROOT / "validate_fixtures.py",
         EVAL_ROOT / case["workspace"],
         EVAL_ROOT / case["reference_tests"],
-        REPO_ROOT / "schemas" / "test-evidence.v1.json",
-        REPO_ROOT / "scripts" / "validate_test_evidence.py",
+        SKILL_ROOT / "schemas" / "test-evidence.v1.json",
+        SKILL_ROOT / "scripts" / "validate_test_evidence.py",
     ]
     files: list[Path] = []
     for path in paths:

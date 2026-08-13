@@ -554,6 +554,8 @@ class SkillPackagingTests(unittest.TestCase):
             destination = Path(directory) / "skill-suite-tests"
             install_skill(destination)
             self.assertTrue((destination / "SKILL.md").is_file())
+            self.assertTrue((destination / "agents" / "openai.yaml").is_file())
+            self.assertTrue((destination / "scripts" / "analyze_test_target.py").is_file())
             self.assertTrue((destination / "scripts" / "detect_test_context.py").is_file())
             self.assertTrue((destination / "scripts" / "prove_test_sensitivity.py").is_file())
             self.assertTrue((destination / "examples" / "test-evidence.example.json").is_file())

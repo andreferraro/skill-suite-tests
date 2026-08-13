@@ -12,6 +12,7 @@ from typing import Any, Iterable
 
 EVAL_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = EVAL_ROOT.parent
+SKILL_ROOT = REPO_ROOT / "skills" / "skill-suite-tests"
 
 GENERATED_PATH_PARTS = {
     ".coverage",
@@ -103,9 +104,9 @@ def copy_reference_tests(case: dict[str, Any], workspace: Path) -> None:
 def copy_eval_contract(workspace: Path) -> None:
     destination = workspace / ".eval-contract"
     destination.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(REPO_ROOT / "schemas" / "test-evidence.v1.json", destination / "test-evidence.v1.json")
+    shutil.copy2(SKILL_ROOT / "schemas" / "test-evidence.v1.json", destination / "test-evidence.v1.json")
     shutil.copy2(
-        REPO_ROOT / "scripts" / "validate_test_evidence.py",
+        SKILL_ROOT / "scripts" / "validate_test_evidence.py",
         destination / "validate_test_evidence.py",
     )
 
@@ -234,22 +235,17 @@ def manifest_hashes(workspace: Path) -> dict[str, str]:
 
 
 def skill_runtime_files() -> list[Path]:
-    files = [
-        REPO_ROOT / "SKILL.md",
-        REPO_ROOT / "agents" / "openai.yaml",
-        REPO_ROOT / "scripts" / "detect_test_context.py",
-        REPO_ROOT / "scripts" / "prove_test_sensitivity.py",
-        REPO_ROOT / "scripts" / "validate_test_evidence.py",
+    return [
+        path
+        for path in SKILL_ROOT.rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts
     ]
-    for directory in ("examples", "references", "schemas"):
-        files.extend(path for path in (REPO_ROOT / directory).rglob("*") if path.is_file() and "__pycache__" not in path.parts)
-    return files
 
 
 def install_skill(destination: Path) -> None:
     destination.mkdir(parents=True, exist_ok=True)
     for source in skill_runtime_files():
-        relative = source.relative_to(REPO_ROOT)
+        relative = source.relative_to(SKILL_ROOT)
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
