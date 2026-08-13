@@ -115,7 +115,9 @@ def main() -> int:
         command,
         args.timeout,
     )
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    # Keep CLI output encodable on Windows consoles configured with cp1252.
+    # Captured test runners commonly emit symbols such as ✓ and ❯.
+    print(json.dumps(result, ensure_ascii=True, indent=2))
     return exit_code
 
 

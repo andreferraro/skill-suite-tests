@@ -8,6 +8,7 @@
 - Cobertura separada de cancelamento, reset, timeout, retry, desconexão e unmount em cada estado ativo relevante.
 - Separação temporal entre a confirmação do cancelamento e a liquidação de callbacks obsoletos.
 - Prova de sensibilidade por mecanismo e fase, evitando generalização a partir de uma única mutação.
+- Saída do helper de mutação compatível com consoles Windows configurados com CP1252.
 
 ### Adicionado
 
