@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.1] - 2026-08-12
+
+### Adicionado
+
+- Início rápido com instalação e primeira invocação no Codex e Cursor.
+- Guia de contribuição, política de segurança, código de conduta e templates do GitHub.
+- Atualizações automatizadas de dependências para Actions e fixtures.
+
+### Alterado
+
+- Documentação de instalação confirmada por uma instalação real a partir da raiz do repositório.
+- Estado da release separado da certificação técnica da `v0.3.0`.
+
+### Certificação
+
+- Runtime da skill inalterado em relação à `v0.3.0` certificada.
+- Nenhuma execução paga necessária para esta patch documental.
+
 ## [0.3.0] - 2026-08-12
 
 ### Adicionado
