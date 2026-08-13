@@ -1,0 +1,56 @@
+name: Relatar um problema
+description: Informe um comportamento incorreto ou uma falha reproduzível.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Não inclua credenciais ou dados sensíveis. Vulnerabilidades devem ser relatadas pela área Security.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Verificações iniciais
+      options:
+        - label: Procurei issues abertas sobre o mesmo problema.
+          required: true
+        - label: Estou usando uma versão suportada.
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versão ou commit
+      placeholder: v0.3.1 ou hash do commit
+    validations:
+      required: true
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Ambiente
+      options:
+        - Codex
+        - Cursor
+        - Scripts locais
+        - GitHub Actions
+        - Outro
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema
+      description: O que aconteceu e qual era o resultado esperado?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reprodução mínima
+      description: Inclua pedido, arquivos relevantes, comandos e saída sem dados sensíveis.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto adicional
+      description: Stack, sistema operacional e limitações conhecidas.
