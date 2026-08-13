@@ -31,7 +31,7 @@ Os comandos acima são determinísticos e não consomem créditos de API.
 
 ## Escopo da mudança
 
-Mudanças em `SKILL.md`, `agents/`, `scripts/`, `schemas/` ou `references/` alteram o runtime distribuído. Elas exigem revisão do benchmark e podem exigir nova certificação.
+Mudanças em `skills/skill-suite-tests/` alteram o runtime distribuído. Elas exigem revisão do benchmark e podem exigir nova certificação. Mudanças restritas ao manifesto, marketplace ou documentação exigem validação estrutural, mas preservam a certificação do runtime quando os arquivos instalados continuam idênticos.
 
 Mudanças somente em documentação, arquivos de comunidade ou CI gratuito dispensam eval pago quando o runtime permanece idêntico. Registre essa condição no pull request.
 

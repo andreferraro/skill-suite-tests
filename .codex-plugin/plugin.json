@@ -1,0 +1,28 @@
+{
+  "name": "skill-suite-tests",
+  "version": "0.5.0",
+  "description": "Cria e valida testes de sistemas guiados por risco com evidências reproduzíveis.",
+  "author": {
+    "name": "Andre Ferraro",
+    "url": "https://github.com/andreferraro"
+  },
+  "homepage": "https://github.com/andreferraro/skill-suite-tests",
+  "repository": "https://github.com/andreferraro/skill-suite-tests",
+  "license": "MIT",
+  "keywords": ["testing", "quality-engineering", "risk-based-testing", "agent-skill"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Skill Suite Tests",
+    "shortDescription": "Testes de sistemas guiados por risco",
+    "longDescription": "Analisa o sistema, integra testes à stack existente, executa os cenários e registra evidências reproduzíveis.",
+    "developerName": "Andre Ferraro",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/andreferraro/skill-suite-tests",
+    "defaultPrompt": [
+      "Crie testes guiados pelos riscos deste fluxo.",
+      "Investigue este bug e prove a correção com testes.",
+      "Teste este endpoint e registre evidências reproduzíveis."
+    ]
+  }
+}

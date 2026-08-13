@@ -12,6 +12,7 @@ from urllib.parse import unquote
 
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SEMVER_PATTERN = re.compile(r"^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$")
 MARKDOWN_LINK = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 SECRET_PATTERNS = (
     ("private key", re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----")),
@@ -89,6 +90,62 @@ def validate_skill(root: Path) -> list[str]:
     return errors
 
 
+def read_json(path: Path) -> tuple[dict, list[str]]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        return {}, [f"unable to read {path}: {error}"]
+    if not isinstance(value, dict):
+        return {}, [f"{path} must contain a JSON object"]
+    return value, []
+
+
+def validate_plugin(root: Path) -> list[str]:
+    errors: list[str] = []
+    manifest, manifest_errors = read_json(root / ".codex-plugin" / "plugin.json")
+    errors.extend(manifest_errors)
+    if manifest_errors:
+        return errors
+
+    if manifest.get("name") != "skill-suite-tests":
+        errors.append("plugin name must be skill-suite-tests")
+    if not SEMVER_PATTERN.fullmatch(str(manifest.get("version", ""))):
+        errors.append("plugin version must use strict semver")
+    if manifest.get("skills") != "./skills/":
+        errors.append("plugin skills path must be ./skills/")
+
+    interface = manifest.get("interface")
+    if not isinstance(interface, dict):
+        errors.append("plugin interface must be an object")
+    else:
+        for field in ("displayName", "shortDescription", "longDescription", "developerName", "category"):
+            if not interface.get(field):
+                errors.append(f"plugin interface is missing {field}")
+
+    skill_root = root / "skills" / "skill-suite-tests"
+    if not skill_root.is_dir():
+        errors.append("plugin must contain skills/skill-suite-tests")
+
+    marketplace, marketplace_errors = read_json(root / ".agents" / "plugins" / "marketplace.json")
+    errors.extend(marketplace_errors)
+    if marketplace_errors:
+        return errors
+    entries = marketplace.get("plugins")
+    if not isinstance(entries, list) or len(entries) != 1:
+        errors.append("marketplace must expose exactly one plugin")
+        return errors
+    entry = entries[0]
+    if entry.get("name") != manifest.get("name"):
+        errors.append("marketplace plugin name must match the manifest")
+    source = entry.get("source", {})
+    if source.get("source") != "url" or source.get("ref") != "main":
+        errors.append("marketplace must install the repository root from main")
+    repository = str(manifest.get("repository", "")).removesuffix(".git")
+    if str(source.get("url", "")).removesuffix(".git") != repository:
+        errors.append("marketplace URL must match the manifest repository")
+    return errors
+
+
 def validate_local_links(root: Path) -> list[str]:
     errors: list[str] = []
     for document in root.rglob("*.md"):
@@ -146,10 +203,12 @@ def scan_secrets(root: Path) -> list[str]:
 
 
 def validate_repository(root: Path) -> list[str]:
+    skill_root = root / "skills" / "skill-suite-tests"
     return [
-        *validate_skill(root),
+        *validate_plugin(root),
+        *validate_skill(skill_root),
         *validate_local_links(root),
-        *validate_schemas(root),
+        *validate_schemas(skill_root),
         *scan_secrets(root),
     ]
 
