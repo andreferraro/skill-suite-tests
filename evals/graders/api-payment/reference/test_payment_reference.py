@@ -2,12 +2,45 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from sqlite3 import Connection
+from threading import Barrier
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import create_app
 from app.payment import PaymentService
+
+
+class CoordinatedConnection:
+    """Make deferred readers reach the write boundary together."""
+
+    def __init__(self, connection: Connection, readers: Barrier):
+        self._connection = connection
+        self._readers = readers
+        self._deferred = False
+
+    def execute(self, sql: str, *args: Any, **kwargs: Any) -> Any:
+        cursor = self._connection.execute(sql, *args, **kwargs)
+        normalized = " ".join(sql.upper().split())
+        if normalized == "BEGIN DEFERRED":
+            self._deferred = True
+        elif self._deferred and normalized.startswith(
+            "SELECT ID, AMOUNT FROM PAYMENTS"
+        ):
+            self._readers.wait(timeout=5)
+        return cursor
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._connection, name)
+
+    def __enter__(self) -> "CoordinatedConnection":
+        self._connection.__enter__()
+        return self
+
+    def __exit__(self, *args: Any) -> Any:
+        return self._connection.__exit__(*args)
 
 
 @pytest.fixture
@@ -25,9 +58,25 @@ def test_returns_stable_result_for_same_idempotency_key(service: PaymentService)
     assert service.count_payments() == 1
 
 
-def test_serializes_concurrent_requests(service: PaymentService) -> None:
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        results = list(executor.map(lambda _: service.create_payment("key-concurrent", 1500), range(8)))
+def test_serializes_concurrent_requests(
+    service: PaymentService, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workers = 8
+    readers = Barrier(workers)
+    connect = service._connect
+    monkeypatch.setattr(
+        service,
+        "_connect",
+        lambda: CoordinatedConnection(connect(), readers),
+    )
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        results = list(
+            executor.map(
+                lambda _: service.create_payment("key-concurrent", 1500),
+                range(workers),
+            )
+        )
 
     assert len({payment.id for payment in results}) == 1
     assert sum(payment.created for payment in results) == 1

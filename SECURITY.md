@@ -4,8 +4,8 @@
 
 | Versão | Suporte |
 | --- | --- |
-| `0.3.x` | Sim |
-| Anteriores a `0.3.0` | Não |
+| `0.5.x` | Sim |
+| `0.4.x` e anteriores | Não |
 
 ## Como relatar
 
