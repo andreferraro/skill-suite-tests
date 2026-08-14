@@ -15,13 +15,13 @@ Skill para orientar Codex e Cursor na criação de testes automatizados guiados 
 
 Você precisa de Git e do Codex ou Cursor. Chaves de API e configuração no GitHub ficam fora do uso comum.
 
-No Codex ou ChatGPT desktop, adicione o catálogo do projeto:
+No terminal com o Codex CLI, adicione o catálogo do projeto:
 
 ```bash
 codex plugin marketplace add andreferraro/skill-suite-tests --ref main
 ```
 
-Reinicie o aplicativo, abra **Plugins Directory**, escolha **Skill Suite Tests** e clique em **Install**.
+Reinicie o ChatGPT desktop, abra **Plugins Directory**, escolha o catálogo **Skill Suite Tests** e instale o plugin de mesmo nome. O marketplace do repositório é uma fonte Git para distribuição direta; ele ainda não faz parte do diretório público universal da OpenAI.
 
 No Codex CLI ou IDE, também é possível instalar somente a skill:
 
@@ -76,7 +76,7 @@ Os arquivos executados pela skill mantêm o mesmo conteúdo certificado na `v0.4
 
 ### Holdout em projeto open source
 
-Além das fixtures controladas, a versão em desenvolvimento foi aplicada ao hook de importação CSV do [Atomic CRM](https://github.com/marmelab/atomic-crm). Com o mesmo modelo, projeto, pedido e contrato, o mutation score passou de **60% no baseline para 80% com a skill**. O tratamento aprovou o gate técnico, preservou o código de produção e matou quatro dos cinco defeitos ocultos.
+Além das fixtures controladas, o runtime incluído na `v0.4.0` foi aplicado ao hook de importação CSV do [Atomic CRM](https://github.com/marmelab/atomic-crm). Com o mesmo modelo, projeto, pedido e contrato, o mutation score passou de **60% no baseline para 80% com a skill**. O tratamento aprovou o gate técnico, preservou o código de produção e matou quatro dos cinco defeitos ocultos.
 
 Consulte os [testes gerados, relatórios estruturados, comandos e resultados de cada mutação](evals/results/atomic-crm-holdout-2026-08-13/README.md). O holdout comprova ganho em uma execução real e complementa a certificação de três repetições da `v0.4.0`.
 
@@ -88,7 +88,7 @@ A versão `v0.4.0` fortalece testes de estados assíncronos, cancelamento, callb
 | --- | --- |
 | Projetos de referência | [3 implementados e aprovados](evals/results/fixture-validation.json) |
 | Mutantes conhecidos | [12 implementados e 12 detectados](evals/results/fixture-validation.json) |
-| Validação local dos scripts | 61 testes unitários aprovados |
+| Validação local dos scripts | 62 testes unitários aprovados |
 | CI de qualidade | [Aprovada no Linux e Windows](https://github.com/andreferraro/skill-suite-tests/actions/workflows/quality.yml) |
 | Certificação Codex | 3 repetições por caso, gate agregado aprovado |
 | Certificação Cursor | 3 repetições por caso, gate agregado aprovado |
@@ -155,13 +155,13 @@ Em fluxos assíncronos, a skill separa estados que possuem proteções diferente
 
 Instalar e usar a skill no Codex ou no Cursor não exige `OPENAI_API_KEY`, `CURSOR_API_KEY` nem configuração no GitHub. Essas credenciais pertencem somente aos benchmarks automatizados mantidos neste repositório.
 
-O repositório segue os dois formatos atuais de distribuição: plugin para ChatGPT e Codex, skill portátil para Cursor e instalações locais.
+O repositório segue os formatos atuais de distribuição: plugin para ChatGPT e Codex, skill portátil para Cursor e instalação local pelo Skill Installer.
 
 O plugin está disponível pelo marketplace Git deste repositório. A publicação no diretório público da OpenAI exige submissão e verificação do desenvolvedor em uma etapa separada.
 
-### ChatGPT e Codex como plugin
+### ChatGPT desktop e Codex como plugin
 
-Adicione o marketplace pelo terminal:
+Adicione o marketplace pelo Codex CLI:
 
 ```bash
 codex plugin marketplace add andreferraro/skill-suite-tests --ref main
@@ -174,7 +174,7 @@ Depois:
 3. Selecione o catálogo **Skill Suite Tests**.
 4. Instale o plugin **Skill Suite Tests**.
 
-O plugin distribui a skill que está em `skills/skill-suite-tests`. Ele não possui MCP, serviço externo nem autenticação própria.
+O plugin distribui a skill que está em `skills/skill-suite-tests`. Ele não possui MCP, serviço externo nem autenticação própria. Marketplaces de repositório são voltados a autoria, teste e distribuição direta; a disponibilidade pode variar entre as superfícies do ChatGPT e do Codex.
 
 Para receber versões novas do catálogo:
 
@@ -333,7 +333,7 @@ O repositório usa Gitflow:
 - `release/*`: preparação da versão.
 - `hotfix/*`: correções originadas de `main`.
 
-Commits seguem Conventional Commits. Uma release exige qualidade estrutural, fixtures verdes e aprovação manual do benchmark de release com Codex e Cursor.
+Commits seguem Conventional Commits. Uma release que altera o runtime exige qualidade estrutural, fixtures verdes e aprovação manual do benchmark com Codex e Cursor. Uma release restrita a empacotamento ou documentação pode reutilizar a certificação anterior somente quando a equivalência do runtime for validada e registrada.
 
 As branches estão protegidas no GitHub:
 
@@ -365,8 +365,9 @@ Os tratamentos foram executados no commit certificado e consolidados pelo mesmo 
 
 ## Referências
 
-- [Skills no Codex](https://developers.openai.com/codex/skills)
+- [Skills no ChatGPT e Codex](https://learn.chatgpt.com/docs/build-skills)
+- [Empacotamento e marketplaces de plugins](https://developers.openai.com/plugins/build/plugins)
 - [Codex em modo não interativo](https://learn.chatgpt.com/docs/non-interactive-mode)
 - [Agent Skills no Cursor](https://cursor.com/docs/skills)
-- [Cursor CLI em modo headless](https://docs.cursor.com/en/cli/headless)
+- [Cursor CLI em modo headless](https://cursor.com/docs/cli/headless)
 - [Apresentação da Skill Suite Tests](https://docs.google.com/presentation/d/10icBAwszr-oIcf-SeNOB2QKGF9NQE1qs7TGqt0nVeQY/edit?usp=sharing)

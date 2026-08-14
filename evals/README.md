@@ -15,7 +15,7 @@ As notas são medianas. O relatório contém os baselines, ganhos e links para t
 
 ## Holdout externo publicado
 
-Em 13 de agosto de 2026, a `v0.4.0` foi avaliada no `usePapaParse` do [Atomic CRM](https://github.com/marmelab/atomic-crm/tree/167a4cdb652b1ab2b4b030831cfa7adcf2099321). O baseline matou 3 de 5 mutantes e o tratamento matou 4 de 5, elevando o mutation score de 60% para 80% e aprovando o gate técnico sem alterações em produção.
+Em 13 de agosto de 2026, o runtime incluído na `v0.4.0`, no commit [`a3a710c`](https://github.com/andreferraro/skill-suite-tests/commit/a3a710cb81284b174b005571808fe32382f7b9ac), foi avaliado no `usePapaParse` do [Atomic CRM](https://github.com/marmelab/atomic-crm/tree/167a4cdb652b1ab2b4b030831cfa7adcf2099321). O baseline matou 3 de 5 mutantes e o tratamento matou 4 de 5, elevando o mutation score de 60% para 80% e aprovando o gate técnico sem alterações em produção.
 
 Os [artefatos do holdout](results/atomic-crm-holdout-2026-08-13/README.md) incluem os testes gerados, relatórios de evidência, metadados, comandos e resultados individuais. Essa execução mede transferência para código open source real. Ela complementa a certificação publicada e não substitui a matriz completa de release.
 
@@ -192,7 +192,7 @@ Uma execução real exige `--max-agent-calls`. O runner calcula o total antes de
 
 Use `--baseline-cache evals/baseline-cache` para reaproveitar o baseline quando agente, modelo, fixture, prompt, contrato, grader, mutantes, harness e imagem das CLIs continuarem equivalentes. A impressão digital invalida o cache quando qualquer um desses elementos muda. Alterações exclusivas na skill preservam o baseline e reduzem o próximo par a uma chamada de tratamento.
 
-No GitHub Actions, cada repetição usa uma chave de cache própria. Isso permite continuar as amostras 2 e 3 sem misturar resultados e sem recalcular um baseline já salvo para a mesma impressão digital.
+No workflow seletivo, cada número de repetição usa uma chave de cache própria. No workflow de release, o lote de uma ou três repetições usa uma chave própria. Isso evita misturar conjuntos incompatíveis e permite reaproveitar apenas baselines com a mesma impressão digital.
 
 Sem `--agent-container-image`, o runner usa as CLIs instaladas no host. Esse modo serve para diagnóstico local e exige `codex` ou `cursor-agent` no `PATH`.
 
@@ -216,7 +216,7 @@ Pushes, pull requests, merges e tags executam somente `quality.yml`. As proteç�
 
 O formulário do workflow mostra e valida o teto antes de liberar os jobs. Deixe a autorização desmarcada para executar somente a prévia gratuita. O runner aplica uma segunda trava. Esses números representam chamadas, não dólares. O custo varia conforme modelo e tokens.
 
-Cada job de caso exige execução válida e gate técnico aprovado. A comparação de ganho fica no job agregado, porque um caso pode ter baseline perfeito e ganho zero sem representar regressão da skill.
+O workflow seletivo exige execução válida e gate técnico por caso. No workflow de release, o job agregado valida a matriz completa, os gates técnicos e a comparação de ganho. Um caso pode ter baseline perfeito e ganho zero sem representar regressão da skill.
 
 ### Configuração do repositório
 
@@ -246,7 +246,7 @@ gh variable set CURSOR_EVAL_MODEL --body "<modelo-cursor>"
 
 Não coloque chaves em `--body`, arquivos versionados, logs ou mensagens do pull request.
 
-### Fluxo da v0.4.0
+### Fluxo de certificação de runtime
 
 1. Use os checks gratuitos em cada pull request para validar scripts, fixtures, mutantes, links e segredos.
 2. Faça uma execução manual de diagnóstico somente quando a release estiver pronta.
