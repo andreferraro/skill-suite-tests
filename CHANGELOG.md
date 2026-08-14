@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-08-13
+
 ### Corrigido
 
 - Grader de concorrência da fixture de pagamentos sincroniza transações `DEFERRED` na fronteira de escrita, removendo dependência do escalonamento das threads.

@@ -63,7 +63,7 @@ Falhas individuais permanecem nos artefatos e participam da consolidação. Um b
 
 Leia a [metodologia completa](evals/README.md#integridade-da-certificação) e consulte o [relatório auditável da v0.4.0](evals/results/v0.4.0-certification.json).
 
-## Distribuição v0.5.0
+## Distribuição desde v0.5.0
 
 A `v0.5.0` adota o formato instalável atual do ChatGPT e Codex:
 
