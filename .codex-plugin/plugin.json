@@ -1,6 +1,6 @@
 {
   "name": "skill-suite-tests",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Cria e valida testes de sistemas guiados por risco com evidências reproduzíveis.",
   "author": {
     "name": "Andre Ferraro",
