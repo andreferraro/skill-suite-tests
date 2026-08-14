@@ -15,7 +15,7 @@ Baseline e tratamento receberam o mesmo projeto, modelo `gpt-5.3-codex-low`, ped
 
 Ganho observado: **20 pontos percentuais**. A skill detectou quatro dos cinco defeitos ocultos. O mutante sobrevivente remove a proteção contra callback tardio após reset durante o parsing.
 
-Este resultado comprova ganho em um projeto open source real e em uma execução pareada. Ele complementa a matriz sintética da `v0.3.0`; uma única execução não substitui a certificação completa de release com três repetições em Codex e Cursor.
+Este resultado comprova ganho em um projeto open source real e em uma execução pareada. Ele complementa a matriz sintética da `v0.4.0`; uma única execução não substitui a certificação completa de release com três repetições em Codex e Cursor.
 
 ## Artefatos
 
