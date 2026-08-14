@@ -9,7 +9,7 @@ Skill para orientar Codex e Cursor na criação de testes automatizados guiados 
 
 [Ver apresentação](https://docs.google.com/presentation/d/10icBAwszr-oIcf-SeNOB2QKGF9NQE1qs7TGqt0nVeQY/edit?usp=sharing)
 
-![Diagrama dos tipos de teste organizados por propósito, nível, qualidade e técnica](assets/linkedin-tipos-de-testes-diagrama.png)
+![Fluxo da Skill Suite Tests: do alvo e risco à descoberta, estratégia, testes executáveis, prova de sensibilidade e evidência reproduzível](assets/skill-suite-tests-flow.png)
 
 ## Comece em 2 minutos
 

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Alterado
+
+- Imagem principal do README substituída por um fluxo objetivo do alvo e risco até a evidência reproduzível.
+
 ## [0.5.1] - 2026-08-13
 
 ### Corrigido
